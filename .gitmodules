@@ -1,3 +1,6 @@
 [submodule "external/clipp"]
 	path = external/clipp
 	url = git@github.com:muellan/clipp.git
+[submodule "external/libaom"]
+	path = external/libaom
+	url = https://aomedia.googlesource.com/aom
