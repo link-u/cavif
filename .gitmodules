@@ -13,3 +13,6 @@
 [submodule "external/libyuv"]
 	path = external/libyuv
 	url = https://chromium.googlesource.com/libyuv/libyuv
+[submodule "external/libavif-container"]
+	path = external/libavif-container
+	url = git@github.com:link-u/libavif-container.git
