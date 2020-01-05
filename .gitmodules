@@ -4,3 +4,12 @@
 [submodule "external/libaom"]
 	path = external/libaom
 	url = https://aomedia.googlesource.com/aom
+[submodule "external/libpng"]
+	path = external/libpng
+	url = git://git.code.sf.net/p/libpng/code
+[submodule "external/fmt"]
+	path = external/fmt
+	url = git@github.com:fmtlib/fmt.git
+[submodule "external/libyuv"]
+	path = external/libyuv
+	url = https://chromium.googlesource.com/libyuv/libyuv
