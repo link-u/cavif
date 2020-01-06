@@ -7,6 +7,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
 
 ###############################################################################
 add_subdirectory(external/libyuv EXCLUDE_FROM_ALL)
+add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 ###############################################################################
 set(SKIP_INSTALL_ALL ON)
 set(PNG_SHARED OFF CACHE BOOL "Build shared lib" FORCE)
@@ -38,7 +39,9 @@ target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)
 target_link_libraries(cavif PRIVATE fmt::fmt)
 target_link_libraries(cavif PRIVATE yuv)
+target_link_libraries(cavif PRIVATE libavif-container)
 target_include_directories(cavif PRIVATE external/libpng)
 target_include_directories(cavif PRIVATE external/libaom)
-target_include_directories(cavif PRIVATE external/libyuv/include)
 target_include_directories(cavif PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/external/libaom")
+target_include_directories(cavif PRIVATE external/libyuv/include)
+target_include_directories(cavif PRIVATE external/libavif-container/src)
