@@ -162,8 +162,8 @@ int main(int argc, char** argv) {
   }
   avif::FileBox fileBox;
   {
-    avif::av1::Parser::Result obus = avif::av1::Parser(log, packets[0]).parse();
-    for(avif::av1::Parser::Result::Packet const& packet : obus.packets()) {
+    std::shared_ptr<avif::av1::Parser::Result> result = avif::av1::Parser(log, packets[0]).parse();
+    for(avif::av1::Parser::Result::Packet const& packet : result->packets()) {
       switch (packet.type()) {
         case avif::av1::Header::Type::SequenceHeader:
           break;
