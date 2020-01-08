@@ -29,12 +29,18 @@ set(ENABLE_TOOLS OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/libaom)
 ###############################################################################
 
-add_executable(cavif src/main.cpp
+add_executable(cavif
+        src/main.cpp
+
         src/PNGReader.cpp
         src/PNGReader.hpp
+
         src/Image.cpp
         src/Image.hpp
-        )
+
+        src/AVIFBuilder.cpp
+        src/AVIFBuilder.hpp
+)
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)
 target_link_libraries(cavif PRIVATE fmt::fmt)
