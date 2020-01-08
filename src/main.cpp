@@ -161,15 +161,29 @@ int main(int argc, char** argv) {
     return -1;
   }
   avif::FileBox fileBox;
+  avif::av1::SequenceHeader seq;
+  std::vector<uint8_t> configOBUs;
+  std::vector<uint8_t> mdat;
   {
     std::shared_ptr<avif::av1::Parser::Result> result = avif::av1::Parser(log, packets[0]).parse();
+    if (!result->ok()) {
+      log.error(result->error());
+      return -1;
+    }
     for(avif::av1::Parser::Result::Packet const& packet : result->packets()) {
       switch (packet.type()) {
+        case avif::av1::Header::Type::TemporalDelimiter:
+        case avif::av1::Header::Type::Padding:
+        case avif::av1::Header::Type::Reserved:
+          break;
         case avif::av1::Header::Type::SequenceHeader:
+          seq = std::get<avif::av1::SequenceHeader>(packet.content());
+          configOBUs.insert(std::end(configOBUs), std::next(std::begin(result->buffer()), packet.beg()), std::next(result->buffer().begin(), packet.end()));
+          mdat.insert(std::end(mdat), std::next(std::begin(result->buffer()), packet.beg()), std::next(std::begin(result->buffer()), packet.end()));
           break;
         case avif::av1::Header::Type::Frame:
-          break;
         default:
+          mdat.insert(std::end(mdat), std::next(std::begin(result->buffer()), packet.beg()), std::next(std::begin(result->buffer()), packet.end()));
           break;
       }
     }
