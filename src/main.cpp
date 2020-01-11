@@ -168,10 +168,10 @@ int main(int argc, char** argv) {
       log.error(result->error());
       return -1;
     }
+    avif::av1::SequenceHeader seq{};
+    std::vector<uint8_t> configOBU;
+    std::vector<uint8_t> mdat;
     for(avif::av1::Parser::Result::Packet const& packet : result->packets()) {
-      avif::av1::SequenceHeader seq;
-      std::vector<uint8_t> configOBU;
-      std::vector<uint8_t> mdat;
       switch (packet.type()) {
         case avif::av1::Header::Type::TemporalDelimiter:
         case avif::av1::Header::Type::Padding:
@@ -188,8 +188,8 @@ int main(int argc, char** argv) {
           break;
         }
       }
-      builder.fillPrimaryFrameInfo(AVIFBuilder::Frame(seq, std::move(configOBU), std::move(mdat)));
     }
+    builder.setPrimaryFrame(AVIFBuilder::Frame(seq, std::move(configOBU), std::move(mdat)));
     avif::FileBox fileBox = builder.build();
 
   }

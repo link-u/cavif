@@ -46,7 +46,7 @@ public:
   AVIFBuilder(AVIFBuilder&&) = delete;
 
 public:
-  AVIFBuilder& setFrame(Frame&& frame);
+  AVIFBuilder& setPrimaryFrame(Frame&& frame);
   [[ nodiscard ]] avif::FileBox build();
 
   void fillPrimaryFrameInfo(Frame const& frame);
