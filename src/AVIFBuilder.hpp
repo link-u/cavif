@@ -7,13 +7,38 @@
 #include <avif/av1/Parser.hpp>
 #include <avif/FileBox.hpp>
 
+
 class AVIFBuilder final {
+public:
+  class Frame final {
+  private:
+    avif::av1::SequenceHeader sequenceHeader_;
+    std::vector<uint8_t> configOBU_;
+    std::vector<uint8_t> data_;
+  public:
+    Frame() = delete;
+    explicit Frame(avif::av1::SequenceHeader sequenceHeader, std::vector<uint8_t> configOBU, std::vector<uint8_t> data)
+    :sequenceHeader_(sequenceHeader)
+    ,configOBU_(std::move(configOBU))
+    ,data_(std::move(data))
+    {
+    }
+  public:
+    [[ nodiscard ]] avif::av1::SequenceHeader const& sequenceHeader() const { return this->sequenceHeader_; }
+    [[ nodiscard ]] std::vector<uint8_t> const& configOBU() const { return this->configOBU_; }
+    [[ nodiscard ]] std::vector<uint8_t> const& data() const { return this->data_; }
+  };
+
 private:
-  std::shared_ptr<avif::av1::Parser::Result> obus_;
+private:
+  uint32_t const width_;
+  uint32_t const height_;
+  std::optional<Frame> frame_{};
   avif::FileBox fileBox_{};
+
 public:
   AVIFBuilder() = delete;
-  AVIFBuilder(std::shared_ptr<avif::av1::Parser::Result> obus);
+  explicit AVIFBuilder(uint32_t width, uint32_t height);
   ~AVIFBuilder() noexcept = default;
   AVIFBuilder& operator=(AVIFBuilder const&) = delete;
   AVIFBuilder& operator=(AVIFBuilder&&) = delete;
@@ -21,7 +46,10 @@ public:
   AVIFBuilder(AVIFBuilder&&) = delete;
 
 public:
-  avif::FileBox build();
+  AVIFBuilder& setFrame(Frame&& frame);
+  [[ nodiscard ]] avif::FileBox build();
+
+  void fillPrimaryFrameInfo(Frame const& frame);
 };
 
 

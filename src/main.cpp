@@ -3,6 +3,7 @@
 #include "../external/clipp/include/clipp.h"
 #include "Image.hpp"
 #include "PNGReader.hpp"
+#include "AVIFBuilder.hpp"
 #include <aom/aom_encoder.h>
 #include <aom/aom_codec.h>
 #include <aom/aomcx.h>
@@ -160,17 +161,17 @@ int main(int argc, char** argv) {
     log.error("no packats to out.");
     return -1;
   }
-  avif::FileBox fileBox;
-  avif::av1::SequenceHeader seq;
-  std::vector<uint8_t> configOBUs;
-  std::vector<uint8_t> mdat;
   {
+    AVIFBuilder builder(width, height);
     std::shared_ptr<avif::av1::Parser::Result> result = avif::av1::Parser(log, packets[0]).parse();
     if (!result->ok()) {
       log.error(result->error());
       return -1;
     }
     for(avif::av1::Parser::Result::Packet const& packet : result->packets()) {
+      avif::av1::SequenceHeader seq;
+      std::vector<uint8_t> configOBU;
+      std::vector<uint8_t> mdat;
       switch (packet.type()) {
         case avif::av1::Header::Type::TemporalDelimiter:
         case avif::av1::Header::Type::Padding:
@@ -178,15 +179,19 @@ int main(int argc, char** argv) {
           break;
         case avif::av1::Header::Type::SequenceHeader:
           seq = std::get<avif::av1::SequenceHeader>(packet.content());
-          configOBUs.insert(std::end(configOBUs), std::next(std::begin(result->buffer()), packet.beg()), std::next(result->buffer().begin(), packet.end()));
+          configOBU.insert(std::end(configOBU), std::next(std::begin(result->buffer()), packet.beg()), std::next(result->buffer().begin(), packet.end()));
           mdat.insert(std::end(mdat), std::next(std::begin(result->buffer()), packet.beg()), std::next(std::begin(result->buffer()), packet.end()));
           break;
         case avif::av1::Header::Type::Frame:
-        default:
+        default: {
           mdat.insert(std::end(mdat), std::next(std::begin(result->buffer()), packet.beg()), std::next(std::begin(result->buffer()), packet.end()));
           break;
+        }
       }
+      builder.fillPrimaryFrameInfo(AVIFBuilder::Frame(seq, std::move(configOBU), std::move(mdat)));
     }
+    avif::FileBox fileBox = builder.build();
+
   }
   return 0;
 }
