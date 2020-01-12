@@ -57,20 +57,19 @@ Image PNGReader::read() {
     png_set_tRNS_to_alpha(png);
   }
 
-  Image::Type type = Image::Type::RGB;
+  Image::Type type = Image::Type::BGR;
   // These color_type don't have an alpha channel then fill it with 0xff.
   switch(color_type) {
     case PNG_COLOR_TYPE_RGB:
     case PNG_COLOR_TYPE_PALETTE:
-      png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
       bytesPerPixel = 3;
-      type = Image::Type::RGB;
+      type = Image::Type::BGR;
       break;
     case PNG_COLOR_TYPE_RGB_ALPHA:
     case PNG_COLOR_TYPE_GRAY:
     case PNG_COLOR_TYPE_GRAY_ALPHA:
       bytesPerPixel = 4;
-      type = Image::Type::RGBA;
+      type = Image::Type::ABGR;
       break;
     default:
       assert("Never to come here.");

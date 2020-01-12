@@ -10,7 +10,9 @@
 #include <libyuv.h>
 #include <avif/av1/Parser.hpp>
 #include <avif/util/FileLogger.hpp>
+#include <avif/util/File.hpp>
 #include <avif/FileBox.hpp>
+#include <avif/Writer.hpp>
 
 namespace {
 
@@ -76,21 +78,31 @@ int main(int argc, char** argv) {
   uint32_t const width = srcImage.width();
   uint32_t const height = srcImage.height();
 
-  // converting RGB(A) -> I444
+  // converting RGB(A) -> I420
   // FIXME(ledyba-z): how about alpha channels?
   std::vector<uint8_t> staging;
-  uint32_t statingStride = 0;
-  uint32_t statingBytesPerPiexl = 4;
+  uint32_t const stagingBytesPerPiexl = 4;
+  uint32_t const stagingStride = width * stagingBytesPerPiexl;
+
   switch(srcImage.type()) {
-    case img::Image::Type::RGB:
-      statingStride = statingBytesPerPiexl * width;
-      staging.resize(height * statingStride);
-      libyuv::RGB24ToARGB(srcImage.data().data(), srcImage.stride(), staging.data(), statingStride, width, height);
+    case img::Image::Type::BGR: {
+      std::vector<uint8_t> abgr;
+      size_t abgrStride = 4 * width;
+      abgr.resize(abgrStride * height);
+      // BGR24ToABGRが無かった
+      libyuv::RGB24ToARGB(srcImage.data().data(), srcImage.stride(), abgr.data(), abgrStride, width, height);
+
+      // BGR24ToARGBが無かった
+      staging.resize(stagingStride * height);
+      libyuv::ABGRToARGB(abgr.data(), abgrStride, staging.data(), stagingStride, width, height);
       break;
-    case img::Image::Type::RGBA:
-      statingStride = statingBytesPerPiexl * width;
-      staging.resize(height * statingStride);
-      libyuv::RGBAToARGB(srcImage.data().data(), srcImage.stride(), staging.data(), statingStride, width, height);
+    }
+    case img::Image::Type::ABGR: {
+      staging = srcImage.data();
+      staging.resize(stagingStride * height);
+      libyuv::ABGRToARGB(srcImage.data().data(), srcImage.stride(), staging.data(), stagingStride, width, height);
+      break;
+    }
   }
 
   // initialize encoder
@@ -99,7 +111,7 @@ int main(int argc, char** argv) {
   cfg.encoder_cfg.disable_cdef = 1;
   cfg.encoder_cfg.disable_dual_filter = 1;
   cfg.monochrome = 0;
-  cfg.g_profile = 1;
+  cfg.g_profile = 0;
   cfg.full_still_picture_hdr = 0;
   if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &cfg, 0)) {
     log.fatal("Failed to initialize encoder.");
@@ -110,8 +122,8 @@ int main(int argc, char** argv) {
   // https://github.com/link-u/libaom/blob/d0b3d306aebb5ef6cc89f49f56dd7adaee41f696/av1/av1_cx_iface.c#L532
   //aom_img_alloc(&img, AOM_IMG_FMT_I420, width, height, 1);
   //libyuv::ARGBToI420(staging.data(), statingStride, img.planes[0], img.stride[0], img.planes[1], img.stride[1], img.planes[2], img.stride[2], width, height);
-  aom_img_alloc(&img, AOM_IMG_FMT_I444, width, height, 1);
-  libyuv::ARGBToI444(staging.data(), statingStride, img.planes[0], img.stride[0], img.planes[1], img.stride[1], img.planes[2], img.stride[2], width, height);
+  aom_img_alloc(&img, AOM_IMG_FMT_I420, width, height, 1);
+  libyuv::ARGBToI420(staging.data(), stagingStride, img.planes[0], img.stride[0], img.planes[1], img.stride[1], img.planes[2], img.stride[2], width, height);
 
   std::vector<std::vector<uint8_t>> packets;
 
@@ -163,6 +175,7 @@ int main(int argc, char** argv) {
   }
   {
     AVIFBuilder builder(width, height);
+
     std::shared_ptr<avif::av1::Parser::Result> result = avif::av1::Parser(log, packets[0]).parse();
     if (!result->ok()) {
       log.error(result->error());
@@ -189,9 +202,25 @@ int main(int argc, char** argv) {
         }
       }
     }
-    builder.setPrimaryFrame(AVIFBuilder::Frame(seq, std::move(configOBU), std::move(mdat)));
+    builder.setPrimaryFrame(AVIFBuilder::Frame(seq, std::move(configOBU), mdat));
     avif::FileBox fileBox = builder.build();
-
+    {
+      avif::util::StreamWriter pass1;
+      avif::Writer(log, pass1).write(fileBox);
+    }
+    for (size_t i = 0; i < fileBox.metaBox.itemLocationBox.items.size(); ++i) {
+      size_t const offset = fileBox.mediaDataBoxes.at(i).offset;
+      fileBox.metaBox.itemLocationBox.items.at(i).baseOffset = offset;
+    }
+    avif::util::StreamWriter out;
+    avif::Writer(log, out).write(fileBox);
+    std::vector<uint8_t> data = out.buffer();
+    std::copy(std::begin(mdat), std::end(mdat), std::next(std::begin(data), fileBox.mediaDataBoxes.at(0).offset));
+    std::optional<std::string> writeResult = avif::util::writeFile(outputFilename, data);
+    if (writeResult.has_value()) {
+      log.error(writeResult.value());
+      return -1;
+    }
   }
   return 0;
 }

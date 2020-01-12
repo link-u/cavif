@@ -66,21 +66,21 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
     locationBox.offsetSize = 0;
     locationBox.lengthSize = 4;
     locationBox.baseOffsetSize = 4;
-    locationBox.itemCount = 1;
     locationBox.items.emplace_back(ItemLocationBox::Item{
         .itemID = 1,
         .dataReferenceIndex = 0,
         .baseOffset = 0,// TODO: fill it after.
-        .extentCount = 1,
-    });
-    locationBox.items[0].extents.emplace_back(ItemLocationBox::Item::Extent{
-        .extentOffset = 0,
-        .extentLength = frame.data().size(),
+        .extents = {{
+            ItemLocationBox::Item::Extent {
+                .extentOffset = 0,
+                .extentLength = frame.data().size(),
+            }
+        }},
     });
   }
   { // fill ItemPropertiesBox
     ItemPropertiesBox& propertiesBox = metaBox.itemPropertiesBox;
-    // FIXME(ledyba-z):
+    // FIXME(ledyba-z): Is it really correct?
     // https://aomediacodec.github.io/av1-isobmff/#av1sampleentry-semantics
     propertiesBox.itemPropertyContainer.properties.emplace_back(PixelAspectRatioBox{
         .hSpacing = 1,
@@ -98,7 +98,6 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
       }
     }
     propertiesBox.itemPropertyContainer.properties.emplace_back(PixelInformationProperty{
-        .numChannels = 3,
         .bitsPerChannel = {{bpp, bpp, bpp}},
     });
     propertiesBox.itemPropertyContainer.properties.emplace_back(AV1CodecConfigurationRecordBox{
@@ -120,11 +119,9 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
       },
     });
     propertiesBox.itemPropertyAssociations.emplace_back(ItemPropertyAssociation{
-      .itemCount = 1,
       .items = {{
           ItemPropertyAssociation::Item {
             .itemID = 1,
-            .entryCount = 4,
             .entries = {{
                 ItemPropertyAssociation::Item::Entry {
                     .essential = false,
@@ -148,8 +145,8 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
     });
   }
   this->fileBox_.mediaDataBoxes.push_back(MediaDataBox {
-    .beg = 0, // TODO: fill it later.
-    .end = 0, // TODO: fill it later.
+    .offset = 0, // TODO: fill it later.
+    .size = frame.data().size(),
   });
 }
 
