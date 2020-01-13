@@ -108,14 +108,18 @@ int main(int argc, char** argv) {
   // initialize encoder
   cfg.g_w = width;
   cfg.g_h = height;
+  cfg.encoder_cfg.init_by_cfg_file = 1;
   cfg.encoder_cfg.disable_cdef = 1;
   cfg.encoder_cfg.disable_dual_filter = 1;
   cfg.monochrome = 0;
   cfg.g_profile = 0;
   cfg.full_still_picture_hdr = 0;
+
   if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &cfg, 0)) {
     log.fatal("Failed to initialize encoder.");
   }
+
+  aom_codec_control(&codec, AV1E_SET_DENOISE_NOISE_LEVEL, 1);
 
   aom_image_t img;
   // FIXME: read validate_img() function.
