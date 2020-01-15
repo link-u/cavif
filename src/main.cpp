@@ -1,8 +1,7 @@
 #include <iostream>
 
-#include "../external/clipp/include/clipp.h"
-#include "Image.hpp"
-#include "PNGReader.hpp"
+#include "img/Image.hpp"
+#include "img/PNGReader.hpp"
 #include "AVIFBuilder.hpp"
 #include <aom/aom_encoder.h>
 #include <aom/aom_codec.h>
@@ -13,6 +12,9 @@
 #include <avif/util/File.hpp>
 #include <avif/FileBox.hpp>
 #include <avif/Writer.hpp>
+#include <thread>
+
+#include "Configurator.hpp"
 
 namespace {
 
@@ -24,53 +26,32 @@ bool endsWidh(std::string const& target, std::string const& suffix) {
   return target.substr(target.size()-suffix.size()) == suffix;
 }
 
-std::string basename(std::string const& path) {
-  auto pos = path.find_last_of('/');
-  if(pos == std::string::npos) {
-    return path;
-  }
-  return path.substr(pos+1);
-}
+
 
 }
 
 int main(int argc, char** argv) {
   avif::util::FileLogger log(stdout, stderr, avif::util::Logger::Level::DEBUG);
 
-  std::string inputFilename = {};
-  std::string outputFilename = {};
-  aom_codec_ctx_t codec = {};
-  aom_codec_enc_cfg cfg = {};
   aom_codec_iface_t* av1codec = aom_codec_av1_cx();
   if(!av1codec) {
     log.fatal("failed to get AV1 encoder.");
   }
-  aom_codec_enc_config_default(av1codec, &cfg, 0);
+
+  Configurator config;
+  aom_codec_enc_config_default(av1codec, &config.encoderConfig, 0);
   {
-    using namespace clipp;
-    auto cli = (
-        required("-i", "--input") & value("input.{png, bmp}", inputFilename),
-        required("-o", "--output") & value("output.avif", outputFilename),
-        option("--cfg.encoder_cfg.disable_cdef").set(cfg.encoder_cfg.disable_cdef, 1u),
-        option("--cfg.monochrome").set(cfg.monochrome, 1u)
-    );
-
-    if(!parse(argc, argv, cli)) {
-      std::cerr << make_man_page(cli, basename(std::string(argv[0])));
-      return -1;
-    }
-
-    if(inputFilename == outputFilename) {
-      std::cerr << make_man_page(cli, basename(std::string(argv[0])));
-      return -1;
+    int const result = config.parse(argc, argv);
+    if(result != 0) {
+      return result;
     }
   }
 
   // decoding input image
   img::Image srcImage;
-  if(endsWidh(inputFilename, ".png")) {
-    srcImage = img::PNGReader(inputFilename).read();
-  } else if(endsWidh(inputFilename, ".bmp")) {
+  if(endsWidh(config.input, ".png")) {
+    srcImage = img::PNGReader(config.input).read();
+  } else if(endsWidh(config.input, ".bmp")) {
 
   } else {
     log.fatal("please give png or bmp file for input");
@@ -85,7 +66,7 @@ int main(int argc, char** argv) {
   uint32_t const stagingStride = width * stagingBytesPerPiexl;
 
   switch(srcImage.type()) {
-    case img::Image::Type::BGR: {
+    case img::Image::Type::RGB: {
       std::vector<uint8_t> abgr;
       size_t abgrStride = 4 * width;
       abgr.resize(abgrStride * height);
@@ -97,29 +78,13 @@ int main(int argc, char** argv) {
       libyuv::ABGRToARGB(abgr.data(), abgrStride, staging.data(), stagingStride, width, height);
       break;
     }
-    case img::Image::Type::ABGR: {
+    case img::Image::Type::RGBA: {
       staging = srcImage.data();
       staging.resize(stagingStride * height);
       libyuv::ABGRToARGB(srcImage.data().data(), srcImage.stride(), staging.data(), stagingStride, width, height);
       break;
     }
   }
-
-  // initialize encoder
-  cfg.g_w = width;
-  cfg.g_h = height;
-  cfg.encoder_cfg.init_by_cfg_file = 1;
-  cfg.encoder_cfg.disable_cdef = 1;
-  cfg.encoder_cfg.disable_dual_filter = 1;
-  cfg.monochrome = 0;
-  cfg.g_profile = 0;
-  cfg.full_still_picture_hdr = 0;
-
-  if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &cfg, 0)) {
-    log.fatal("Failed to initialize encoder.");
-  }
-
-  aom_codec_control(&codec, AV1E_SET_DENOISE_NOISE_LEVEL, 1);
 
   aom_image_t img;
   // FIXME: read validate_img() function.
@@ -129,8 +94,32 @@ int main(int argc, char** argv) {
   aom_img_alloc(&img, AOM_IMG_FMT_I420, width, height, 1);
   libyuv::ARGBToI420(staging.data(), stagingStride, img.planes[0], img.stride[0], img.planes[1], img.stride[1], img.planes[2], img.stride[2], width, height);
 
-  std::vector<std::vector<uint8_t>> packets;
+  // initialize encoder
+  config.encoderConfig.g_w = width;
+  config.encoderConfig.g_h = height;
+  // Generate just one frame.
+  config.encoderConfig.g_limit = 1;
+  config.encoderConfig.g_pass = AOM_RC_ONE_PASS;
+  // FIXME(ledyba-z):
+  // > A value of 0 implies all frames will be keyframes.
+  // However, when it is set to 0, assertion always fails:
+  // cavif/external/libaom/av1/encoder/gop_structure.c:92:
+  // construct_multi_layer_gf_structure: Assertion `gf_interval >= 1' failed.
+  config.encoderConfig.kf_max_dist = 1;
+  // One frame takes 1 second.
+  config.encoderConfig.g_timebase.den = 1;
+  config.encoderConfig.g_timebase.num = 1;
+  //
+  config.encoderConfig.rc_target_bitrate = 0;
 
+  aom_codec_ctx_t codec{};
+  if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &config.encoderConfig, 0)) {
+    log.fatal("Failed to initialize encoder.");
+  }
+
+  config.modify(&codec);
+
+  std::vector<std::vector<uint8_t>> packets;
   { // encode a frame
     aom_codec_cx_pkt_t const* pkt;
     aom_codec_iter_t iter = nullptr;
@@ -185,8 +174,8 @@ int main(int argc, char** argv) {
       log.error(result->error());
       return -1;
     }
-    avif::av1::SequenceHeader seq{};
-    std::vector<uint8_t> configOBU;
+    std::optional<avif::av1::SequenceHeader> seq{};
+    std::vector<uint8_t> configOBUs;
     std::vector<uint8_t> mdat;
     for(avif::av1::Parser::Result::Packet const& packet : result->packets()) {
       switch (packet.type()) {
@@ -196,7 +185,7 @@ int main(int argc, char** argv) {
           break;
         case avif::av1::Header::Type::SequenceHeader:
           seq = std::get<avif::av1::SequenceHeader>(packet.content());
-          configOBU.insert(std::end(configOBU), std::next(std::begin(result->buffer()), packet.beg()), std::next(result->buffer().begin(), packet.end()));
+          configOBUs.insert(std::end(configOBUs), std::next(std::begin(result->buffer()), packet.beg()), std::next(result->buffer().begin(), packet.end()));
           mdat.insert(std::end(mdat), std::next(std::begin(result->buffer()), packet.beg()), std::next(std::begin(result->buffer()), packet.end()));
           break;
         case avif::av1::Header::Type::Frame:
@@ -206,7 +195,10 @@ int main(int argc, char** argv) {
         }
       }
     }
-    builder.setPrimaryFrame(AVIFBuilder::Frame(seq, std::move(configOBU), mdat));
+    if (!seq.has_value()) {
+      throw std::logic_error("No sequence header OBU.");
+    }
+    builder.setPrimaryFrame(AVIFBuilder::Frame(seq.value(), std::move(configOBUs), mdat));
     avif::FileBox fileBox = builder.build();
     {
       avif::util::StreamWriter pass1;
@@ -220,7 +212,7 @@ int main(int argc, char** argv) {
     avif::Writer(log, out).write(fileBox);
     std::vector<uint8_t> data = out.buffer();
     std::copy(std::begin(mdat), std::end(mdat), std::next(std::begin(data), fileBox.mediaDataBoxes.at(0).offset));
-    std::optional<std::string> writeResult = avif::util::writeFile(outputFilename, data);
+    std::optional<std::string> writeResult = avif::util::writeFile(config.output, data);
     if (writeResult.has_value()) {
       log.error(writeResult.value());
       return -1;

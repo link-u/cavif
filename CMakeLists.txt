@@ -32,15 +32,17 @@ add_subdirectory(external/libaom)
 add_executable(cavif
         src/main.cpp
 
-        src/PNGReader.cpp
-        src/PNGReader.hpp
+        src/img/PNGReader.cpp
+        src/img/PNGReader.hpp
+        src/img/Image.cpp
+        src/img/Image.hpp
 
-        src/Image.cpp
-        src/Image.hpp
+        src/Configurator.cpp
+        src/Configurator.hpp
 
         src/AVIFBuilder.cpp
         src/AVIFBuilder.hpp
-)
+        )
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)
 target_link_libraries(cavif PRIVATE fmt::fmt)

@@ -25,7 +25,6 @@ public:
   PNGReader(std::string filename)
   :filename_(std::move(filename))
   {
-
   }
 
 public:

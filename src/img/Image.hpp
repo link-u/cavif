@@ -12,8 +12,8 @@ namespace img {
 class Image {
 public:
   enum class Type {
-    BGR,
-    ABGR
+    RGB, /* [R,G,B], [R,G,B], ... */
+    RGBA, /* [R,G,B,A], [R,G,B,A], ... */
   };
 private:
   Type type_;
