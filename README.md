@@ -72,12 +72,13 @@ OPTIONS
        daala-dist  daala-dist
 ```
 
-## limitations
+## TODO
 
- - Not supported:
+ - Support:
    - Alpha channel(Auxially images)
    - Color profiles
    - HDR images(10bit/12bit).
+ - Add more and more command-line flags.
 
 # Related repositories
 
