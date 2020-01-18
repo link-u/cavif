@@ -5,7 +5,7 @@ avif encoder, using [libaom](https://aomedia.googlesource.com/aom/) directly.
 ## basic usage
 
 ```bash
-davif -i <output.{bmp, png}> -o <input.avif>
+cavif -i <output.{bmp, png}> -o <input.avif>
 ```
 
 Example avif files are available in [AOMediaCodec/av1-avif](https://github.com/AOMediaCodec/av1-avif/tree/master/testFiles) or [link-u/avif-sample-images](https://github.com/link-u/avif-sample-images).
