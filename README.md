@@ -81,5 +81,6 @@ OPTIONS
 
 # Related repositories
 
+ - [link-u/davif](https://github.com/link-u/davif) - avif decoder, using dav1d directly.
  - [link-u/libavif-container](https://github.com/link-u/libavif-container) - a library to parse avif container.
- - [link-u/avif-sample-images](https://github.com/link-u/avif-sample-images) - sample images.
+ - [link-u/avif-sample-images](https://github.com/link-u/avif-sample-images) - sample images from us.
