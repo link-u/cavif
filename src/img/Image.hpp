@@ -7,8 +7,6 @@
 #include <vector>
 #include <cstdint>
 
-namespace img {
-
 class Image {
 public:
   enum class Type {
@@ -50,6 +48,3 @@ public:
     return this->data_;
   }
 };
-
-}
-

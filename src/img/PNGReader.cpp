@@ -11,7 +11,6 @@
 
 #include "Image.hpp"
 
-namespace img {
 Image PNGReader::read() {
   FILE* file = fopen(filename_.c_str(), "rb");
   if(!file) {
@@ -98,6 +97,4 @@ Image PNGReader::read() {
   fclose(file);
   png_destroy_read_struct(&png, &info, nullptr);
   return Image(type, width, height, bytesPerPixel, width * bytesPerPixel, std::move(data));
-}
-
 }

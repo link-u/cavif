@@ -15,6 +15,7 @@
 #include <thread>
 
 #include "Configurator.hpp"
+#include "img/ImageConverter.hpp"
 
 namespace {
 
@@ -48,9 +49,9 @@ int main(int argc, char** argv) {
   }
 
   // decoding input image
-  img::Image srcImage;
+  Image srcImage;
   if(endsWidh(config.input, ".png")) {
-    srcImage = img::PNGReader(config.input).read();
+    srcImage = PNGReader(config.input).read();
   } else if(endsWidh(config.input, ".bmp")) {
 
   } else {
@@ -59,40 +60,9 @@ int main(int argc, char** argv) {
   uint32_t const width = srcImage.width();
   uint32_t const height = srcImage.height();
 
-  // converting RGB(A) -> I420
-  // FIXME(ledyba-z): how about alpha channels?
-  std::vector<uint8_t> staging;
-  uint32_t const stagingBytesPerPiexl = 4;
-  uint32_t const stagingStride = width * stagingBytesPerPiexl;
-
-  switch(srcImage.type()) {
-    case img::Image::Type::RGB: {
-      std::vector<uint8_t> abgr;
-      size_t abgrStride = 4 * width;
-      abgr.resize(abgrStride * height);
-      // BGR24ToABGRが無かった
-      libyuv::RGB24ToARGB(srcImage.data().data(), srcImage.stride(), abgr.data(), abgrStride, width, height);
-
-      // BGR24ToARGBが無かった
-      staging.resize(stagingStride * height);
-      libyuv::ABGRToARGB(abgr.data(), abgrStride, staging.data(), stagingStride, width, height);
-      break;
-    }
-    case img::Image::Type::RGBA: {
-      staging = srcImage.data();
-      staging.resize(stagingStride * height);
-      libyuv::ABGRToARGB(srcImage.data().data(), srcImage.stride(), staging.data(), stagingStride, width, height);
-      break;
-    }
-  }
-
   aom_image_t img;
-  // FIXME: read validate_img() function.
-  // https://github.com/link-u/libaom/blob/d0b3d306aebb5ef6cc89f49f56dd7adaee41f696/av1/av1_cx_iface.c#L532
-  //aom_img_alloc(&img, AOM_IMG_FMT_I420, width, height, 1);
-  //libyuv::ARGBToI420(staging.data(), statingStride, img.planes[0], img.stride[0], img.planes[1], img.stride[1], img.planes[2], img.stride[2], width, height);
-  aom_img_alloc(&img, AOM_IMG_FMT_I420, width, height, 1);
-  libyuv::ARGBToI420(staging.data(), stagingStride, img.planes[0], img.stride[0], img.planes[1], img.stride[1], img.planes[2], img.stride[2], width, height);
+  aom_img_alloc(&img, config.outPixFmt, width, height, 1);
+  ImageConverter(srcImage, img).convert();
 
   // initialize encoder
   config.encoderConfig.g_w = width;

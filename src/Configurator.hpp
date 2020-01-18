@@ -11,14 +11,15 @@
 #include <aom/aomcx.h>
 #include "../external/clipp/include/clipp.h"
 
-class Configurator {
+class Configurator final {
 public:
   std::string input{};
   std::string output{};
   aom_codec_enc_cfg encoderConfig{};
 public:
+  aom_img_fmt_t outPixFmt = AOM_IMG_FMT_I420;
   int crf = 32;
-  int cpu_used = 1;
+  int cpuUsed = 1;
   bool enableCDEF = false;
   bool fullColorRange = false;
   aom_superblock_size_t superblockSize = AOM_SUPERBLOCK_SIZE_DYNAMIC;

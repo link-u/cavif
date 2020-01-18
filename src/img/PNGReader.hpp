@@ -7,7 +7,6 @@
 #include <string>
 #include <aom/aom_image.h>
 
-namespace img {
 class Image;
 
 class PNGReader final {
@@ -31,6 +30,5 @@ public:
   Image read();
 };
 
-}
 
 

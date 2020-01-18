@@ -36,6 +36,8 @@ add_executable(cavif
         src/img/PNGReader.hpp
         src/img/Image.cpp
         src/img/Image.hpp
+        src/img/ImageConverter.cpp
+        src/img/ImageConverter.hpp
 
         src/Configurator.cpp
         src/Configurator.hpp
