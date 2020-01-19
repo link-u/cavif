@@ -21,55 +21,74 @@ cd cavif
 mkdir build && cd build
 cmake ..
 make
+```
 
-# show usage
-% ./cavif
+## SYNOPSIS
+
+```
+% cmake-build-debug/cavif
 SYNOPSIS
-       cavif -i <input.{png, bmp}> -o <output.avif> [--profile <AV1 Profile(0=base, 1=high,
-             2=professional)>] [--monochrome] [--usage [good|realtime]] [--threads <Num of threads
-             to use>] [--pix-fmt [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--rate-control
-             [q|cq]] [--large-scale-tile] [--full-still-picture-header] [--enable-full-color-range]
-             [--crf <CQ Level in CQ rate control mode>] [--cpu-used <Quality/Speed ratio modifier>]
-             [--enable-cdef] [--superblock-size [dynamic|128|64]] [--tune
-             [ssim|psnr|cdef-dist|daala-dist]]
+        cavif -i <input.{png, bmp}> -o <output.avif> [--profile <0=base, 1=high, 2=professional>]
+              [--monochrome] [--usage [good|realtime]] [--threads <Num of threads to use>]
+              [--pix-fmt [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--rate-control [q|cq]]
+              [--enable-large-scale-tile] [--disable-large-scale-tile] [--full-still-picture-header]
+              [--enable-full-color-range] [--disable-full-color-range] [--crf <0-63>] [--cpu-used
+              <0-8>] [--enable-cdef] [--disable-cdef] [--superblock-size [dynamic|128|64]] [--tune
+              [ssim|psnr|cdef-dist|daala-dist]]
 
 OPTIONS
-       --monochrome
-                   Encode to monochrome image.
+        -i, --input Filename to input
+        -o, --output
+                    Filename to output
 
-       --usage     Encoder usage
-       good        Good Quality mode
-       realtime    Real time encoding mode.
-       --pix-fmt   Pixel format of output image.
-       --bit-depth Bit depth of output image.
-       --rate-control
-                   Rate control method
+        --profile   AV1 Profile(0=base, 1=high, 2=professional)
+        --monochrome
+                    Encode to monochrome image.
 
-       q           Constant Quality
-       cq          Constrained Quality
-       --large-scale-tile
-                   Use large scale tile mode.
+        --usage     Encoder usage
+        good        Good Quality mode
+        realtime    Real time encoding mode.
+        --pix-fmt   Pixel format of output image.
+        --bit-depth Bit depth of output image.
+        --rate-control
+                    Rate control method
 
-       --full-still-picture-header
-                   Force to output full picture header
+        q           Constant Quality
+        cq          Constrained Quality
+        --enable-large-scale-tile
+                    Use large scale tile mode.
 
-       --enable-full-color-range
-                   Quality/Speed ratio modifier
+        --disable-large-scale-tile
+                    Don't use large scale tile mode.
 
-       --enable-cdef
-                   Quality/Speed ratio modifier
+        --full-still-picture-header
+                    Force to output full picture header
 
-       --superblock-size
-                   Superblock size.
+        --enable-full-color-range
+                    Use full YUV color range.
 
-       dynamic     encoder determines the size automatically.
-       128         use 128x128 superblock.
-       64          use 64x64 superblock.
-       --tune      Quality metric to tune
-       ssim        structural similarity
-       psnr        peak signal-to-noise ratio
-       cdef-dist   cdef-dist
-       daala-dist  daala-dist
+        --disable-full-color-range
+                    Use limited YUV color range.
+
+        --crf       CQ Level in CQ rate control mode
+        --cpu-used  Quality/Speed ratio modifier
+        --enable-cdef
+                    Enable Constrained Directional Enhancement Filter
+
+        --disable-cdef
+                    Disable Constrained Directional Enhancement Filter
+
+        --superblock-size
+                    Superblock size.
+
+        dynamic     encoder determines the size automatically.
+        128         use 128x128 superblock.
+        64          use 64x64 superblock.
+        --tune      Quality metric to tune
+        ssim        structural similarity
+        psnr        peak signal-to-noise ratio
+        cdef-dist   cdef-dist
+        daala-dist  daala-dist
 ```
 
 ## TODO
