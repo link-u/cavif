@@ -21,6 +21,7 @@ public:
   int crf = 32;
   int cpuUsed = 1;
   bool enableCDEF = false;
+  bool enableRestoration = false;
   bool fullColorRange = false;
   aom_superblock_size_t superblockSize = AOM_SUPERBLOCK_SIZE_DYNAMIC;
   aom_tune_metric tune = AOM_TUNE_SSIM;

@@ -29,7 +29,7 @@ int Configurator::parse(int argc, char **argv) {
       option("--usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
       option("--threads") & integer("Num of threads to use", aom.g_threads),
       option("--pix-fmt").doc("Pixel format of output image.") & (parameter("yuv420").set(outPixFmt, AOM_IMG_FMT_I420) | parameter("yuv422").set(outPixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(outPixFmt, AOM_IMG_FMT_I444)),
-      option("--bit-depth").doc("Bit depth of output image.") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8) | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_10)),
+      option("--bit-depth").doc("Bit depth of output image.") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8) | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_12)),
       option("--rate-control").doc("Rate control method") & (parameter("q").doc("Constant Quality").set(aom.rc_end_usage, AOM_Q) | parameter("cq").doc("Constrained Quality").set(aom.rc_end_usage, AOM_CQ)),
       option("--enable-large-scale-tile").doc("Use large scale tile mode.").set(aom.large_scale_tile, 1u),
       option("--disable-large-scale-tile").doc("Don't use large scale tile mode.").set(aom.large_scale_tile, 0u),
@@ -40,6 +40,8 @@ int Configurator::parse(int argc, char **argv) {
       option("--cpu-used").doc("Quality/Speed ratio modifier") & integer("0-8", cpuUsed),
       option("--enable-cdef").doc("Enable Constrained Directional Enhancement Filter").set(enableCDEF, true),
       option("--disable-cdef").doc("Disable Constrained Directional Enhancement Filter").set(enableCDEF, false),
+      option("--enable-restoration").doc("Enable Loop Restoration Filter").set(enableRestoration, true),
+      option("--disable-restoration").doc("Disable Loop Restoration Filter").set(enableRestoration, false),
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64)),
       option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR) | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST))
   );
@@ -61,6 +63,7 @@ void Configurator::modify(aom_codec_ctx_t *codec) {
   aom_codec_control(codec, AOME_SET_TUNING, tune);
   aom_codec_control(codec, AOME_SET_CQ_LEVEL, this->crf);
   aom_codec_control(codec, AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
+  aom_codec_control(codec, AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
 
   //FIXME(ledyba-z): support color profile. PNG can contain gamma correction and color profile.
   // Gamma Correction and Precision Color (PNG: The Definitive Guide)

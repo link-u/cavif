@@ -50,6 +50,7 @@ void ImageConverter::convert() {
   }
 }
 
+
 void ImageConverter::convertFromBGRA(std::vector<uint8_t> const& bgra, size_t const stride) {
   bool ok = false;
   switch (dst_.fmt) {
