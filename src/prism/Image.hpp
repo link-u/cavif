@@ -7,16 +7,19 @@
 #include <vector>
 #include <cstdint>
 
-class Image {
+namespace prism {
+
+class Image final {
 public:
   enum class Type {
     RGB, /* [R,G,B], [R,G,B], ... */
     RGBA, /* [R,G,B,A], [R,G,B,A], ... */
   };
 private:
-  Type type_;
+  Type type_{};
   uint32_t width_{};
   uint32_t height_{};
+  uint8_t bitsPerComponent_{};
   uint32_t bytesPerPixel_{};
   uint32_t stride_{};
   std::vector<uint8_t> data_{};
@@ -28,7 +31,7 @@ public:
   Image& operator=(Image&&) = default;
   ~Image() noexcept = default;
 public:
-  Image(Type type, uint32_t width, uint32_t height, uint32_t bytesPerPixel, uint32_t stride, std::vector<uint8_t> data);
+  explicit Image(Type type, uint32_t width, uint32_t height, uint8_t bitsPerComponent, uint32_t bytesPerPixel, uint32_t stride, std::vector<uint8_t> data);
   [[ nodiscard ]] Type type() const {
     return this->type_;
   }
@@ -44,7 +47,11 @@ public:
   [[ nodiscard ]] uint32_t bytesPerPixel() const {
     return this->bytesPerPixel_;
   }
-  [[ nodiscard ]] std::vector<uint8_t> const& data() const {
-    return this->data_;
+  [[ nodiscard ]] uint8_t bitsPerComponent() const {
+    return this->bitsPerComponent_;
   }
+  template <typename T>
+  [[ nodiscard ]] T const* data() const;
 };
+
+}

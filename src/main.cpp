@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "img/Image.hpp"
+#include "prism/Image.hpp"
 #include "img/PNGReader.hpp"
 #include "AVIFBuilder.hpp"
 #include <aom/aom_encoder.h>
@@ -40,6 +40,7 @@ int main(int argc, char** argv) {
   }
 
   Configurator config;
+  aom_codec_flags_t flags = 0;
   aom_codec_enc_config_default(av1codec, &config.encoderConfig, 0);
   {
     int const result = config.parse(argc, argv);
@@ -49,7 +50,7 @@ int main(int argc, char** argv) {
   }
 
   // decoding input image
-  Image srcImage;
+  prism::Image srcImage;
   if(endsWidh(config.input, ".png")) {
     srcImage = PNGReader(config.input).read();
   } else if(endsWidh(config.input, ".bmp")) {
@@ -61,8 +62,15 @@ int main(int argc, char** argv) {
   uint32_t const height = srcImage.height();
 
   aom_image_t img;
-  aom_img_alloc(&img, config.outPixFmt, width, height, 1);
-  ImageConverter(srcImage, img).convert();
+  aom_img_fmt_t pixFmt = config.pixFmt;
+  if(config.encoderConfig.g_bit_depth > 8) {
+    pixFmt = static_cast<aom_img_fmt_t>(pixFmt | static_cast<unsigned int>(AOM_IMG_FMT_HIGHBITDEPTH));
+    flags |= AOM_CODEC_USE_HIGHBITDEPTH;
+  }
+  aom_img_alloc(&img, pixFmt, width, height, 1);
+  ImageConverter(srcImage, img).convert(config.encoderConfig.g_bit_depth);
+  // FIXME(ledyba-z): bug?
+  config.encoderConfig.g_input_bit_depth = config.encoderConfig.g_bit_depth;
 
   // initialize encoder
   config.encoderConfig.g_w = width;
@@ -83,8 +91,9 @@ int main(int argc, char** argv) {
   config.encoderConfig.rc_target_bitrate = 0;
 
   aom_codec_ctx_t codec{};
-  if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &config.encoderConfig, 0)) {
-    log.fatal("Failed to initialize encoder.");
+
+  if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &config.encoderConfig, flags)) {
+    log.fatal("Failed to initialize encoder: %s", aom_codec_error_detail(&codec));
   }
 
   config.modify(&codec);
@@ -95,7 +104,7 @@ int main(int argc, char** argv) {
     aom_codec_iter_t iter = nullptr;
     aom_codec_err_t const res = aom_codec_encode(&codec, &img, 0, 1, AOM_EFLAG_FORCE_KF);
     if (res != AOM_CODEC_OK) {
-      log.fatal("failed to encode a key frame");
+      log.fatal("failed to encode a key frame: %s", aom_codec_error_detail(&codec));
     }
     while ((pkt = aom_codec_get_cx_data(&codec, &iter)) != nullptr) {
       if (pkt->kind == AOM_CODEC_CX_FRAME_PKT) {
@@ -113,7 +122,7 @@ int main(int argc, char** argv) {
       aom_codec_cx_pkt_t const* pkt = nullptr;
       const aom_codec_err_t res = aom_codec_encode(&codec, nullptr, -1, 1, 0);
       if (res != AOM_CODEC_OK) {
-        log.fatal("failed to flushing encoder");
+        log.fatal("failed to flushing encoder: %s", aom_codec_error_detail(&codec));
       }
       bool gotPkt = false;
       while ((pkt = aom_codec_get_cx_data(&codec, &iter)) != nullptr) {
@@ -129,7 +138,7 @@ int main(int argc, char** argv) {
   }
   aom_img_free(&img);
   if (aom_codec_destroy(&codec) != AOM_CODEC_OK) {
-    log.error("Failed to destroy codec.");
+    log.error("Failed to destroy codec: %s", aom_codec_error_detail(&codec));
     return -1;
   }
   if(packets.empty()) {

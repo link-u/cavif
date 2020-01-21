@@ -17,7 +17,7 @@ public:
   std::string output{};
   aom_codec_enc_cfg encoderConfig{};
 public:
-  aom_img_fmt_t outPixFmt = AOM_IMG_FMT_I420;
+  aom_img_fmt_t pixFmt = AOM_IMG_FMT_I420;
   int crf = 32;
   int cpuUsed = 1;
   bool enableCDEF = false;

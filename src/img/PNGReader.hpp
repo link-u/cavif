@@ -6,8 +6,7 @@
 
 #include <string>
 #include <aom/aom_image.h>
-
-class Image;
+#include "../prism/Image.hpp"
 
 class PNGReader final {
 private:
@@ -21,13 +20,13 @@ public:
   ~PNGReader() noexcept = default;
 
 public:
-  PNGReader(std::string filename)
+  explicit PNGReader(std::string filename)
   :filename_(std::move(filename))
   {
   }
 
 public:
-  Image read();
+  prism::Image read();
 };
 
 

@@ -6,8 +6,8 @@
 
 #include <aom/aom_image.h>
 #include <vector>
+#include "../prism/Image.hpp"
 
-class Image;
 class ImageConverter {
 public:
   ImageConverter() = delete;
@@ -19,13 +19,13 @@ public:
 private:
   size_t const width_;
   size_t const height_;
-  Image& src_;
+  prism::Image& src_;
   aom_image& dst_;
 public:
-  explicit ImageConverter(Image& src, aom_image& dst);
-  void convert();
+  explicit ImageConverter(prism::Image& src, aom_image& dst);
+  void convert(uint8_t bitsPerComponent);
 private:
-  void convertFromBGRA(std::vector<uint8_t> const& bgra, size_t stride);
+  void convertFromBGRA8888(std::vector<uint8_t> const& bgra, const size_t stride);
 };
 
 

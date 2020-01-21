@@ -9,9 +9,7 @@
 #include <png.h>
 #include <cassert>
 
-#include "Image.hpp"
-
-Image PNGReader::read() {
+prism::Image PNGReader::read() {
   FILE* file = fopen(filename_.c_str(), "rb");
   if(!file) {
     fclose(file);
@@ -36,11 +34,7 @@ Image PNGReader::read() {
 
   // Read any color_type into 8bit depth, RGBA format.
   // See http://www.libpng.org/pub/png/libpng-manual.txt
-  // FIXME(ledyba-z): av1 supports high-depth image.
   int bytesPerPixel = 3;
-  if(bit_depth == 16) {
-    png_set_strip_16(png);
-  }
 
   if(color_type == PNG_COLOR_TYPE_PALETTE) {
     png_set_palette_to_rgb(png);
@@ -56,19 +50,27 @@ Image PNGReader::read() {
     png_set_tRNS_to_alpha(png);
   }
 
-  Image::Type type = Image::Type::RGB;
+  prism::Image::Type type = prism::Image::Type::RGB;
   // These color_type don't have an alpha channel then fill it with 0xff.
   switch(color_type) {
     case PNG_COLOR_TYPE_RGB:
     case PNG_COLOR_TYPE_PALETTE:
-      bytesPerPixel = 3;
-      type = Image::Type::RGB;
+      type = prism::Image::Type::RGB;
+      if(bit_depth == 16) {
+        bytesPerPixel = 6;
+      } else {
+        bytesPerPixel = 3;
+      }
       break;
     case PNG_COLOR_TYPE_RGB_ALPHA:
     case PNG_COLOR_TYPE_GRAY:
     case PNG_COLOR_TYPE_GRAY_ALPHA:
-      bytesPerPixel = 4;
-      type = Image::Type::RGBA;
+      type = prism::Image::Type::RGBA;
+      if(bit_depth == 16) {
+        bytesPerPixel = 8;
+      } else {
+        bytesPerPixel = 4;
+      }
       break;
     default:
       assert("Never to come here.");
@@ -96,5 +98,5 @@ Image PNGReader::read() {
   png_read_image(png, rows.data());
   fclose(file);
   png_destroy_read_struct(&png, &info, nullptr);
-  return Image(type, width, height, bytesPerPixel, width * bytesPerPixel, std::move(data));
+  return prism::Image(type, width, height, bit_depth, bytesPerPixel, width * bytesPerPixel, std::move(data));
 }

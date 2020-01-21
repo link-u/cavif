@@ -28,7 +28,7 @@ int Configurator::parse(int argc, char **argv) {
       option("--monochrome").doc("Encode to monochrome image.").set(encoderConfig.monochrome, 1u),
       option("--usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
       option("--threads") & integer("Num of threads to use", aom.g_threads),
-      option("--pix-fmt").doc("Pixel format of output image.") & (parameter("yuv420").set(outPixFmt, AOM_IMG_FMT_I420) | parameter("yuv422").set(outPixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(outPixFmt, AOM_IMG_FMT_I444)),
+      option("--pix-fmt").doc("Pixel format of output image.") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420) | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444)),
       option("--bit-depth").doc("Bit depth of output image.") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8) | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_12)),
       option("--rate-control").doc("Rate control method") & (parameter("q").doc("Constant Quality").set(aom.rc_end_usage, AOM_Q) | parameter("cq").doc("Constrained Quality").set(aom.rc_end_usage, AOM_CQ)),
       option("--enable-large-scale-tile").doc("Use large scale tile mode.").set(aom.large_scale_tile, 1u),

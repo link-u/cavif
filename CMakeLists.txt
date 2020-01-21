@@ -32,10 +32,12 @@ add_subdirectory(external/libaom)
 add_executable(cavif
         src/main.cpp
 
+        src/prism/Image.cpp
+        src/prism/Image.hpp
+        src/prism/BT2020.cpp
+        src/prism/BT2020.hpp
         src/img/PNGReader.cpp
         src/img/PNGReader.hpp
-        src/img/Image.cpp
-        src/img/Image.hpp
         src/img/ImageConverter.cpp
         src/img/ImageConverter.hpp
 
