@@ -5,7 +5,7 @@ avif encoder, using [libaom](https://aomedia.googlesource.com/aom/) directly.
 ## basic usage
 
 ```bash
-cavif -i <output.{bmp, png}> -o <input.avif>
+cavif -i <output.png> -o <input.avif>
 ```
 
 Example avif files are available in [AOMediaCodec/av1-avif](https://github.com/AOMediaCodec/av1-avif/tree/master/testFiles) or [link-u/avif-sample-images](https://github.com/link-u/avif-sample-images).
@@ -28,7 +28,7 @@ make
 ```
 % cmake-build-debug/cavif
 SYNOPSIS
-        cavif -i <input.{png, bmp}> -o <output.avif> [--profile <0=base, 1=high, 2=professional>]
+        cavif -i <input.png> -o <output.avif> [--profile <0=base, 1=high, 2=professional>]
               [--monochrome] [--usage [good|realtime]] [--threads <Num of threads to use>]
               [--pix-fmt [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--rate-control [q|cq]]
               [--enable-large-scale-tile] [--disable-large-scale-tile] [--full-still-picture-header]
