@@ -6,7 +6,6 @@
 #include <aom/aom_encoder.h>
 #include <aom/aom_codec.h>
 #include <aom/aomcx.h>
-#include <libyuv.h>
 #include <avif/av1/Parser.hpp>
 #include <avif/util/FileLogger.hpp>
 #include <avif/util/File.hpp>
@@ -27,11 +26,45 @@ bool endsWidh(std::string const& target, std::string const& suffix) {
   return target.substr(target.size()-suffix.size()) == suffix;
 }
 
-
+size_t encode(avif::util::Logger& log, aom_codec_ctx_t& codec, aom_image* img, std::vector<std::vector<uint8_t>>& packets) {
+  aom_codec_cx_pkt_t const* pkt;
+  aom_codec_iter_t iter = nullptr;
+  aom_codec_err_t const res = aom_codec_encode(&codec, img, 0, 1, img ? AOM_EFLAG_FORCE_KF : 0);
+  if (res != AOM_CODEC_OK) {
+    if(img) {
+      log.fatal("failed to encode a frame: %s", aom_codec_error_detail(&codec));
+    } else {
+      log.fatal("failed to flush encoder: %s", aom_codec_error_detail(&codec));
+    }
+    return 0;
+  }
+  size_t numPackets = 0;
+  while ((pkt = aom_codec_get_cx_data(&codec, &iter)) != nullptr) {
+    if (pkt->kind == AOM_CODEC_CX_FRAME_PKT) {
+      auto& frame = pkt->data.frame;
+      auto const beg = reinterpret_cast<uint8_t*>(frame.buf);
+      packets.emplace_back(std::vector<uint8_t>(beg, beg + frame.sz));
+      ++numPackets;
+    }
+  }
+  return numPackets;
+}
 
 }
 
+static int _main(int argc, char** argv);
+
 int main(int argc, char** argv) {
+  try {
+    return _main(argc, argv);
+  } catch (std::exception& err) {
+    fprintf(stderr, "%s\n", err.what());
+    fflush(stderr);
+    return -1;
+  }
+}
+
+int _main(int argc, char** argv) {
   avif::util::FileLogger log(stdout, stderr, avif::util::Logger::Level::DEBUG);
 
   aom_codec_iface_t* av1codec = aom_codec_av1_cx();
@@ -43,9 +76,9 @@ int main(int argc, char** argv) {
   aom_codec_flags_t flags = 0;
   aom_codec_enc_config_default(av1codec, &config.encoderConfig, 0);
   {
-    int const result = config.parse(argc, argv);
-    if(result != 0) {
-      return result;
+    int const parsrResult = config.parse(argc, argv);
+    if(parsrResult != 0) {
+      return parsrResult;
     }
   }
 
@@ -53,8 +86,6 @@ int main(int argc, char** argv) {
   prism::Image srcImage;
   if(endsWidh(config.input, ".png")) {
     srcImage = PNGReader(config.input).read();
-  } else if(endsWidh(config.input, ".bmp")) {
-
   } else {
     log.fatal("please give png or bmp file for input");
   }
@@ -65,12 +96,10 @@ int main(int argc, char** argv) {
   aom_img_fmt_t pixFmt = config.pixFmt;
   if(config.encoderConfig.g_bit_depth > 8) {
     pixFmt = static_cast<aom_img_fmt_t>(pixFmt | static_cast<unsigned int>(AOM_IMG_FMT_HIGHBITDEPTH));
-    flags |= AOM_CODEC_USE_HIGHBITDEPTH;
+    flags = static_cast<unsigned int>(flags | AOM_CODEC_USE_HIGHBITDEPTH);
   }
   aom_img_alloc(&img, pixFmt, width, height, 1);
   ImageConverter(srcImage, img).convert(config.encoderConfig.g_bit_depth);
-  // FIXME(ledyba-z): bug?
-  config.encoderConfig.g_input_bit_depth = config.encoderConfig.g_bit_depth;
 
   // initialize encoder
   config.encoderConfig.g_w = width;
@@ -78,7 +107,9 @@ int main(int argc, char** argv) {
   // Generate just one frame.
   config.encoderConfig.g_limit = 1;
   config.encoderConfig.g_pass = AOM_RC_ONE_PASS;
-  // FIXME(ledyba-z):
+  // FIXME(ledyba-z): Encoder produces wrong images when g_input_bit_depth != g_bit_depth. Bug?
+  config.encoderConfig.g_input_bit_depth = config.encoderConfig.g_bit_depth;
+  // FIXME(ledyba-z): If kf_max_dist = 1, it crashes. Bug?
   // > A value of 0 implies all frames will be keyframes.
   // However, when it is set to 0, assertion always fails:
   // cavif/external/libaom/av1/encoder/gop_structure.c:92:
@@ -99,55 +130,21 @@ int main(int argc, char** argv) {
   config.modify(&codec);
 
   std::vector<std::vector<uint8_t>> packets;
-  { // encode a frame
-    aom_codec_cx_pkt_t const* pkt;
-    aom_codec_iter_t iter = nullptr;
-    aom_codec_err_t const res = aom_codec_encode(&codec, &img, 0, 1, AOM_EFLAG_FORCE_KF);
-    if (res != AOM_CODEC_OK) {
-      log.fatal("failed to encode a key frame: %s", aom_codec_error_detail(&codec));
-    }
-    while ((pkt = aom_codec_get_cx_data(&codec, &iter)) != nullptr) {
-      if (pkt->kind == AOM_CODEC_CX_FRAME_PKT) {
-        auto& frame = pkt->data.frame;
-        auto const beg = reinterpret_cast<uint8_t*>(frame.buf);
-        packets.emplace_back(std::vector<uint8_t>(beg, beg + frame.sz));
-      }
-      break;
-    }
-  }
-  { // flushing
-    bool cont = true;
-    while(cont) {
-      aom_codec_iter_t iter = nullptr;
-      aom_codec_cx_pkt_t const* pkt = nullptr;
-      const aom_codec_err_t res = aom_codec_encode(&codec, nullptr, -1, 1, 0);
-      if (res != AOM_CODEC_OK) {
-        log.fatal("failed to flushing encoder: %s", aom_codec_error_detail(&codec));
-      }
-      bool gotPkt = false;
-      while ((pkt = aom_codec_get_cx_data(&codec, &iter)) != nullptr) {
-        gotPkt = true;
-        if (pkt->kind == AOM_CODEC_CX_FRAME_PKT) {
-          auto& frame = pkt->data.frame;
-          auto const beg = reinterpret_cast<uint8_t*>(frame.buf);
-          packets.emplace_back(std::vector<uint8_t>(beg, beg + frame.sz));
-        }
-      }
-      cont &= gotPkt;
-    }
-  }
+  encode(log, codec, &img, packets);
+  while(encode(log, codec, nullptr, packets) > 0); //flushing
   aom_img_free(&img);
+
   if (aom_codec_destroy(&codec) != AOM_CODEC_OK) {
     log.error("Failed to destroy codec: %s", aom_codec_error_detail(&codec));
     return -1;
   }
+
   if(packets.empty()) {
     log.error("no packats to out.");
     return -1;
   }
   {
     AVIFBuilder builder(width, height);
-
     std::shared_ptr<avif::av1::Parser::Result> result = avif::av1::Parser(log, packets[0]).parse();
     if (!result->ok()) {
       log.error(result->error());

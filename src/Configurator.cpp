@@ -22,7 +22,7 @@ int Configurator::parse(int argc, char **argv) {
   using namespace clipp;
   auto& aom = this->encoderConfig;
   auto cli = (
-      required("-i", "--input").doc("Filename to input") & value("input.{png, bmp}", input),
+      required("-i", "--input").doc("Filename to input") & value("input.png", input),
       required("-o", "--output").doc("Filename to output") & value("output.avif", output),
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base, 1=high, 2=professional", aom.g_profile),
       option("--monochrome").doc("Encode to monochrome image.").set(encoderConfig.monochrome, 1u),
@@ -46,11 +46,11 @@ int Configurator::parse(int argc, char **argv) {
       option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR) | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST))
   );
   if(!clipp::parse(argc, argv, cli)) {
-    std::cerr << make_man_page(cli, basename(std::string(argv[0])));
+    std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
     return -1;
   }
   if(input == output) {
-    std::cerr << make_man_page(cli, basename(std::string(argv[0])));
+    std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
     return -1;
   }
   return 0;
