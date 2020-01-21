@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
 
 ###############################################################################
-add_subdirectory(external/libyuv EXCLUDE_FROM_ALL)
 add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 ###############################################################################
 set(SKIP_INSTALL_ALL ON)
@@ -34,12 +33,11 @@ add_executable(cavif
 
         src/prism/Image.cpp
         src/prism/Image.hpp
-        src/prism/BT2020.cpp
-        src/prism/BT2020.hpp
+        src/prism/Conversion.hpp
         src/img/PNGReader.cpp
         src/img/PNGReader.hpp
-        src/img/ImageConverter.cpp
-        src/img/ImageConverter.hpp
+        src/img/Convert.cpp
+        src/img/Convert.hpp
 
         src/Configurator.cpp
         src/Configurator.hpp
@@ -50,7 +48,6 @@ add_executable(cavif
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)
 target_link_libraries(cavif PRIVATE fmt::fmt)
-target_link_libraries(cavif PRIVATE yuv)
 target_link_libraries(cavif PRIVATE libavif-container)
 target_include_directories(cavif PRIVATE external/libpng)
 target_include_directories(cavif PRIVATE external/libaom)

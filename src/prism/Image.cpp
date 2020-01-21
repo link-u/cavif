@@ -18,13 +18,4 @@ Image::Image(Type type, uint32_t width, uint32_t height, uint8_t bitsPerComponen
 
 }
 
-template <>
-[[ nodiscard ]] uint8_t const* Image::data<uint8_t>() const {
-  return this->data_.data();
-}
-template <>
-[[ nodiscard ]] uint16_t const* Image::data<uint16_t>() const {
-  return reinterpret_cast<uint16_t const*>(this->data_.data());
-}
-
 }

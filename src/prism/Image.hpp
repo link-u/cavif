@@ -50,8 +50,12 @@ public:
   [[ nodiscard ]] uint8_t bitsPerComponent() const {
     return this->bitsPerComponent_;
   }
-  template <typename T>
-  [[ nodiscard ]] T const* data() const;
+  [[ nodiscard ]] uint8_t numComponents() const {
+    return this->type_ == Type::RGB ? 3 : 4;
+  }
+  [[ nodiscard ]] uint8_t const* data() const {
+    return this->data_.data();
+  }
 };
 
 }

@@ -14,7 +14,7 @@
 #include <thread>
 
 #include "Configurator.hpp"
-#include "img/ImageConverter.hpp"
+#include "img/Convert.hpp"
 
 namespace {
 
@@ -99,7 +99,7 @@ int _main(int argc, char** argv) {
     flags = static_cast<unsigned int>(flags | AOM_CODEC_USE_HIGHBITDEPTH);
   }
   aom_img_alloc(&img, pixFmt, width, height, 1);
-  ImageConverter(srcImage, img).convert(config.encoderConfig.g_bit_depth);
+  convert(srcImage, img);
 
   // initialize encoder
   config.encoderConfig.g_w = width;
