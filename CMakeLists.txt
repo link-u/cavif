@@ -31,6 +31,9 @@ set(PNG_TESTS OFF CACHE BOOL "Build libpng tests" FORCE)
 add_subdirectory(external/libpng EXCLUDE_FROM_ALL)
 #FIXME(ledyba-z): Workaround to include "pnglibconf.h"
 target_include_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/libpng)
+#vendoring zlib:
+target_include_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/zlib)
+target_include_directories(png_static PUBLIC external/zlib)
 target_link_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/zlib)
 target_link_libraries(png_static zlibstatic)
 add_dependencies(png_static zlibstatic) #FIXME(ledyba-z): this line requires CMP0079
