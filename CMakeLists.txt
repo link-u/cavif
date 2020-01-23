@@ -5,6 +5,12 @@ enable_language(C CXX ASM)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
 
+if (WIN32)
+    # https://stackoverflow.com/questions/47690822/possible-to-force-cmake-msvc-to-use-utf-8-encoding-for-source-files-without-a-bo
+    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+endif(WIN32)
+
 ###############################################################################
 add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 ###############################################################################
@@ -54,3 +60,7 @@ target_include_directories(cavif PRIVATE external/libaom)
 target_include_directories(cavif PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/external/libaom")
 target_include_directories(cavif PRIVATE external/libyuv/include)
 target_include_directories(cavif PRIVATE external/libavif-container/src)
+if (UNIX)
+    # FIXME(ledyba-z): workaround for gcc-8
+    target_link_libraries(cavif PRIVATE stdc++fs)
+endif (UNIX)
