@@ -21,6 +21,9 @@ add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 set(ASM686L OFF CACHE BOOL "Enable building i686 assembly implementation" FORCE)
 set(ASM686 OFF CACHE BOOL "Enable building amd64 assembly implementation" FORCE)
 add_subdirectory(external/zlib EXCLUDE_FROM_ALL)
+#FIXME(ledyba-z): Workaround to vendor zlib sources:
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/external/zlib)
+include_directories(external/zlib)
 ###############################################################################
 set(SKIP_INSTALL_ALL ON)
 
@@ -31,9 +34,6 @@ set(PNG_TESTS OFF CACHE BOOL "Build libpng tests" FORCE)
 add_subdirectory(external/libpng EXCLUDE_FROM_ALL)
 #FIXME(ledyba-z): Workaround to include "pnglibconf.h"
 target_include_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/libpng)
-#vendoring zlib:
-target_include_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/zlib)
-target_include_directories(png_static PUBLIC external/zlib)
 target_link_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/zlib)
 target_link_libraries(png_static zlibstatic)
 add_dependencies(png_static zlibstatic) #FIXME(ledyba-z): this line requires CMP0079
