@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 project(cavif)
 
 enable_language(C CXX ASM)
@@ -11,9 +11,6 @@ if (WIN32)
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 endif(WIN32)
 
-# FIXME(ledyba-z): workaround for CMake 3.10
-cmake_policy(SET CMP0079 NEW)
-
 ###############################################################################
 add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 ###############################################################################
@@ -21,9 +18,9 @@ add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 set(ASM686L OFF CACHE BOOL "Enable building i686 assembly implementation" FORCE)
 set(ASM686 OFF CACHE BOOL "Enable building amd64 assembly implementation" FORCE)
 add_subdirectory(external/zlib EXCLUDE_FROM_ALL)
-#FIXME(ledyba-z): Workaround to vendor zlib sources:
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/external/zlib)
-include_directories(external/zlib)
+set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/zlib" "${CMAKE_CURRENT_BINARY_DIR}/external/zlib")
+set(ZLIB_ROOT "${CMAKE_BINARY_DIR}/zlib")
+set(ZLIB_DIR "${CMAKE_BINARY_DIR}/zlib")
 ###############################################################################
 set(SKIP_INSTALL_ALL ON)
 
@@ -33,10 +30,11 @@ set(PNG_STATIC ON CACHE BOOL "Build static lib" FORCE)
 set(PNG_TESTS OFF CACHE BOOL "Build libpng tests" FORCE)
 add_subdirectory(external/libpng EXCLUDE_FROM_ALL)
 #FIXME(ledyba-z): Workaround to include "pnglibconf.h"
-target_include_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/libpng)
-target_link_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/zlib)
+target_include_directories(png_static PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/external/libpng")
+# zlib
+target_link_directories(png_static PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/external/zlib")
+target_include_directories(png_static PRIVATE external/zlib)
 target_link_libraries(png_static zlibstatic)
-add_dependencies(png_static zlibstatic) #FIXME(ledyba-z): this line requires CMP0079
 ###############################################################################
 # fmt
 set(FMT_TEST OFF CACHE BOOL "" FORCE)
