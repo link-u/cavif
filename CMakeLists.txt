@@ -35,13 +35,13 @@ add_dependencies(png_static zlibstatic)
 # fmt
 set(FMT_TEST OFF CACHE BOOL "" FORCE)
 set(FMT_FUZZ OFF CACHE BOOL "" FORCE)
-add_subdirectory(external/fmt)
+add_subdirectory(external/fmt EXCLUDE_FROM_ALL)
 ###############################################################################
 set(CONFIG_AV1_DECODER 0 CACHE STRING "Enable AV1 decoder." FORCE)
 set(ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(ENABLE_TOOLS OFF CACHE BOOL "" FORCE)
-add_subdirectory(external/libaom)
+add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
 ###############################################################################
 
 add_executable(cavif

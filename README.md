@@ -21,7 +21,7 @@ cd cavif
 # build davif
 mkdir build && cd build
 cmake ..
-make
+make cavif
 ```
 
 ## SYNOPSIS
