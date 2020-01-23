@@ -14,7 +14,8 @@ Example avif files are available in [AOMediaCodec/av1-avif](https://github.com/A
 
 ```bash
 # cloning this repository with dependencies.
-git clone --recurse-submodules --recursive git@link-u.github.com:link-u/cavif.git
+git clone --recurse-submodules --recursive git@github.com:link-u/cavif.git
+
 cd cavif
 
 # build davif
