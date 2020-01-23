@@ -35,6 +35,7 @@ target_include_directories(png_static PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/extern
 target_link_directories(png_static PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/external/zlib")
 target_include_directories(png_static PRIVATE external/zlib)
 target_link_libraries(png_static zlibstatic)
+add_dependencies(png_static zlibstatic)
 ###############################################################################
 # fmt
 set(FMT_TEST OFF CACHE BOOL "" FORCE)
