@@ -11,6 +11,9 @@ if (WIN32)
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 endif(WIN32)
 
+# FIXME(ledyba-z): workaround for CMake 3.10
+cmake_policy(SET CMP0079 NEW)
+
 ###############################################################################
 add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 ###############################################################################
