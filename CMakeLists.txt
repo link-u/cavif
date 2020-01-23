@@ -14,13 +14,23 @@ endif(WIN32)
 ###############################################################################
 add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 ###############################################################################
+# zlib
+set(ASM686L OFF CACHE BOOL "Enable building i686 assembly implementation" FORCE)
+set(ASM686 OFF CACHE BOOL "Enable building amd64 assembly implementation" FORCE)
+add_subdirectory(external/zlib EXCLUDE_FROM_ALL)
+###############################################################################
 set(SKIP_INSTALL_ALL ON)
+
+set(PNG_BUILD_ZLIB ON CACHE BOOL "Custom zlib Location, else find_package is used" FORCE)
 set(PNG_SHARED OFF CACHE BOOL "Build shared lib" FORCE)
 set(PNG_STATIC ON CACHE BOOL "Build static lib" FORCE)
 set(PNG_TESTS OFF CACHE BOOL "Build libpng tests" FORCE)
 add_subdirectory(external/libpng EXCLUDE_FROM_ALL)
 #FIXME(ledyba-z): Workaround to include "pnglibconf.h"
 target_include_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/libpng)
+target_link_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/zlib)
+target_link_libraries(png_static zlibstatic)
+add_dependencies(png_static zlibstatic)
 ###############################################################################
 # fmt
 set(FMT_TEST OFF CACHE BOOL "" FORCE)
