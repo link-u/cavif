@@ -18,9 +18,16 @@ git clone --recurse-submodules --recursive git@github.com:link-u/cavif.git
 
 cd cavif
 
-# build davif
+# make build directory
 mkdir build && cd build
+
+# System gcc is 8.0 or higher:
 cmake ..
+
+# If not, please install gcc-8 (or higher) and tell them to CMake.
+CXX=g++-8 CC=gcc-8 cmake ..
+
+# build cavif binary.
 make cavif
 ```
 
