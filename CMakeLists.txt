@@ -33,7 +33,7 @@ add_subdirectory(external/libpng EXCLUDE_FROM_ALL)
 target_include_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/libpng)
 target_link_directories(png_static PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/external/zlib)
 target_link_libraries(png_static zlibstatic)
-add_dependencies(png_static zlibstatic)
+add_dependencies(png_static zlibstatic) #FIXME(ledyba-z): this line requires CMP0079
 ###############################################################################
 # fmt
 set(FMT_TEST OFF CACHE BOOL "" FORCE)
