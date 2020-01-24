@@ -3,11 +3,13 @@
 //
 
 #include "AVIFBuilder.hpp"
+#include "Config.hpp"
 
 #include <utility>
 
-AVIFBuilder::AVIFBuilder(uint32_t width, uint32_t height)
-:width_(width)
+AVIFBuilder::AVIFBuilder(Config& config, uint32_t width, uint32_t height)
+:config_(config)
+,width_(width)
 ,height_(height)
 {
 }
@@ -79,70 +81,82 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
     });
   }
   { // fill ItemPropertiesBox
+    ItemPropertyAssociation assoc{};
+    ItemPropertyAssociation::Item item{};
+    item.itemID = 1;
     ItemPropertiesBox& propertiesBox = metaBox.itemPropertiesBox;
-    // FIXME(ledyba-z): Is it really correct?
-    // https://aomediacodec.github.io/av1-isobmff/#av1sampleentry-semantics
-    propertiesBox.itemPropertyContainer.properties.emplace_back(PixelAspectRatioBox{
-        .hSpacing = 1,
-        .vSpacing = 1,
-    });
-    propertiesBox.itemPropertyContainer.properties.emplace_back(ImageSpatialExtentsProperty{
-        .imageWidth = width_,
-        .imageHeight = height_,
-    });
-    uint8_t bpp = 8;
-    if(frame.sequenceHeader().colorConfig.highBitdepth) {
-      bpp = 10;
-      if(frame.sequenceHeader().colorConfig.twelveBit) {
-        bpp = 12;
-      }
+    {
+      // FIXME(ledyba-z): Is it really correct?
+      // https://aomediacodec.github.io/av1-isobmff/#av1sampleentry-semantics
+      propertiesBox.propertyContainers.properties.emplace_back(PixelAspectRatioBox{
+          .hSpacing = 1,
+          .vSpacing = 1,
+      });
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry{
+          .essential = false,
+          .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
+      });
     }
-    propertiesBox.itemPropertyContainer.properties.emplace_back(PixelInformationProperty{
-        .bitsPerChannel = {{bpp, bpp, bpp}},
-    });
-    propertiesBox.itemPropertyContainer.properties.emplace_back(AV1CodecConfigurationRecordBox{
-      .av1Config = AV1CodecConfigurationRecord {
-        .marker = true,
-        .version = 1,
-        .seqProfile = frame.sequenceHeader().seqProfile,
-        .seqLevelIdx0 = frame.sequenceHeader().operatingPoints.at(0).seqLevelIdx,
-        .seqTier0 = frame.sequenceHeader().operatingPoints.at(0).seqTier,
-        .highBitDepth = frame.sequenceHeader().colorConfig.highBitdepth,
-        .twelveBit = frame.sequenceHeader().colorConfig.twelveBit,
-        .monochrome = frame.sequenceHeader().colorConfig.monochrome,
-        .chromaSubsamplingX = frame.sequenceHeader().colorConfig.subsamplingX,
-        .chromaSubsamplingY = frame.sequenceHeader().colorConfig.subsamplingY,
-        .chromaSamplePosition = frame.sequenceHeader().colorConfig.chromaSamplePosition.has_value() ?
-                                frame.sequenceHeader().colorConfig.chromaSamplePosition.value() :
-                                static_cast<uint8_t>(0) /* CSP_UNKNOWN: 6.4.2. Color config semantics */,
-        .configOBUs = frame.configOBU(),
-      },
-    });
-    propertiesBox.itemPropertyAssociations.emplace_back(ItemPropertyAssociation{
-      .items = {{
-          ItemPropertyAssociation::Item {
-            .itemID = 1,
-            .entries = {{
-                ItemPropertyAssociation::Item::Entry {
-                    .essential = false,
-                    .propertyIndex = 1,
-                },
-                ItemPropertyAssociation::Item::Entry {
-                    .essential = false,
-                    .propertyIndex = 2,
-                },
-                ItemPropertyAssociation::Item::Entry {
-                    .essential = true,
-                    .propertyIndex = 3,
-                },
-                ItemPropertyAssociation::Item::Entry {
-                    .essential = true,
-                    .propertyIndex = 4,
-                },
-            }},
-          }},
-      },
-    });
+    if(config_.rotation.has_value()) {
+      propertiesBox.propertyContainers.properties.emplace_back( ImageRotation {
+        .angle = static_cast<uint8_t>(config_.rotation.value())
+      });
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
+          .essential = true,
+          .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
+      });
+    }
+    {
+      propertiesBox.propertyContainers.properties.emplace_back(ImageSpatialExtentsProperty {
+          .imageWidth = width_,
+          .imageHeight = height_,
+      });
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
+          .essential = false,
+          .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
+      });
+    }
+    {
+      uint8_t bpp = 8;
+      if(frame.sequenceHeader().colorConfig.highBitdepth) {
+        bpp = 10;
+        if(frame.sequenceHeader().colorConfig.twelveBit) {
+          bpp = 12;
+        }
+      }
+      propertiesBox.propertyContainers.properties.emplace_back(PixelInformationProperty {
+          .bitsPerChannel = {{bpp, bpp, bpp}},
+      });
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
+          .essential = true,
+          .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
+      });
+    }
+    {
+      propertiesBox.propertyContainers.properties.emplace_back(AV1CodecConfigurationRecordBox {
+          .av1Config = AV1CodecConfigurationRecord {
+              .marker = true,
+              .version = 1,
+              .seqProfile = frame.sequenceHeader().seqProfile,
+              .seqLevelIdx0 = frame.sequenceHeader().operatingPoints.at(0).seqLevelIdx,
+              .seqTier0 = frame.sequenceHeader().operatingPoints.at(0).seqTier,
+              .highBitDepth = frame.sequenceHeader().colorConfig.highBitdepth,
+              .twelveBit = frame.sequenceHeader().colorConfig.twelveBit,
+              .monochrome = frame.sequenceHeader().colorConfig.monochrome,
+              .chromaSubsamplingX = frame.sequenceHeader().colorConfig.subsamplingX,
+              .chromaSubsamplingY = frame.sequenceHeader().colorConfig.subsamplingY,
+              .chromaSamplePosition = frame.sequenceHeader().colorConfig.chromaSamplePosition.has_value() ?
+                                      frame.sequenceHeader().colorConfig.chromaSamplePosition.value() :
+                                      static_cast<uint8_t>(0) /* CSP_UNKNOWN: 6.4.2. Color config semantics */,
+              .configOBUs = frame.configOBU(),
+          },
+      });
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
+          .essential = true,
+          .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
+      });
+    }
+    propertiesBox.associations.emplace_back(assoc);
   }
   this->fileBox_.mediaDataBoxes.push_back(MediaDataBox {
     .offset = 0, // TODO: fill it later.

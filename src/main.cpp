@@ -13,7 +13,7 @@
 #include <avif/Writer.hpp>
 #include <thread>
 
-#include "Configurator.hpp"
+#include "Config.hpp"
 #include "img/Convert.hpp"
 
 namespace {
@@ -72,9 +72,9 @@ int _main(int argc, char** argv) {
     log.fatal("failed to get AV1 encoder.");
   }
 
-  Configurator config;
+  Config config;
   aom_codec_flags_t flags = 0;
-  aom_codec_enc_config_default(av1codec, &config.encoderConfig, 0);
+  aom_codec_enc_config_default(av1codec, &config.codec, 0);
   {
     int const parsrResult = config.parse(argc, argv);
     if(parsrResult != 0) {
@@ -94,7 +94,7 @@ int _main(int argc, char** argv) {
 
   aom_image_t img;
   aom_img_fmt_t pixFmt = config.pixFmt;
-  if(config.encoderConfig.g_bit_depth > 8) {
+  if(config.codec.g_bit_depth > 8) {
     pixFmt = static_cast<aom_img_fmt_t>(pixFmt | static_cast<unsigned int>(AOM_IMG_FMT_HIGHBITDEPTH));
     flags = static_cast<unsigned int>(flags | AOM_CODEC_USE_HIGHBITDEPTH);
   }
@@ -102,28 +102,28 @@ int _main(int argc, char** argv) {
   convert(srcImage, img);
 
   // initialize encoder
-  config.encoderConfig.g_w = width;
-  config.encoderConfig.g_h = height;
+  config.codec.g_w = width;
+  config.codec.g_h = height;
   // Generate just one frame.
-  config.encoderConfig.g_limit = 1;
-  config.encoderConfig.g_pass = AOM_RC_ONE_PASS;
+  config.codec.g_limit = 1;
+  config.codec.g_pass = AOM_RC_ONE_PASS;
   // FIXME(ledyba-z): Encoder produces wrong images when g_input_bit_depth != g_bit_depth. Bug?
-  config.encoderConfig.g_input_bit_depth = config.encoderConfig.g_bit_depth;
+  config.codec.g_input_bit_depth = config.codec.g_bit_depth;
   // FIXME(ledyba-z): If kf_max_dist = 1, it crashes. Bug?
   // > A value of 0 implies all frames will be keyframes.
   // However, when it is set to 0, assertion always fails:
   // cavif/external/libaom/av1/encoder/gop_structure.c:92:
   // construct_multi_layer_gf_structure: Assertion `gf_interval >= 1' failed.
-  config.encoderConfig.kf_max_dist = 1;
+  config.codec.kf_max_dist = 1;
   // One frame takes 1 second.
-  config.encoderConfig.g_timebase.den = 1;
-  config.encoderConfig.g_timebase.num = 1;
+  config.codec.g_timebase.den = 1;
+  config.codec.g_timebase.num = 1;
   //
-  config.encoderConfig.rc_target_bitrate = 0;
+  config.codec.rc_target_bitrate = 0;
 
   aom_codec_ctx_t codec{};
 
-  if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &config.encoderConfig, flags)) {
+  if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &config.codec, flags)) {
     log.fatal("Failed to initialize encoder: %s", aom_codec_error_detail(&codec));
   }
 
@@ -144,7 +144,7 @@ int _main(int argc, char** argv) {
     return -1;
   }
   {
-    AVIFBuilder builder(width, height);
+    AVIFBuilder builder(config, width, height);
     std::shared_ptr<avif::av1::Parser::Result> result = avif::av1::Parser(log, packets[0]).parse();
     if (!result->ok()) {
       log.error(result->error());

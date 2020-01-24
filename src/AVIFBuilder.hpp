@@ -7,7 +7,7 @@
 #include <avif/av1/Parser.hpp>
 #include <avif/FileBox.hpp>
 
-
+class Config;
 class AVIFBuilder final {
 public:
   class Frame final {
@@ -31,6 +31,7 @@ public:
 
 private:
 private:
+  Config& config_;
   uint32_t const width_;
   uint32_t const height_;
   std::optional<Frame> frame_{};
@@ -38,7 +39,7 @@ private:
 
 public:
   AVIFBuilder() = delete;
-  explicit AVIFBuilder(uint32_t width, uint32_t height);
+  explicit AVIFBuilder(Config& config, uint32_t width, uint32_t height);
   ~AVIFBuilder() noexcept = default;
   AVIFBuilder& operator=(AVIFBuilder const&) = delete;
   AVIFBuilder& operator=(AVIFBuilder&&) = delete;

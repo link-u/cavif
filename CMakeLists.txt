@@ -60,8 +60,8 @@ add_executable(cavif
         src/img/Convert.cpp
         src/img/Convert.hpp
 
-        src/Configurator.cpp
-        src/Configurator.hpp
+        src/Config.cpp
+        src/Config.hpp
 
         src/AVIFBuilder.cpp
         src/AVIFBuilder.hpp

@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-#include "Configurator.hpp"
+#include "Config.hpp"
 
 namespace {
 
@@ -18,14 +18,17 @@ std::string basename(std::string const& path) {
 
 }
 
-int Configurator::parse(int argc, char **argv) {
+int Config::parse(int argc, char **argv) {
   using namespace clipp;
-  auto& aom = this->encoderConfig;
+  auto& aom = this->codec;
   auto cli = (
       required("-i", "--input").doc("Filename to input") & value("input.png", input),
       required("-o", "--output").doc("Filename to output") & value("output.avif", output),
+      // meta
+      option("--rotation").doc("Set rotation meta data(irot). Counter-clockwise.") & (parameter("0").set(rotation, std::make_optional(Rotation::Rot0)) | parameter("90").set(rotation, std::make_optional(Rotation::Rot180)) | parameter("180").set(rotation, std::make_optional(Rotation::Rot180)) | parameter("270").set(rotation, std::make_optional(Rotation::Rot270))),
+      // encoding
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base, 1=high, 2=professional", aom.g_profile),
-      option("--monochrome").doc("Encode to monochrome image.").set(encoderConfig.monochrome, 1u),
+      option("--monochrome").doc("Encode to monochrome image.").set(codec.monochrome, 1u),
       option("--usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
       option("--threads") & integer("Num of threads to use", aom.g_threads),
       option("--pix-fmt").doc("Pixel format of output image.") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420) | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444)),
@@ -56,7 +59,7 @@ int Configurator::parse(int argc, char **argv) {
   return 0;
 }
 
-void Configurator::modify(aom_codec_ctx_t *codec) {
+void Config::modify(aom_codec_ctx_t *codec) {
   //aom_codec_control(codec, AV1E_SET_DENOISE_NOISE_LEVEL, 1);
   aom_codec_control(codec, AOME_SET_CPUUSED, this->cpuUsed);
   aom_codec_control(codec, AOME_SET_STATIC_THRESHOLD, 0);
