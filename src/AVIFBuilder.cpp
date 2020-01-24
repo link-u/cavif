@@ -80,6 +80,11 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
         }},
     });
   }
+  {
+    PrimaryItemBox pitm{};
+    pitm.itemID = 1;
+    metaBox.primaryItemBox = pitm;
+  }
   { // fill ItemPropertiesBox
     ItemPropertyAssociation assoc{};
     ItemPropertyAssociation::Item item{};
@@ -98,7 +103,7 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
       });
     }
     if(config_.rotation.has_value()) {
-      propertiesBox.propertyContainers.properties.emplace_back( ImageRotation {
+      propertiesBox.propertyContainers.properties.emplace_back( ImageRotationBox {
         .angle = static_cast<uint8_t>(config_.rotation.value())
       });
       item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
