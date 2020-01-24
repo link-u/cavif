@@ -9,24 +9,20 @@
 #include <aom/aom_encoder.h>
 #include <aom/aom_codec.h>
 #include <aom/aomcx.h>
+#include <avif/ImageRotationBox.hpp>
+#include <avif/ImageMirrorBox.hpp>
 #include "../external/clipp/include/clipp.h"
 
 class Configurator;
 class Config final {
   friend class Configurator;
 public:
-  enum class Rotation : uint8_t {
-    Rot0   = 0,
-    Rot90  = 1,
-    Rot180 = 2,
-    Rot270 = 3,
-  };
-public:
   std::string input{};
   std::string output{};
 public:
   // meta
-  std::optional<Rotation> rotation{};
+  std::optional<avif::ImageRotationBox::Rotation> rotation{};
+  std::optional<avif::ImageMirrorBox::Axis> mirrorAxis{};
   // encoding
   aom_codec_enc_cfg codec{};
   aom_img_fmt_t pixFmt = AOM_IMG_FMT_I420;

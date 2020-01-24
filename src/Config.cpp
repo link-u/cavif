@@ -25,7 +25,8 @@ int Config::parse(int argc, char **argv) {
       required("-i", "--input").doc("Filename to input") & value("input.png", input),
       required("-o", "--output").doc("Filename to output") & value("output.avif", output),
       // meta
-      option("--rotation").doc("Set rotation meta data(irot). Counter-clockwise.") & (parameter("0").set(rotation, std::make_optional(Rotation::Rot0)) | parameter("90").set(rotation, std::make_optional(Rotation::Rot180)) | parameter("180").set(rotation, std::make_optional(Rotation::Rot180)) | parameter("270").set(rotation, std::make_optional(Rotation::Rot270))),
+      option("--rotation").doc("Set rotation meta data(irot). Counter-clockwise.") & (parameter("0").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot0)) | parameter("90").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot180)) | parameter("180").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot180)) | parameter("270").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot270))),
+      option("--mirror").doc("Set mirror meta data(imir).") & (parameter("vertical").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Vertical)) | parameter("horizontal").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Horizontal))),
       // encoding
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base, 1=high, 2=professional", aom.g_profile),
       option("--monochrome").doc("Encode to monochrome image.").set(codec.monochrome, 1u),

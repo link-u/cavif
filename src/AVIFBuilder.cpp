@@ -104,10 +104,19 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
     }
     if(config_.rotation.has_value()) {
       propertiesBox.propertyContainers.properties.emplace_back( ImageRotationBox {
-        .angle = static_cast<uint8_t>(config_.rotation.value())
+          .angle = config_.rotation.value(),
       });
       item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
-          .essential = true,
+          .essential = false,
+          .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
+      });
+    }
+    if(config_.mirrorAxis.has_value()) {
+      propertiesBox.propertyContainers.properties.emplace_back( ImageMirrorBox {
+          .axis = config_.mirrorAxis.value(),
+      });
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
+          .essential = false,
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }
