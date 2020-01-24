@@ -170,6 +170,7 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }
+    assoc.items.emplace_back(item);
     propertiesBox.associations.emplace_back(assoc);
   }
   this->fileBox_.mediaDataBoxes.push_back(MediaDataBox {
