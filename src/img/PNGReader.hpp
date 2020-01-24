@@ -6,7 +6,8 @@
 
 #include <string>
 #include <aom/aom_image.h>
-#include "../prism/Image.hpp"
+#include <avif/img/Image.hpp>
+#include <variant>
 
 class PNGReader final {
 private:
@@ -26,7 +27,7 @@ public:
   }
 
 public:
-  prism::Image read();
+  std::variant<avif::img::Image<8>, avif::img::Image<16>> read();
 };
 
 

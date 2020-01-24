@@ -73,10 +73,11 @@ int Config::parse(int argc, char **argv) {
       option("--cpu-used").doc("Quality/Speed ratio modifier") & integer("0-8", cpuUsed),
       option("--enable-cdef").doc("Enable Constrained Directional Enhancement Filter").set(enableCDEF, true),
       option("--disable-cdef").doc("Disable Constrained Directional Enhancement Filter").set(enableCDEF, false),
-      option("--enable-restoration").doc("Enable Loop Restoration Filter").set(enableRestoration, true),
-      option("--disable-restoration").doc("Disable Loop Restoration Filter").set(enableRestoration, false),
+      option("--enable-loop-restoration").doc("Enable Loop Restoration Filter").set(enableRestoration, true),
+      option("--disable-loop-restoration").doc("Disable Loop Restoration Filter").set(enableRestoration, false),
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64)),
-      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR) | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST))
+      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR) | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST)),
+      option("")
   );
   if(!clipp::parse(argc, argv, cli)) {
     std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
@@ -97,10 +98,10 @@ int Config::parse(int argc, char **argv) {
 
 void Config::modify(aom_codec_ctx_t* aom) {
   //aom_codec_control(codec, AV1E_SET_DENOISE_NOISE_LEVEL, 1);
-  aom_codec_control(aom, AOME_SET_CPUUSED, this->cpuUsed);
+  aom_codec_control(aom, AOME_SET_CPUUSED, cpuUsed);
   aom_codec_control(aom, AOME_SET_STATIC_THRESHOLD, 0);
   aom_codec_control(aom, AOME_SET_TUNING, tune);
-  aom_codec_control(aom, AOME_SET_CQ_LEVEL, this->crf);
+  aom_codec_control(aom, AOME_SET_CQ_LEVEL, crf);
   aom_codec_control(aom, AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
   aom_codec_control(aom, AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
 

@@ -37,9 +37,9 @@ public:
   aom_tune_metric tune = AOM_TUNE_SSIM;
 public:
   Config() = default;
-  Config(Config&&) = default;
+  Config(Config&&) noexcept = default;
   Config(Config const&) = default;
-  Config& operator=(Config&&) = default;
+  Config& operator=(Config&&) noexcept = default;
   Config& operator=(Config const&) = default;
 
 public:

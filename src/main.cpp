@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "prism/Image.hpp"
+#include "avif/img/Image.hpp"
 #include "img/PNGReader.hpp"
 #include "AVIFBuilder.hpp"
 #include <aom/aom_encoder.h>
@@ -12,6 +12,8 @@
 #include <avif/FileBox.hpp>
 #include <avif/Writer.hpp>
 #include <thread>
+#include <avif/img/Transform.hpp>
+#include <avif/img/Crop.hpp>
 
 #include "Config.hpp"
 #include "img/Convert.hpp"
@@ -83,27 +85,33 @@ int _main(int argc, char** argv) {
   }
 
   // decoding input image
-  prism::Image srcImage;
-  if(endsWidh(config.input, ".png")) {
-    srcImage = PNGReader(config.input).read();
-  } else {
+  if(!endsWidh(config.input, ".png")) {
     log.fatal("please give png or bmp file for input");
   }
-  uint32_t const width = srcImage.width();
-  uint32_t const height = srcImage.height();
+  std::variant<avif::img::Image<8>, avif::img::Image<16>> loadedImage = PNGReader(config.input).read();
 
   aom_image_t img;
   aom_img_fmt_t pixFmt = config.pixFmt;
   if(config.codec.g_bit_depth > 8) {
     pixFmt = static_cast<aom_img_fmt_t>(pixFmt | static_cast<unsigned int>(AOM_IMG_FMT_HIGHBITDEPTH));
-    flags = static_cast<unsigned int>(flags | AOM_CODEC_USE_HIGHBITDEPTH);
+    flags = flags | AOM_CODEC_USE_HIGHBITDEPTH;
   }
-  aom_img_alloc(&img, pixFmt, width, height, 1);
-  convert(srcImage, img);
+  if(std::holds_alternative<avif::img::Image<8>>(loadedImage)) {
+    auto src = std::get<avif::img::Image<8>>(loadedImage);
+    aom_img_alloc(&img, pixFmt, src.width(), src.height(), 1);
+    convert(src, img);
+  } else {
+    auto src = std::get<avif::img::Image<16>>(loadedImage);
+    aom_img_alloc(&img, pixFmt, src.width(), src.height(), 1);
+    convert(src, img);
+  }
+
+  uint32_t const width = img.w;
+  uint32_t const height = img.h;
 
   // initialize encoder
-  config.codec.g_w = width;
-  config.codec.g_h = height;
+  config.codec.g_w = img.w;
+  config.codec.g_h = img.h;
   // Generate just one frame.
   config.codec.g_limit = 1;
   config.codec.g_pass = AOM_RC_ONE_PASS;

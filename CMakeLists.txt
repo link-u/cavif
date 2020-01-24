@@ -52,12 +52,8 @@ add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
 add_executable(cavif
         src/main.cpp
 
-        src/prism/Image.cpp
-        src/prism/Image.hpp
-        src/prism/Conversion.hpp
         src/img/PNGReader.cpp
         src/img/PNGReader.hpp
-        src/img/Convert.cpp
         src/img/Convert.hpp
 
         src/Config.cpp
@@ -65,7 +61,7 @@ add_executable(cavif
 
         src/AVIFBuilder.cpp
         src/AVIFBuilder.hpp
-        )
+)
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)
 target_link_libraries(cavif PRIVATE fmt::fmt)

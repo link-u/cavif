@@ -9,7 +9,7 @@
 #include <png.h>
 #include <cassert>
 
-prism::Image PNGReader::read() {
+std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   FILE* file = fopen(filename_.c_str(), "rb");
   if(!file) {
     fclose(file);
@@ -50,12 +50,12 @@ prism::Image PNGReader::read() {
     png_set_tRNS_to_alpha(png);
   }
 
-  prism::Image::Type type = prism::Image::Type::RGB;
+  avif::img::PixelOrder pixelOrder = avif::img::PixelOrder::RGB;
   // These color_type don't have an alpha channel then fill it with 0xff.
   switch(color_type) {
     case PNG_COLOR_TYPE_RGB:
     case PNG_COLOR_TYPE_PALETTE:
-      type = prism::Image::Type::RGB;
+      pixelOrder = avif::img::PixelOrder::RGB;
       if(bit_depth == 16) {
         bytesPerPixel = 6;
       } else {
@@ -65,7 +65,7 @@ prism::Image PNGReader::read() {
     case PNG_COLOR_TYPE_RGB_ALPHA:
     case PNG_COLOR_TYPE_GRAY:
     case PNG_COLOR_TYPE_GRAY_ALPHA:
-      type = prism::Image::Type::RGBA;
+      pixelOrder = avif::img::PixelOrder::RGBA;
       if(bit_depth == 16) {
         bytesPerPixel = 8;
       } else {
@@ -98,5 +98,9 @@ prism::Image PNGReader::read() {
   png_read_image(png, rows.data());
   fclose(file);
   png_destroy_read_struct(&png, &info, nullptr);
-  return prism::Image(type, width, height, bit_depth, bytesPerPixel, width * bytesPerPixel, std::move(data));
+  if(bit_depth == 16) {
+    return avif::img::Image<16>(pixelOrder, width, height, bytesPerPixel, width * bytesPerPixel, std::move(data));
+  } else {
+    return avif::img::Image<8>(pixelOrder, width, height, bytesPerPixel, width * bytesPerPixel, std::move(data));
+  }
 }
