@@ -34,21 +34,24 @@ make cavif
 ## SYNOPSIS
 
 ```
-% cmake-build-debug/cavif
+%/cavif
 SYNOPSIS
-        cavif -i <input.png> -o <output.avif> [--profile <0=base, 1=high, 2=professional>]
-              [--monochrome] [--usage [good|realtime]] [--threads <Num of threads to use>]
-              [--pix-fmt [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--rate-control [q|cq]]
+        cavif -i <input.png> -o <output.avif> [--rotation [0|90|180|270]] [--mirror
+              [vertical|horizontal]] [--profile <0=base, 1=high, 2=professional>] [--monochrome]
+              [--usage [good|realtime]] [--threads <Num of threads to use>] [--pix-fmt
+              [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--rate-control [q|cq]]
               [--enable-large-scale-tile] [--disable-large-scale-tile] [--full-still-picture-header]
               [--enable-full-color-range] [--disable-full-color-range] [--crf <0-63>] [--cpu-used
-              <0-8>] [--enable-cdef] [--disable-cdef] [--superblock-size [dynamic|128|64]] [--tune
-              [ssim|psnr|cdef-dist|daala-dist]]
+              <0-8>] [--enable-cdef] [--disable-cdef] [--enable-restoration] [--disable-restoration]
+              [--superblock-size [dynamic|128|64]] [--tune [ssim|psnr|cdef-dist|daala-dist]]
 
 OPTIONS
         -i, --input Filename to input
         -o, --output
                     Filename to output
 
+        --rotation  Set rotation meta data(irot). Counter-clockwise.
+        --mirror    Set mirror meta data(imir).
         --profile   AV1 Profile(0=base, 1=high, 2=professional)
         --monochrome
                     Encode to monochrome image.
@@ -85,6 +88,12 @@ OPTIONS
 
         --disable-cdef
                     Disable Constrained Directional Enhancement Filter
+
+        --enable-restoration
+                    Enable Loop Restoration Filter
+
+        --disable-restoration
+                    Disable Loop Restoration Filter
 
         --superblock-size
                     Superblock size.
