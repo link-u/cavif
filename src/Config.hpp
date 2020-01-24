@@ -23,6 +23,8 @@ public:
   // meta
   std::optional<avif::ImageRotationBox::Rotation> rotation{};
   std::optional<avif::ImageMirrorBox::Axis> mirrorAxis{};
+  std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropSize{};
+  std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropOffset{};
   // encoding
   aom_codec_enc_cfg codec{};
   aom_img_fmt_t pixFmt = AOM_IMG_FMT_I420;

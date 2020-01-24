@@ -16,6 +16,33 @@ std::string basename(std::string const& path) {
   return path.substr(pos+1);
 }
 
+std::string trim(std::string str) {
+  str.erase(std::find_if(str.rbegin(), str.rend(), [](int ch) {
+    return !std::isspace(ch);
+  }).base(), str.end());
+  str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](int ch) {
+    return !std::isspace(ch);
+  }));
+  return std::move(str);
+}
+
+std::pair<uint32_t, uint32_t> parseFraction(std::string const& str) {
+  auto pos = str.find('/');
+  std::string first = trim(str.substr(0, pos));
+  std::string second = trim(str.substr(pos + 1));
+  return std::make_pair(std::stoi(first), std::stoi(second));
+}
+
+std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>> parseFractionPair(std::string const& str) {
+  auto pos = str.find(',');
+  if(pos == std::string::npos) {
+    throw std::runtime_error("Invalid fraction pair. Example: \"3/2, 10/7\"");
+  }
+  std::string first = trim(str.substr(0, pos));
+  std::string second = trim(str.substr(pos + 1));
+  return std::make_pair(parseFraction(first), parseFraction(second));
+}
+
 }
 
 int Config::parse(int argc, char **argv) {
@@ -27,6 +54,8 @@ int Config::parse(int argc, char **argv) {
       // meta
       option("--rotation").doc("Set rotation meta data(irot). Counter-clockwise.") & (parameter("0").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot0)) | parameter("90").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot180)) | parameter("180").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot180)) | parameter("270").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot270))),
       option("--mirror").doc("Set mirror meta data(imir).") & (parameter("vertical").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Vertical)) | parameter("horizontal").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Horizontal))),
+      option("--crop-size").doc("Crop size(clap).") & value("widthN/widthD,heightN/heightD").call([&](std::string const& str){ cropSize = parseFractionPair(str); }),
+      option("--crop-offset").doc("Crop offset(clap).") & value("horizOffN/horizOffD,vertOffN/vertOffD").call([&](std::string const& str){ cropOffset = parseFractionPair(str); }),
       // encoding
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base, 1=high, 2=professional", aom.g_profile),
       option("--monochrome").doc("Encode to monochrome image.").set(codec.monochrome, 1u),

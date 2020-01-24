@@ -102,6 +102,26 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }
+    if(config_.cropSize.has_value() || config_.cropOffset.has_value()) {
+      CleanApertureBox clap{};
+      if(config_.cropSize.has_value()) {
+        clap.cleanApertureWidthN = config_.cropSize.value().first.first;
+        clap.cleanApertureWidthD = config_.cropSize.value().first.second;
+        clap.cleanApertureHeightN = config_.cropSize.value().second.first;
+        clap.cleanApertureHeightD = config_.cropSize.value().second.second;
+      }
+      if(config_.cropOffset.has_value()) {
+        clap.horizOffN = config_.cropOffset.value().first.first;
+        clap.horizOffD = config_.cropOffset.value().first.second;
+        clap.vertOffN = config_.cropOffset.value().second.first;
+        clap.vertOffD = config_.cropOffset.value().second.second;
+      }
+      propertiesBox.propertyContainers.properties.emplace_back(clap);
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
+          .essential = false,
+          .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
+      });
+    }
     if(config_.rotation.has_value()) {
       propertiesBox.propertyContainers.properties.emplace_back( ImageRotationBox {
           .angle = config_.rotation.value(),
