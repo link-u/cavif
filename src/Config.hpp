@@ -44,7 +44,7 @@ public:
 
 public:
   int parse(int argc, char** argv);
-  void modify(aom_codec_ctx_t* codec);
+  void modify(aom_codec_ctx_t* aom);
 };
 
 

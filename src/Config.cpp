@@ -82,29 +82,35 @@ int Config::parse(int argc, char **argv) {
     std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
     return -1;
   }
-  if(input == output) {
-    std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
-    return -1;
+  { // validate
+    if(input == output) {
+      std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
+      return -1;
+    }
+    if(!cropSize.has_value() && cropOffset.has_value()) {
+      std::cerr << "crop-size must also be set, when crop-offset is set." << std::endl << std::flush;
+      return -1;
+    }
   }
   return 0;
 }
 
-void Config::modify(aom_codec_ctx_t *codec) {
+void Config::modify(aom_codec_ctx_t* aom) {
   //aom_codec_control(codec, AV1E_SET_DENOISE_NOISE_LEVEL, 1);
-  aom_codec_control(codec, AOME_SET_CPUUSED, this->cpuUsed);
-  aom_codec_control(codec, AOME_SET_STATIC_THRESHOLD, 0);
-  aom_codec_control(codec, AOME_SET_TUNING, tune);
-  aom_codec_control(codec, AOME_SET_CQ_LEVEL, this->crf);
-  aom_codec_control(codec, AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
-  aom_codec_control(codec, AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
+  aom_codec_control(aom, AOME_SET_CPUUSED, this->cpuUsed);
+  aom_codec_control(aom, AOME_SET_STATIC_THRESHOLD, 0);
+  aom_codec_control(aom, AOME_SET_TUNING, tune);
+  aom_codec_control(aom, AOME_SET_CQ_LEVEL, this->crf);
+  aom_codec_control(aom, AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
 
   //FIXME(ledyba-z): support color profile. PNG can contain gamma correction and color profile.
   // Gamma Correction and Precision Color (PNG: The Definitive Guide)
   // http://www.libpng.org/pub/png/book/chapter10.html
-  aom_codec_control(codec, AV1E_SET_COLOR_PRIMARIES,2 );
-  aom_codec_control(codec, AV1E_SET_MATRIX_COEFFICIENTS,2 );
-  aom_codec_control(codec, AV1E_SET_TRANSFER_CHARACTERISTICS, 2);
+  aom_codec_control(aom, AV1E_SET_COLOR_PRIMARIES, 2 );
+  aom_codec_control(aom, AV1E_SET_MATRIX_COEFFICIENTS, 2 );
+  aom_codec_control(aom, AV1E_SET_TRANSFER_CHARACTERISTICS, 2);
   //
-  aom_codec_control(codec, AV1E_SET_COLOR_RANGE, fullColorRange ? 1 : 0);
-  aom_codec_control(codec, AV1E_SET_SUPERBLOCK_SIZE, superblockSize);
+  aom_codec_control(aom, AV1E_SET_COLOR_RANGE, fullColorRange ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_SUPERBLOCK_SIZE, superblockSize);
 }
