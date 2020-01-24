@@ -37,9 +37,10 @@ make cavif
 %/cavif
 SYNOPSIS
         cavif -i <input.png> -o <output.avif> [--rotation [0|90|180|270]] [--mirror
-              [vertical|horizontal]] [--profile <0=base, 1=high, 2=professional>] [--monochrome]
-              [--usage [good|realtime]] [--threads <Num of threads to use>] [--pix-fmt
-              [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--rate-control [q|cq]]
+              [vertical|horizontal]] [--crop-size <widthN/widthD,heightN/heightD>] [--crop-offset
+              <horizOffN/horizOffD,vertOffN/vertOffD>] [--profile <0=base, 1=high, 2=professional>]
+              [--monochrome] [--usage [good|realtime]] [--threads <Num of threads to use>]
+              [--pix-fmt [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--rate-control [q|cq]]
               [--enable-large-scale-tile] [--disable-large-scale-tile] [--full-still-picture-header]
               [--enable-full-color-range] [--disable-full-color-range] [--crf <0-63>] [--cpu-used
               <0-8>] [--enable-cdef] [--disable-cdef] [--enable-restoration] [--disable-restoration]
@@ -52,6 +53,10 @@ OPTIONS
 
         --rotation  Set rotation meta data(irot). Counter-clockwise.
         --mirror    Set mirror meta data(imir).
+        --crop-size Crop size(clap).
+        --crop-offset
+                    Crop offset(clap).
+
         --profile   AV1 Profile(0=base, 1=high, 2=professional)
         --monochrome
                     Encode to monochrome image.
