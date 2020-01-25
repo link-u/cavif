@@ -1,0 +1,15 @@
+.DS_Store
+.debhelper
+files
+*.debhelper
+*.deb
+*.dsc
+*.build
+*.buildinfo
+*.changes
+*.tar.gz
+*.log
+*.substvars
+
+*/
+!source/
