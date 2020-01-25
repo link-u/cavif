@@ -39,8 +39,8 @@ void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
 
 
 template <size_t BitsPerPixel>
-void convert(avif::img::Image<BitsPerPixel>& src, aom_image& dst) {
-  switch (dst.bit_depth) {
+void convert(avif::img::Image<BitsPerPixel>& src, aom_image& dst, int const yuvBits) {
+  switch (yuvBits) {
     case 8:
       convert<BitsPerPixel, 8>(src, dst);
       break;
