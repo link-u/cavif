@@ -4,9 +4,9 @@ Priority: optional
 Maintainer: Ryo Hirafuji <ryo.hirafuji@link-u.co.jp>
 Build-Depends: debhelper (>= 10), cmake (>= 3.13), gcc-8, g++-8, libgcc-8-dev, libstdc++-8-dev, yasm
 Standards-Version: 4.1.2
-Homepage: <insert the upstream URL, if relevant>
-#Vcs-Git: https://anonscm.debian.org/git/collab-maint/cavif.git
-#Vcs-Browser: https://anonscm.debian.org/cgit/collab-maint/cavif.git
+Homepage: https://github.com/link-u/cavif
+Vcs-Git: https://github.com/link-u/cavif.git
+Vcs-Browser: https://github.com/link-u/cavif
 
 Package: cavif
 Architecture: any
