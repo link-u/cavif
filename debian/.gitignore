@@ -13,3 +13,4 @@ files
 
 */
 !source/
+debhelper-build-stamp

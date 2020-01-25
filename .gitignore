@@ -4,6 +4,9 @@
 *.avif
 /perf.data
 /perf.data.old
+/obj-*
+/*.deb
+/*.ddeb
 
 ### C++ template
 # Compiled Object files
