@@ -111,6 +111,9 @@ int Config::parse(int argc, char **argv) {
 
 void Config::modify(aom_codec_ctx_t* aom) {
   //aom_codec_control(codec, AV1E_SET_DENOISE_NOISE_LEVEL, 1);
+  // AOME_SET_ROI_MAP // FIXME: not implemented yet at libaom.
+  // AOME_SET_ACTIVEMAP for internal use only
+  //
   aom_codec_control(aom, AOME_SET_CPUUSED, cpuUsed);
   aom_codec_control(aom, AOME_SET_STATIC_THRESHOLD, 0);
   aom_codec_control(aom, AOME_SET_TUNING, tune);
