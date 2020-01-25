@@ -42,17 +42,18 @@ make cavif
 ## SYNOPSIS
 
 ```
-%/cavif
+% cavif
 SYNOPSIS
         cavif -i <input.png> -o <output.avif> [--rotation [0|90|180|270]] [--mirror
               [vertical|horizontal]] [--crop-size <widthN/widthD,heightN/heightD>] [--crop-offset
               <horizOffN/horizOffD,vertOffN/vertOffD>] [--profile <0=base, 1=high, 2=professional>]
-              [--monochrome] [--usage [good|realtime]] [--threads <Num of threads to use>]
-              [--pix-fmt [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--rate-control [q|cq]]
-              [--enable-large-scale-tile] [--disable-large-scale-tile] [--full-still-picture-header]
-              [--enable-full-color-range] [--disable-full-color-range] [--crf <0-63>] [--cpu-used
-              <0-8>] [--enable-cdef] [--disable-cdef] [--enable-restoration] [--disable-restoration]
-              [--superblock-size [dynamic|128|64]] [--tune [ssim|psnr|cdef-dist|daala-dist]]
+              [--monochrome] [--encoder-usage [good|realtime]] [--threads <Num of threads to use>]
+              [--pix-fmt [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--bit-rate <kilo-bits per
+              second>] [--rate-control [q|cq]] [--full-still-picture-header]
+              [--disable-full-color-range] [--enable-full-color-range] [--crf <0-63>] [--cpu-used
+              <0-8>] [--enable-cdef] [--disable-cdef] [--enable-loop-restoration]
+              [--disable-loop-restoration] [--superblock-size [dynamic|128|64]] [--tune
+              [psnr|ssim|cdef-dist|daala-dist]]
 
 OPTIONS
         -i, --input Filename to input
@@ -61,38 +62,35 @@ OPTIONS
 
         --rotation  Set rotation meta data(irot). Counter-clockwise.
         --mirror    Set mirror meta data(imir).
-        --crop-size Crop size(clap).
+        --crop-size Set crop size.
         --crop-offset
-                    Crop offset(clap).
+                    Set crop offset.
 
         --profile   AV1 Profile(0=base, 1=high, 2=professional)
         --monochrome
                     Encode to monochrome image.
 
-        --usage     Encoder usage
+        --encoder-usage
+                    Encoder usage
+
         good        Good Quality mode
         realtime    Real time encoding mode.
         --pix-fmt   Pixel format of output image.
         --bit-depth Bit depth of output image.
+        --bit-rate  Bit rate of output image.
         --rate-control
                     Rate control method
 
         q           Constant Quality
         cq          Constrained Quality
-        --enable-large-scale-tile
-                    Use large scale tile mode.
-
-        --disable-large-scale-tile
-                    Don't use large scale tile mode.
-
         --full-still-picture-header
                     Force to output full picture header
 
-        --enable-full-color-range
-                    Use full YUV color range.
-
         --disable-full-color-range
                     Use limited YUV color range.
+
+        --enable-full-color-range
+                    Use full YUV color range.
 
         --crf       CQ Level in CQ rate control mode
         --cpu-used  Quality/Speed ratio modifier
@@ -102,10 +100,10 @@ OPTIONS
         --disable-cdef
                     Disable Constrained Directional Enhancement Filter
 
-        --enable-restoration
+        --enable-loop-restoration
                     Enable Loop Restoration Filter
 
-        --disable-restoration
+        --disable-loop-restoration
                     Disable Loop Restoration Filter
 
         --superblock-size
@@ -115,8 +113,8 @@ OPTIONS
         128         use 128x128 superblock.
         64          use 64x64 superblock.
         --tune      Quality metric to tune
-        ssim        structural similarity
         psnr        peak signal-to-noise ratio
+        ssim        structural similarity
         cdef-dist   cdef-dist
         daala-dist  daala-dist
 ```
