@@ -86,7 +86,7 @@ int _main(int argc, char** argv) {
 
   // decoding input image
   if(!endsWidh(config.input, ".png")) {
-    log.fatal("please give png or bmp file for input");
+    log.fatal("please give png file for input");
   }
   std::variant<avif::img::Image<8>, avif::img::Image<16>> loadedImage = PNGReader(config.input).read();
 

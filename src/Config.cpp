@@ -28,15 +28,24 @@ std::string trim(std::string str) {
 
 std::pair<uint32_t, uint32_t> parseFraction(std::string const& str) {
   auto pos = str.find('/');
-  std::string first = trim(str.substr(0, pos));
-  std::string second = trim(str.substr(pos + 1));
-  return std::make_pair(std::stoi(first), std::stoi(second));
+  if(pos == std::string::npos) {
+    return std::make_pair(std::stoi(trim(str)), 1);
+  } else {
+    std::string first = trim(str.substr(0, pos));
+    std::string second = trim(str.substr(pos + 1));
+    int n = std::stoi(first);
+    int d = std::stoi(second);
+    if(d == 0) {
+      throw std::invalid_argument("denominator can't be 0.");
+    }
+    return std::make_pair(n, d);
+  }
 }
 
 std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>> parseFractionPair(std::string const& str) {
   auto pos = str.find(',');
   if(pos == std::string::npos) {
-    throw std::runtime_error("Invalid fraction pair. Example: \"3/2, 10/7\"");
+    throw std::invalid_argument(R"(Invalid fraction pair. Example: "30/4, 100/7", "100, 100/2" or "100, 100")");
   }
   std::string first = trim(str.substr(0, pos));
   std::string second = trim(str.substr(pos + 1));
@@ -91,6 +100,9 @@ int Config::parse(int argc, char **argv) {
     if(!cropSize.has_value() && cropOffset.has_value()) {
       std::cerr << "crop-size must also be set, when crop-offset is set." << std::endl << std::flush;
       return -1;
+    }
+    if(cropSize.has_value() && !cropOffset.has_value()) {
+      cropOffset = std::make_pair(std::make_pair(0,1), std::make_pair(0,1));
     }
   }
   return 0;
