@@ -4,7 +4,7 @@
 *.avif
 /perf.data
 /perf.data.old
-/obj-*
+/build/
 /*.deb
 /*.ddeb
 
