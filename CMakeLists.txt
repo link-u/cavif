@@ -76,7 +76,8 @@ if (UNIX)
     target_link_libraries(cavif PRIVATE stdc++fs)
 endif (UNIX)
 
+###############################################################################
+
 install(TARGETS cavif
     RUNTIME DESTINATION bin
 )
-
