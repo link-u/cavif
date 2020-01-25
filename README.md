@@ -17,6 +17,10 @@ Example avif files are available in [AOMediaCodec/av1-avif](https://github.com/A
 ## how to build
 
 ```bash
+# pre-requirements
+# If your system cmake is lower than 3.13, please install latest version:
+# https://apt.kitware.com/
+
 # cloning this repository with dependencies.
 git clone --recurse-submodules --recursive git@github.com:link-u/cavif.git
 
