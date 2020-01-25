@@ -19,6 +19,7 @@ avif::FileBox AVIFBuilder::build() {
   if(!this->frame_.has_value()){
     throw std::runtime_error("No primary frame.");
   }
+  Frame& frame = this->frame_.value();
   using namespace avif;
   FileBox& fileBox = this->fileBox_;
   {
@@ -32,9 +33,29 @@ avif::FileBox AVIFBuilder::build() {
     fileTypeBox.compatibleBrands.emplace_back("miaf");
     // https://aomediacodec.github.io/av1-avif/#baseline-profile
     // The AV1 profile shall be the Main Profile and the level shall be 5.1 or lower.
-    // fileTypeBox.compatibleBrands.emplace_back("MA1B");
+    if(config_.codec.g_profile == 0) {
+      bool baseProfile = true;
+      for(auto const& operatingPoint : frame.sequenceHeader().operatingPoints) {
+        baseProfile &= operatingPoint.seqLevelIdx <= 13;
+      }
+      if (baseProfile) {
+        fileTypeBox.compatibleBrands.emplace_back("MA1B");
+      }
+    }
+    // https://aomediacodec.github.io/av1-avif/#advanced-profile
+    // 6.4. AVIF Advanced Profile
+    // The AV1 profile shall be the High Profile and the level shall be 6.0 or lower.
+    if(config_.codec.g_profile == 1) {
+      bool advancedProfile = true;
+      for(auto const& operatingPoint : frame.sequenceHeader().operatingPoints) {
+        advancedProfile &= operatingPoint.seqLevelIdx <= 16;
+      }
+      if (advancedProfile) {
+        fileTypeBox.compatibleBrands.emplace_back("MA1A");
+      }
+    }
   }
-  this->fillPrimaryFrameInfo(this->frame_.value());
+  this->fillPrimaryFrameInfo(frame);
 
   return this->fileBox_;
 }
