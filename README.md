@@ -2,6 +2,8 @@
 
 avif encoder, using [libaom](https://aomedia.googlesource.com/aom/) directly.
 
+The most significant mission of this project is "**Make it enable to tune libaom's all encoding options to optimize quality/size ratio as nice as possible human beings can**".
+
 ## basic usage
 
 ```bash
