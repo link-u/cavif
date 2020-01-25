@@ -12,6 +12,8 @@ cavif -i <output.png> -o <input.avif>
 
 Example avif files are available in [AOMediaCodec/av1-avif](https://github.com/AOMediaCodec/av1-avif/tree/master/testFiles) or [link-u/avif-sample-images](https://github.com/link-u/avif-sample-images).
 
+ - [日本語のドキュメント](./doc/ja_JP/README.md)
+
 ## how to build
 
 ```bash
