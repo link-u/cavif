@@ -68,6 +68,8 @@ int main(int argc, char** argv) {
 
 int _main(int argc, char** argv) {
   avif::util::FileLogger log(stdout, stderr, avif::util::Logger::Level::DEBUG);
+  log.info("cavif");
+  log.info("libaom ver: %s", aom_codec_version_str());
 
   aom_codec_iface_t* av1codec = aom_codec_av1_cx();
   if(!av1codec) {
