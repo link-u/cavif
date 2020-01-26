@@ -53,7 +53,11 @@ public:
   bool enableIntraEdgeFilter = true;
   bool enableTX64 = true;
   bool enableFlipIDTX = true;
+  bool useDCTOnly = false;
+  bool useDefaultTXOnly = false;
+  bool useReducedTXSet = false;
   int adaptiveQuantization = NO_AQ;
+  bool enableAdaptiveQuantizationB = false;
   bool enableFilterIntra = true;
   bool enableSmoothIntra = true;
   bool enablePaethIntra = true;

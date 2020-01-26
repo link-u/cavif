@@ -84,10 +84,13 @@ int Config::parse(int argc, char **argv) {
 
       // rate-control
       option("--rate-control").doc("Rate control method") & (parameter("q").doc("Constant Quality").set(aom.rc_end_usage, AOM_Q) | parameter("cq").doc("Constrained Quality").set(aom.rc_end_usage, AOM_CQ)),
+      option("--bit-rate").doc("Bit rate of output image.") & integer("kilo-bits per second", aom.rc_target_bitrate),
       option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63", crf),
       option("--qmin").doc("Minimum (Best Quality) Quantizer") & integer("0-63", codec.rc_min_quantizer),
       option("--qmax").doc("Maximum (Worst Quality) Quantizer") & integer("0-63", codec.rc_max_quantizer),
       option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none").set(adaptiveQuantization, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantization, int(CYCLIC_REFRESH_AQ))),
+      option("--enable-adaptive-quantization-b").doc("use adaptive quantize_b").set(enableAdaptiveQuantizationB, true),
+      option("--enable-adaptive-quantization-b").doc("use traditional adaptive quantization").set(enableAdaptiveQuantizationB, false),
       option("--delta-q").doc("a mode of delta q mode feature, that allows modulating q per superblock") & (parameter("off").doc("disable deltaQ").set(deltaQMode, int(NO_DELTA_Q)) | parameter("objective").doc("Use modulation to maximize objective quality").set(deltaQMode, int(DELTA_Q_OBJECTIVE)) | parameter("perceptual").doc("Use modulation to maximize perceptual quality").set(deltaQMode, int(DELTA_Q_PERCEPTUAL))),
       option("--enable-chroma-delta-q").doc("enable delta quantization in chroma").set(enableChromaDeltaQ, true),
       option("--disable-chroma-delta-q").doc("disable delta quantization in chroma").set(enableChromaDeltaQ, false),
@@ -99,8 +102,7 @@ int Config::parse(int argc, char **argv) {
       option("--qm-min-y").doc("Min quant matrix flatness for Y") & integer("0-15 (default: 10)", qmMinY),
       option("--qm-min-u").doc("Min quant matrix flatness for U") & integer("0-15 (default: 11)", qmMinU),
       option("--qm-min-v").doc("Min quant matrix flatness for V") & integer("0-15 (default: 12)", qmMinV),
-      option("--bit-rate").doc("Bit rate of output image.") & integer("kilo-bits per second", aom.rc_target_bitrate),
-      option("--tune").doc("Quality metric to tune") & (parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR) | parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST)),
+      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR)  | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST)),
       option("--lossless").doc("Enable lossless encoding").set(lossless, true),
 
       // pre-process
@@ -114,6 +116,7 @@ int Config::parse(int argc, char **argv) {
       option("--enable-loop-restoration").doc("Enable Loop Restoration Filter").set(enableRestoration, true),
 
       // coding parameter
+      option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64)),
       option("--tile-rows").doc("Number of tile rows") & integer("0-6", tileRows),
       option("--tile-colums").doc("Number of tile colums") & integer("0-6", tileColums),
       option("--disable-keyframe-temporal-filtering").doc("Disable temporal filtering on key frame").set(enableKeyframeTemporalFiltering, false),
@@ -131,7 +134,9 @@ int Config::parse(int argc, char **argv) {
       option("--enable-tx64").doc("enable 64-length transforms").set(enableTX64, true),
       option("--disable-tx64").doc("disable 64-length transforms").set(enableTX64, false),
       option("--enable-flip-idtx").doc("enable flip and identity transforms.").set(enableFlipIDTX, true),
-      option("--disable-flip-idtx").doc("disable flip and identity transforms.").set(enableFlipIDTX, false),
+      option("--use-dct-only").doc("use dct only.").set(useDCTOnly, true),
+      option("--use-default-tx-only").doc("use default tx type only").set(useDefaultTXOnly, true),
+      option("--use-reduced-tx-set").doc("use reduced tx set, transforms w/o flip (4) + Identity (1).").set(useReducedTXSet, true),
       option("--enable-filter-intra").doc("enable ").set(enableFilterIntra, true),
       option("--disable-filter-intra").doc("disable ").set(enableFilterIntra, false),
       option("--enable-smooth-intra").doc("enable ").set(enableSmoothIntra, true),
@@ -147,10 +152,7 @@ int Config::parse(int argc, char **argv) {
       option("--enable-intrabc").doc("enable intra block copy mode").set(enableIntraBC, true),
       option("--disable-intrabc").doc("disable intra block copy mode").set(enableIntraBC, false),
       option("--enable-angle-delta").doc("enable intra angle delta").set(enableAngleDelta, true),
-      option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false),
-//option("--enable-").doc("enable ").set(enableSuperres, true),
-//option("--disable-").doc("disable ").set(enableSuperres, false),
-      option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64))
+      option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false)
   );
   if(!clipp::parse(argc, argv, cli)) {
     std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
@@ -183,7 +185,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   aom_codec_control(aom, AOME_SET_SHARPNESS, sharpness);
   // AOME_SET_ENABLEAUTOALTREF is used only in 2nd pass(thus, is's for video).
   // AOME_SET_ENABLEAUTOBWDREF is for video (bwd-pred frames).
-  // AOME_SET_STATIC_THRESHOLD // FIXME(ledyba-z): it can be set, but not used.
+  // AOME_SET_STATIC_THRESHOLD is for video.
   // AOME_SET_ARNR_MAXFRAMES is for video.
   // AOME_SET_ARNR_STRENGTH is for video.
   aom_codec_control(aom, AOME_SET_TUNING, tune);
@@ -286,5 +288,21 @@ void Config::modify(aom_codec_ctx_t* aom) {
   // AV1E_SET_TIMING_INFO_TYPE is for video.
   // AV1E_SET_FILM_GRAIN_TEST_VECTOR is for testing
   // AV1E_SET_FILM_GRAIN_TABLE can be supported, but it is mainly for video.
-
+  // AV1E_SET_DENOISE_NOISE_LEVEL can be supported, but it is mainly for video.
+  // AV1E_SET_DENOISE_BLOCK_SIZE can be supported, but it is mainly for video.
+  aom_codec_control(aom, AV1E_SET_REDUCED_TX_TYPE_SET, useReducedTXSet ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_INTRA_DCT_ONLY, useDCTOnly ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_INTRA_DEFAULT_TX_ONLY, useDefaultTXOnly ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_QUANT_B_ADAPT, enableAdaptiveQuantizationB ? 1 : 0);
+  // AV1E_SET_GF_MAX_PYRAMID_HEIGHT is for video.
+  // AV1E_SET_MAX_REFERENCE_FRAMES is for video.
+  // AV1E_SET_REDUCED_REFERENCE_SET is for video.
+  // AV1E_SET_COEFF_COST_UPD_FREQ may be for video, because it mentions tile decoding.
+  // AV1E_SET_MODE_COST_UPD_FREQ may be for video, because it mentions tile decoding.
+  // AV1E_SET_MV_COST_UPD_FREQ may be for video, because it mentions tile decoding.
+  // AV1E_SET_TIER_MASK for video, because still picture always has 1 control point.
+  // AV1E_SET_MIN_CR is for video. My GDB says that.
+  // AV1E_SET_SVC_LAYER_ID is for video.
+  // AV1E_SET_SVC_PARAMS is for video.
+  // AV1E_SET_SVC_REF_FRAME_CONFIG is for video.
 }

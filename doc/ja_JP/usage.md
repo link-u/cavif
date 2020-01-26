@@ -151,6 +151,16 @@ YUVからRGBへの変換方法を定めているRec.2020などを読んでも扱
 
 ## ビットレート制御
 
+### チューニング・メトリクス
+
+`--tune [ssim|psnr|cdef-dist|daala-dist]`
+
+エンコーダが画質を最適するためにパラメータをチューニングするときに、どの指標をつかって画質を評価するか指定する。
+
+PSNRとSSIMは有名なので省略。CDEF-distはよくわからない。daalaはAV1の前身だが、daala-distが何なのかはよくわからない。
+
+少し試した限りでは正直よくわからなかった。結果はその目で確かめてください。デフォルトはSSIM。
+
 ### レートコントロール・アルゴリズム
 
 `--rate-control [q, cq]`
@@ -166,12 +176,18 @@ YUVからRGBへの変換方法を定めているRec.2020などを読んでも扱
 
 qとcqで守らせたい品質を指定する。値が低いほど画質はよい。
 
+### ビットレート
+
+`--bit-rate <kilo-bits per second>`
+
+`--rate-control cq`で守らせるビットレート。1秒の動画という扱いにしているので、出力されるファイルはここで指定した`kilo-bits`を上回らない…はずだが、努力目標っぽい。
+
 ### qmax, qmin
 
 `--qmax [0-63] (Maximum (Worst Quality) Quantizer)`  
 `--qmin [0-63] (Minimum (Best Quality) Quantizer)`
 
-`--rate control[q, cq]`や`--crf [0-63]`で品質を固定した上で、さらに利用するq level（量子化レベル）の上限と下限を指定できる。ソースを読んだ限り、たぶんcrfよりさらにキツく制御できるんだと思うが、よくわからない。
+`--rate control[q, cq]`や`--crf [0-63]`で品質を固定した上で、さらに利用するq level（量子化レベル）の上限と下限を指定できる。ソースを読んだ限り、たぶんcrfよりさらにキツく上限と下限を制御するようになるんだと思うけれど、よくわからない。
 
 ### adaptive quantization
 
@@ -179,21 +195,30 @@ qとcqで守らせたい品質を指定する。値が低いほど画質はよ�
 
 フレーム内で適応的に量子化パラメータを変える機能。デフォルトでnone。主観画質を上げるのに役立つらしい。
 
+`--disable-adaptive-quantization-b`  
+`--enable-adaptive-quantization-b`
+
+さらにその進化版もあるらしい。違いはわからない。
+
 ### delta q / delta lf
 
 `--delta-q [none, objective, perceptual]`
 
 スーパーブロックごとにqの値を変えることができる。デフォルトではoff。objectiveにすると客観指標がよくなり、perceptualにすると主観的によくなるらしい。
 
+#### Chroma Delta Q
+
 `--disable-chroma-delta-q`  
 `--enable-chroma-delta-q`
 
 chromaでも有効にするかどうか
 
+#### Delta LF
+
 `--disable-delta-lf`  
 `--enable-delta-lf`
 
-Delta Qが有効になっているとDelta LFというのも有効にできる。デフォルトでは無効。
+Delta Qが有効になっているとDelta LoopFilterというのも有効にできる。デフォルトではoff。
 
 ### quantisation matrices(qm) and quant matrix flatness
 
@@ -205,22 +230,6 @@ Delta Qが有効になっているとDelta LFというのも有効にできる�
 `--qm-min-v [0-15] (default: 12)`
 
 上記のqとは別にQMatricesというのを使って品質を変えることも出来るらしい。qと同じく、上がれば上がるほど品質が良いらしい。デフォルトではoff。
-
-### ビットレート
-
-`--bit-rate <kilo-bits per second>`
-
-`--rate-control cq`で守らせるビットレート。1秒の動画という扱いにしているので、出力されるファイルはここで指定した`kilo-bits`を上回らない…はずだが、努力目標っぽい。
-
-### チューニング・メトリクス
-
-`--tune [psnr|ssim|cdef-dist|daala-dist]`
-
-エンコーダが画質を最適するためにパラメータをチューニングするときに、どの指標をつかって画質を評価するか指定する。
-
-PSNRとSSIMは有名なのでググってください。CDEF-distはよくわからない。daalaはAV1の前身だがdaala-distが何なのかはよくわからない。
-
-ちょろっと試した感じでは正直どれでチューニングしても五十歩百歩だった。
 
 ### ロスレスモード
 
@@ -260,7 +269,7 @@ PSNRとSSIMは有名なのでググってください。CDEF-distはよくわか
 
 [失われてしまった高周波数領域を復活させるためのフィルタとのこと](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/11137/1113718/AV1-In-loop-super-resolution-framework/10.1117/12.2534538.short?SSO=1)。
 
-dav1dで試した限り結構負荷が高いので切ってもいいかもと思い、cavifではデフォルトでoff。
+dav1dで試した限り結構負荷が高いので切ってもいいかもと思い、cavifではデフォルトでdisable。
 
 ## Coding parameter
 
@@ -270,7 +279,7 @@ dav1dで試した限り結構負荷が高いので切ってもいいかもと思
 
 AV1では、画像をまずすべて同じ大きさのスーパーブロックに分割してから、その後それぞれのスーパーブロックを再帰的に分割して符号化していく。その大本のスーパーブロックのサイズを指定する。
 
-dynamicを指定すると、短辺が480ピクセル以上の時128x128、それ以下のときは64x64のスーパーブロックで分割する。
+デフォルトの`dynamic`を指定すると、短辺が480ピクセル以上の時`128x128`、それ以下のときは`64x64`のスーパーブロックで分割する。
 
 ### タイル分割
 
@@ -278,7 +287,7 @@ dynamicを指定すると、短辺が480ピクセル以上の時128x128、それ
 
 画像をそれぞれ `pow(2, <tile-rows>)`, `pow(2, <tile-colums>)`個の画像に分割して独立してエンコード・デコードする。
 
-デフォルトではどちらも0で、１枚の画像として扱う。
+デフォルトではどちらも0で、分割せず１枚の画像として扱う。
 
 ### disable-(rect, ab, 1to4)-partitions
 
@@ -328,14 +337,14 @@ rect/ab/1to4については次のAAを見よ：
 
 画像がスーパーブロックの定数倍でない限り、端っこにあまりの部分が出る。それらに対して掛けるフィルタを有効にするか否か。
 
-デフォルトではon。
+デフォルトではenable。
 
 ### TX64
 
 `--enable-tx64`  
 `--disable-tx64`
 
-64ピクセルのタイルでのTransformを許可するかしないか設定する。デフォルトでは許可。
+64ピクセルのタイルでのTransformを許可するかしないか設定する。デフォルトではenable。
 
 許可しない場合、64ピクセル以下のブロックになるまで必ず分割が走る。
 
@@ -356,13 +365,18 @@ disableにすると、左右非対称な変換と恒等変換を無効にする�
 * H_FLIPADST
  ```
 
+同様に、`--use-dct-only`　を指定するとDCTかデフォルトの変換しか行わなくなる。
+
+`--use-default-tx-only`を指定すると、現在の予測モードから定まる「デフォルトのTX」以外は使わなくなる(`intra_mode_to_tx_type()`)。
+
+`--use-reduced-tx-set`を指定すると、16種類ある変換中、`transforms w/o flip (4) + Identity (1)`の5種類しか使わなくなる(`av1_get_ext_tx_set_type()`)。
+
 ### キーフレーム・フィルタリング
 
 `--disable-keyfram-temporale-filtering`
 `--enable-keyframe-temporal-filtering`
 
-フレーム同士の相関を見たりするフィルタをキーフレームにも掛けるかどうかを指定する。libaomではデフォルトでonになっているが、cavifでは静止画がターゲットなのでデフォルトでoffにしている。品質に問題があったらONに戻してください。
-
+フレーム同士の相関を見たりするフィルタをキーフレームにも掛けるかどうかを指定する。libaomではデフォルトでonになっているが、cavifでは静止画がターゲットなのでデフォルトでoffにしている。品質に問題があったらenableに戻してください。
 
 ### Intraフレーム各種
 
@@ -396,14 +410,16 @@ disableにすると、左右非対称な変換と恒等変換を無効にする�
 `--enable-chroma-from-luma`  
 `--disable-chroma-from-luma`
 
+Luma信号からChroma信号を予測する。当たる場合、圧縮率がよくなる。
+
 曰く「[どちゃくそ重いからHEVCではstrongly rejectedされたけど、現実的な範囲のものができたからAV1では有効にするぜ](https://arxiv.org/abs/1711.03951)」。デフォルトでon。
 
-モノクロ画像ではどちらを指定しても関係ないかもしれないが、ゼロの値を使って無から何かを予測している可能性はあり、offにするとモノクロでもデコードが速くなる可能性も無いではない。
+モノクロ画像ではどちらを指定しても関係ないかもしれないが、ゼロの値を使って「無」から何かを予測している可能性はあり、offにするとモノクロでもデコードが速くなる可能性は無いではない。
 
 #### パレットモード
 
-`--enable-palette`  
-`--disable-palette`
+`--disable-palette`  
+`--enable-palette`
 
 有効にすると、8色しか使えないらしい。デフォルトはoff。
 
