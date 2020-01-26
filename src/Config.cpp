@@ -65,16 +65,18 @@ int Config::parse(int argc, char **argv) {
       option("--mirror").doc("Set mirror meta data(imir).") & (parameter("vertical").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Vertical)) | parameter("horizontal").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Horizontal))),
       option("--crop-size").doc("Set crop size.") & value("widthN/widthD,heightN/heightD").call([&](std::string const& str){ cropSize = parseFractionPair(str); }),
       option("--crop-offset").doc("Set crop offset.") & value("horizOffN/horizOffD,vertOffN/vertOffD").call([&](std::string const& str){ cropOffset = parseFractionPair(str); }),
+
       // av1 sequence header
       option("--full-still-picture-header").doc("Force to output full picture header").set(aom.full_still_picture_hdr, 1u),
-      // encoding
+
+      // profile and pixel formats
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base, 1=high, 2=professional", aom.g_profile),
       option("--pix-fmt").doc("Pixel format of output image.") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420) | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444)),
       option("--bit-depth").doc("Bit depth of output image.") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8) | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_12)),
       option("--disable-full-color-range").doc("Use limited YUV color range.").set(fullColorRange, false),
       option("--enable-full-color-range").doc("Use full YUV color range.").set(fullColorRange, true),
 
-      // speeeds
+      // trade offs between speed and quality.
       option("--encoder-usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
       option("--threads") & integer("Num of threads to use", aom.g_threads),
       option("--row-mt").doc("Enable row based multi-threading of encoder").set(rowMT, true),
@@ -91,14 +93,16 @@ int Config::parse(int argc, char **argv) {
       option("--monochrome").doc("Encode to monochrome image.").set(codec.monochrome, 1u),
       option("--sharpness").doc("Sharpening output") & integer("0-7", sharpness),
 
-      // coding parameter
-      option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64)),
-
       // post-process
       option("--disable-cdef").doc("Disable Constrained Directional Enhancement Filter").set(enableCDEF, false),
       option("--enable-cdef").doc("Enable Constrained Directional Enhancement Filter").set(enableCDEF, true),
       option("--disable-loop-restoration").doc("Disable Loop Restoration Filter").set(enableRestoration, false),
-      option("--enable-loop-restoration").doc("Enable Loop Restoration Filter").set(enableRestoration, true)
+      option("--enable-loop-restoration").doc("Enable Loop Restoration Filter").set(enableRestoration, true),
+
+      // coding parameter
+      option("--tile-rows").doc("Number of tile rows") & integer("0-6", tileRows),
+      option("--tile-colums").doc("Number of tile colums") & integer("0-6", tileColums),
+      option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64))
   );
   if(!clipp::parse(argc, argv, cli)) {
     std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
@@ -143,6 +147,8 @@ void Config::modify(aom_codec_ctx_t* aom) {
   // AV1E_SET_GF_CBR_BOOST_PCT for video.(I don't know what Golden Frame is)
   aom_codec_control(aom, AV1E_SET_LOSSLESS, lossless ? 1 : 0);
   aom_codec_control(aom, AV1E_SET_ROW_MT, rowMT ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_TILE_ROWS, tileRows);
+  aom_codec_control(aom, AV1E_SET_TILE_COLUMNS, tileColums);
   aom_codec_control(aom, AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
   aom_codec_control(aom, AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
 

@@ -32,6 +32,8 @@ public:
   bool rowMT = false;
   int cpuUsed = 1;
   int sharpness = 0;
+  int tileRows = 0;
+  int tileColums = 0;
   bool lossless = false;
   bool enableCDEF = false;
   bool enableRestoration = false;
