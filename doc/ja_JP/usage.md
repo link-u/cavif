@@ -365,15 +365,15 @@ disableにすると、左右非対称な変換と恒等変換を無効にする�
 * H_FLIPADST
  ```
 
-同様に、`--use-dct-only`　を指定するとDCTかデフォルトの変換しか行わなくなる。
+同様に、`--use-dct-only` を指定するとDCTしか行わなくなる。
 
-`--use-default-tx-only`を指定すると、現在の予測モードから定まる「デフォルトのTX」以外は使わなくなる(`intra_mode_to_tx_type()`)。
+`--use-default-tx-only` を指定すると、現在の予測モードから定まる「デフォルトのTX」以外は使わなくなる(`intra_mode_to_tx_type()`)。
 
-`--use-reduced-tx-set`を指定すると、16種類ある変換中、`transforms w/o flip (4) + Identity (1)`の5種類しか使わなくなる(`av1_get_ext_tx_set_type()`)。
+`--use-reduced-tx-set` を指定すると、16種類ある変換中、 `transforms w/o flip (4) + Identity (1)` の5種類しか使わなくなる(`av1_get_ext_tx_set_type()`)。
 
 ### キーフレーム・フィルタリング
 
-`--disable-keyfram-temporale-filtering`
+`--disable-keyfram-temporale-filtering`  
 `--enable-keyframe-temporal-filtering`
 
 フレーム同士の相関を見たりするフィルタをキーフレームにも掛けるかどうかを指定する。libaomではデフォルトでonになっているが、cavifでは静止画がターゲットなのでデフォルトでoffにしている。品質に問題があったらenableに戻してください。
@@ -428,4 +428,4 @@ Luma信号からChroma信号を予測する。当たる場合、圧縮率がよ�
 `--enable-intrabc`  
 `--disable-intrabc`
 
-同じ領域があったらコピーするモードらしい。４コマ漫画で上のコマと下のコマでセリフ以外コピーしてる時とかは役に立つかもしれない。デフォルトはon。
+同じ内容の領域があったらコピーするモードらしい。４コマ漫画で上のコマと下のコマでセリフ以外コピーしてる時とかは役に立つかもしれない。デフォルトはon。
