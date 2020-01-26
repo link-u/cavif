@@ -46,14 +46,22 @@ make cavif
 SYNOPSIS
         cavif -i <input.png> -o <output.avif> [--rotation [0|90|180|270]] [--mirror
               [vertical|horizontal]] [--crop-size <widthN/widthD,heightN/heightD>] [--crop-offset
-              <horizOffN/horizOffD,vertOffN/vertOffD>] [--profile <0=base, 1=high, 2=professional>]
-              [--monochrome] [--encoder-usage [good|realtime]] [--threads <Num of threads to use>]
-              [--pix-fmt [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--bit-rate <kilo-bits per
-              second>] [--rate-control [q|cq]] [--full-still-picture-header]
-              [--disable-full-color-range] [--enable-full-color-range] [--crf <0-63>] [--cpu-used
-              <0-8>] [--enable-cdef] [--disable-cdef] [--enable-loop-restoration]
-              [--disable-loop-restoration] [--superblock-size [dynamic|128|64]] [--tune
-              [psnr|ssim|cdef-dist|daala-dist]]
+              <horizOffN/horizOffD,vertOffN/vertOffD>] [--full-still-picture-header] [--profile
+              <0=base, 1=high, 2=professional>] [--pix-fmt [yuv420|yuv422|yuv444]] [--bit-depth
+              [8|10|12]] [--disable-full-color-range] [--enable-full-color-range] [--encoder-usage
+              [good|realtime]] [--threads <Num of threads to use>] [--row-mt] [--cpu-used <0-8>]
+              [--rate-control [q|cq]] [--crf <0-63>] [--qmin <0-63>] [--qmax <0-63>] [--use-qm]
+              [--qm-min <0-15 (default: 5)>] [--qm-max <0-15 (default: 9)>] [--qm-min-y <0-15
+              (default: 10)>] [--qm-min-u <0-15 (default: 11)>] [--qm-min-v <0-15 (default: 12)>]
+              [--bit-rate <kilo-bits per second>] [--tune [psnr|ssim|cdef-dist|daala-dist]]
+              [--lossless] [--monochrome] [--sharpness <0-7>] [--disable-cdef] [--enable-cdef]
+              [--disable-loop-restoration] [--enable-loop-restoration] [--tile-rows <0-6>]
+              [--tile-colums <0-6>] [--disable-keyframe-temporal-filtering]
+              [--enable-keyframe-temporal-filtering] [--adaptive-quantization
+              [none|variance|complexity|cyclic]] [--disable-rect-partitions]
+              [--disable-ab-partitions] [--disable-1to4-partitions] [--min-partition-size
+              [4|8|16|32|64|128]] [--max-partition-size [4|8|16|32|64|128]] [--superblock-size
+              [dynamic|128|64]]
 
 OPTIONS
         -i, --input Filename to input
@@ -66,45 +74,93 @@ OPTIONS
         --crop-offset
                     Set crop offset.
 
-        --profile   AV1 Profile(0=base, 1=high, 2=professional)
-        --monochrome
-                    Encode to monochrome image.
-
-        --encoder-usage
-                    Encoder usage
-
-        good        Good Quality mode
-        realtime    Real time encoding mode.
-        --pix-fmt   Pixel format of output image.
-        --bit-depth Bit depth of output image.
-        --bit-rate  Bit rate of output image.
-        --rate-control
-                    Rate control method
-
-        q           Constant Quality
-        cq          Constrained Quality
         --full-still-picture-header
                     Force to output full picture header
 
+        --profile   AV1 Profile(0=base, 1=high, 2=professional)
+        --pix-fmt   Pixel format of output image.
+        --bit-depth Bit depth of output image.
         --disable-full-color-range
                     Use limited YUV color range.
 
         --enable-full-color-range
                     Use full YUV color range.
 
-        --crf       CQ Level in CQ rate control mode
+        --encoder-usage
+                    Encoder usage
+
+        good        Good Quality mode
+        realtime    Real time encoding mode.
+        --row-mt    Enable row based multi-threading of encoder
         --cpu-used  Quality/Speed ratio modifier
+        --rate-control
+                    Rate control method
+
+        q           Constant Quality
+        cq          Constrained Quality
+        --crf       CQ Level in CQ rate control mode
+        --qmin      Minimum (Best Quality) Quantizer
+        --qmax      Maximum (Worst Quality) Quantizer
+        --use-qm    Use QMatrix
+        --qm-min    Min quant matrix flatness
+        --qm-max    Max quant matrix flatness
+        --qm-min-y  Min quant matrix flatness for Y
+        --qm-min-u  Min quant matrix flatness for U
+        --qm-min-v  Min quant matrix flatness for V
+        --bit-rate  Bit rate of output image.
+        --tune      Quality metric to tune
+        psnr        peak signal-to-noise ratio
+        ssim        structural similarity
+        cdef-dist   cdef-dist
+        daala-dist  daala-dist
+        --lossless  Enable lossless encoding
+        --monochrome
+                    Encode to monochrome image.
+
+        --sharpness Sharpening output
+        --disable-cdef
+                    Disable Constrained Directional Enhancement Filter
+
         --enable-cdef
                     Enable Constrained Directional Enhancement Filter
 
-        --disable-cdef
-                    Disable Constrained Directional Enhancement Filter
+        --disable-loop-restoration
+                    Disable Loop Restoration Filter
 
         --enable-loop-restoration
                     Enable Loop Restoration Filter
 
-        --disable-loop-restoration
-                    Disable Loop Restoration Filter
+        --tile-rows Number of tile rows
+        --tile-colums
+                    Number of tile colums
+
+        --disable-keyframe-temporal-filtering
+                    Disable temporal filtering on key frame
+
+        --enable-keyframe-temporal-filtering
+                    Enable temporal filtering on key frame
+
+        --adaptive-quantization
+                    Set adaptive-quantization mode
+
+        none        none
+        variance    variance based
+        complexity  complexity based
+        cyclic      Cyclic refresh
+        --disable-rect-partitions
+                    disable rectangular partitions
+
+        --disable-ab-partitions
+                    disable ab partitions
+
+        --disable-1to4-partitions
+                    disable 1to4 partitions
+
+        --min-partition-size
+                    min partition size
+
+        --max-partition-size
+                    max partition size
 
         --superblock-size
                     Superblock size.
@@ -112,11 +168,6 @@ OPTIONS
         dynamic     encoder determines the size automatically.
         128         use 128x128 superblock.
         64          use 64x64 superblock.
-        --tune      Quality metric to tune
-        psnr        peak signal-to-noise ratio
-        ssim        structural similarity
-        cdef-dist   cdef-dist
-        daala-dist  daala-dist
 ```
 
 ## TODO
