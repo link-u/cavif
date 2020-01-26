@@ -116,7 +116,7 @@ AV1のプロファイルを指定する。[プロファイルごとに使える�
 
 ### 色域
 
-`--disable-full-color-range`
+`--disable-full-color-range`  
 `--enable-full-color-range`
 
 例えば通常の8bitのYUVのフォーマットでは、Yの値として16-235、UとVの値として16-240しか使わないが、このフラグをenableにすると0-255のすべてを使うようになる。10/12ビットでも同様。デフォルトではfalse。
@@ -165,6 +165,65 @@ YUVからRGBへの変換方法を定めているRec.2020などを読んでも扱
 `--crf [0-63]`
 
 qとcqで守らせたい品質を指定する。値が低いほど画質はよい。
+
+### qmax, qmin
+
+`--qmax [0-63] (Maximum (Worst Quality) Quantizer)`  
+`--qmin [0-63] (Minimum (Best Quality) Quantizer)`
+
+`--rate control[q, cq]`や`--crf [0-63]`で品質を固定した上で、さらに利用するq level（量子化レベル）の上限と下限を指定できる。ソースを読んだ限り、たぶんcrfよりさらにキツく制御できるんだと思うが、よくわからない。
+
+### quantisation matrices(qm) and quant matrix flatness
+
+`--use-qm`  
+`--qm-min [0-15] (default: 5)`  
+`--qm-max [0-15] (default: 9)`  
+`--qm-min-y [0-15] (default: 10)`  
+`--qm-min-u [0-15] (default: 11)`  
+`--qm-min-v [0-15] (default: 12)`
+
+上記のqとは別にQMatricesというのを使って品質を変えることも出来るらしい。qと同じく、上がれば上がるほど品質が良いらしい。デフォルトではoff。
+
+### disable-(rect, ab, 1to4)-partitions
+
+`--disable-rect-partitions`  
+`--disable-ab-partitions`  
+`--disable-1to4-partitions`
+
+ブロック分割する時にそれぞれの分割を無効にする。デフォルトでは全部有効。
+
+rect/ab/1to4については次のAAを見よ：
+
+```
+//  Partition types.  R: Recursive
+//
+//  NONE          HORZ          VERT          SPLIT
+//  +-------+     +-------+     +---+---+     +---+---+
+//  |       |     |       |     |   |   |     | R | R |
+//  |       |     +-------+     |   |   |     +---+---+
+//  |       |     |       |     |   |   |     | R | R |
+//  +-------+     +-------+     +---+---+     +---+---+
+//
+//  HORZ_A        HORZ_B        VERT_A        VERT_B
+//  +---+---+     +-------+     +---+---+     +---+---+
+//  |   |   |     |       |     |   |   |     |   |   |
+//  +---+---+     +---+---+     +---+   |     |   +---+
+//  |       |     |   |   |     |   |   |     |   |   |
+//  +-------+     +---+---+     +---+---+     +---+---+
+//
+//  HORZ_4        VERT_4
+//  +-----+       +-+-+-+
+//  +-----+       | | | |
+//  +-----+       | | | |
+//  +-----+       +-+-+-+
+```
+
+### max/min partition size
+
+`--min-partition-size [4|8|16|32|64|128]`  
+`--max-partition-size [4|8|16|32|64|128]`
+
+上のパーティションの最小・最大サイズを指定する。デフォルトで最小は4、最大は128。
 
 ### ビットレート
 
@@ -242,9 +301,8 @@ dynamicを指定すると、短辺が480ピクセル以上の時128x128、それ
 
 ### adaptive quantization
 
-`--disable-adaptive-quantization`
-`--enable-adaptive-quantization`
+`--adaptive-quantization [none, variance, complexity, cyclic]`
 
-フレーム内で適応的に量子化パラメータを変える機能。デフォルトでoff。主観画質を上げるのに役立つらしい。
+フレーム内で適応的に量子化パラメータを変える機能。デフォルトでnone。主観画質を上げるのに役立つらしい。
 
 ###

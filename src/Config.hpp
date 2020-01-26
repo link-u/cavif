@@ -11,6 +11,7 @@
 #include <aom/aomcx.h>
 #include <avif/ImageRotationBox.hpp>
 #include <avif/ImageMirrorBox.hpp>
+#include <av1/encoder/encoder.h>
 #include "../external/clipp/include/clipp.h"
 
 class Configurator;
@@ -29,13 +30,24 @@ public:
   aom_codec_enc_cfg codec{};
   aom_img_fmt_t pixFmt = AOM_IMG_FMT_I420;
   int crf = 32;
+  bool useQM;
+  int qmMin = DEFAULT_QM_FIRST;
+  int qmMax = DEFAULT_QM_LAST;
+  int qmMinY = DEFAULT_QM_Y;
+  int qmMinU = DEFAULT_QM_U;
+  int qmMinV = DEFAULT_QM_V;
+  bool enableRectPartition = true;
+  bool enableABPartition = true;
+  bool enable1to4Partition = true;
+  int minPartitionSize = 4;
+  int maxPartitionSize = 128;
   bool rowMT = false;
   int cpuUsed = 1;
   int sharpness = 0;
   int tileRows = 0;
   int tileColums = 0;
   bool keyframeTemporalFiltering = false;
-  bool adaptiveQuantization = false;
+  int adaptiveQuantization = NO_AQ;
   bool lossless = false;
   bool enableCDEF = false;
   bool enableRestoration = false;

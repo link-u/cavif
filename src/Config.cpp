@@ -85,6 +85,14 @@ int Config::parse(int argc, char **argv) {
       // rate-control
       option("--rate-control").doc("Rate control method") & (parameter("q").doc("Constant Quality").set(aom.rc_end_usage, AOM_Q) | parameter("cq").doc("Constrained Quality").set(aom.rc_end_usage, AOM_CQ)),
       option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63", crf),
+      option("--qmin").doc("Minimum (Best Quality) Quantizer") & integer("0-63", codec.rc_min_quantizer),
+      option("--qmax").doc("Maximum (Worst Quality) Quantizer") & integer("0-63", codec.rc_max_quantizer),
+      option("--use-qm").doc("Use QMatrix").set(useQM, true),
+      option("--qm-min").doc("Min quant matrix flatness") & integer("0-15 (default: 5)", qmMin),
+      option("--qm-max").doc("Max quant matrix flatness") & integer("0-15 (default: 9)", qmMax),
+      option("--qm-min-y").doc("Min quant matrix flatness for Y") & integer("0-15 (default: 10)", qmMinY),
+      option("--qm-min-u").doc("Min quant matrix flatness for U") & integer("0-15 (default: 11)", qmMinU),
+      option("--qm-min-v").doc("Min quant matrix flatness for V") & integer("0-15 (default: 12)", qmMinV),
       option("--bit-rate").doc("Bit rate of output image.") & integer("kilo-bits per second", aom.rc_target_bitrate),
       option("--tune").doc("Quality metric to tune") & (parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR) | parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST)),
       option("--lossless").doc("Enable lossless encoding").set(lossless, true),
@@ -104,8 +112,12 @@ int Config::parse(int argc, char **argv) {
       option("--tile-colums").doc("Number of tile colums") & integer("0-6", tileColums),
       option("--disable-keyframe-temporal-filtering").doc("Disable temporal filtering on key frame").set(keyframeTemporalFiltering, false),
       option("--enable-keyframe-temporal-filtering").doc("Enable temporal filtering on key frame").set(keyframeTemporalFiltering, true),
-      option("--disable-adaptive-quantization").doc("Disable adaptive quantization").set(adaptiveQuantization, false),
-      option("--enable-adaptive-quantization").doc("Enable adaptive quantization").set(adaptiveQuantization, true),
+      option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none").set(adaptiveQuantization, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantization, int(CYCLIC_REFRESH_AQ))),
+      option("--disable-rect-partitions").doc("disable rectangular partitions").set(enableRectPartition, false),
+      option("--disable-ab-partitions").doc("disable ab partitions").set(enableABPartition, false),
+      option("--disable-1to4-partitions").doc("disable 1to4 partitions").set(enable1to4Partition, false),
+      option("--min-partition-size").doc("min partition size") & (parameter("4").set(minPartitionSize, 4) | parameter("8").set(minPartitionSize, 8) | parameter("16").set(minPartitionSize, 16) | parameter("32").set(minPartitionSize, 32) | parameter("64").set(minPartitionSize, 64) | parameter("128").set(minPartitionSize, 128)),
+      option("--max-partition-size").doc("max partition size") & (parameter("4").set(maxPartitionSize, 4) | parameter("8").set(maxPartitionSize, 8) | parameter("16").set(maxPartitionSize, 16) | parameter("32").set(maxPartitionSize, 32) | parameter("64").set(maxPartitionSize, 64) | parameter("128").set(maxPartitionSize, 128)),
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64))
   );
   if(!clipp::parse(argc, argv, cli)) {
@@ -191,7 +203,21 @@ void Config::modify(aom_codec_ctx_t* aom) {
   // AV1E_SET_DISABLE_TRELLIS_QUANT is for video(motion estimation).
   // https://en.wikipedia.org/wiki/Trellis_quantization
 
-  //
-
-  //
+  if(useQM) {
+    aom_codec_control(aom, AV1E_SET_ENABLE_QM, 1);
+    aom_codec_control(aom, AV1E_SET_QM_MIN, qmMin);
+    aom_codec_control(aom, AV1E_SET_QM_MAX, qmMax);
+    aom_codec_control(aom, AV1E_SET_QM_Y, qmMinY);
+    aom_codec_control(aom, AV1E_SET_QM_U, qmMinU);
+    aom_codec_control(aom, AV1E_SET_QM_V, qmMinV);
+  }
+  // AV1E_SET_ENABLE_DIST_8X8 is for testing purposes
+  // AV1E_SET_NUM_TG is for video.
+  // AV1E_SET_MTU is for video.
+  // AV1E_SET_ANS_WINDOW_SIZE_LOG2 is not used.
+  aom_codec_control(aom, AV1E_SET_ENABLE_RECT_PARTITIONS, enableRectPartition ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_AB_PARTITIONS, enableABPartition ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_1TO4_PARTITIONS, enable1to4Partition ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_MIN_PARTITION_SIZE, minPartitionSize);
+  aom_codec_control(aom, AV1E_SET_MAX_PARTITION_SIZE, maxPartitionSize);
 }
