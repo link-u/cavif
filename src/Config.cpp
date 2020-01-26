@@ -88,7 +88,11 @@ int Config::parse(int argc, char **argv) {
       option("--qmin").doc("Minimum (Best Quality) Quantizer") & integer("0-63", codec.rc_min_quantizer),
       option("--qmax").doc("Maximum (Worst Quality) Quantizer") & integer("0-63", codec.rc_max_quantizer),
       option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none").set(adaptiveQuantization, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantization, int(CYCLIC_REFRESH_AQ))),
-      option("--enable-rect-partitions").doc("enable rectangular partitions").set(enableRectPartition, true),
+      option("--delta-q").doc("a mode of delta q mode feature, that allows modulating q per superblock") & (parameter("off").doc("disable deltaQ").set(deltaQMode, int(NO_DELTA_Q)) | parameter("objective").doc("Use modulation to maximize objective quality").set(deltaQMode, int(DELTA_Q_OBJECTIVE)) | parameter("perceptual").doc("Use modulation to maximize perceptual quality").set(deltaQMode, int(DELTA_Q_PERCEPTUAL))),
+      option("--enable-chroma-delta-q").doc("enable delta quantization in chroma").set(enableChromaDeltaQ, true),
+      option("--disable-chroma-delta-q").doc("disable delta quantization in chroma").set(enableChromaDeltaQ, false),
+      option("--enable-delta-lf").doc("enable delta loop filter").set(enableDeltaLoopfilter, true),
+      option("--disable-delta-lf").doc("disable delta loop filter").set(enableDeltaLoopfilter, false),
       option("--use-qm").doc("Use QMatrix").set(useQM, true),
       option("--qm-min").doc("Min quant matrix flatness") & integer("0-15 (default: 5)", qmMin),
       option("--qm-max").doc("Max quant matrix flatness") & integer("0-15 (default: 9)", qmMax),
@@ -114,6 +118,7 @@ int Config::parse(int argc, char **argv) {
       option("--tile-colums").doc("Number of tile colums") & integer("0-6", tileColums),
       option("--disable-keyframe-temporal-filtering").doc("Disable temporal filtering on key frame").set(enableKeyframeTemporalFiltering, false),
       option("--enable-keyframe-temporal-filtering").doc("Enable temporal filtering on key frame").set(enableKeyframeTemporalFiltering, true),
+      option("--enable-rect-partitions").doc("enable rectangular partitions").set(enableRectPartition, true),
       option("--disable-rect-partitions").doc("disable rectangular partitions").set(enableRectPartition, false),
       option("--enable-ab-partitions").doc("enable ab partitions").set(enableABPartition, true),
       option("--disable-ab-partitions").doc("disable ab partitions").set(enableABPartition, false),
@@ -127,6 +132,24 @@ int Config::parse(int argc, char **argv) {
       option("--disable-tx64").doc("disable 64-length transforms").set(enableTX64, false),
       option("--enable-flip-idtx").doc("enable flip and identity transforms.").set(enableFlipIDTX, true),
       option("--disable-flip-idtx").doc("disable flip and identity transforms.").set(enableFlipIDTX, false),
+      option("--enable-filter-intra").doc("enable ").set(enableFilterIntra, true),
+      option("--disable-filter-intra").doc("disable ").set(enableFilterIntra, false),
+      option("--enable-smooth-intra").doc("enable ").set(enableSmoothIntra, true),
+      option("--disable-smooth-intra").doc("disable ").set(enableSmoothIntra, false),
+      option("--enable-paeth-intra").doc("enable ").set(enablePaethIntra, true),
+      option("--disable-paeth-intra").doc("disable ").set(enablePaethIntra, false),
+      option("--enable-chroma-from-luma").doc("enable ").set(enableChromaFromLuma, true),
+      option("--disable-chroma-from-luma").doc("disable ").set(enableChromaFromLuma, false),
+      option("--enable-superres").doc("enable frame superresolution").set(enableSuperres, true),
+      option("--disable-superres").doc("disable frame superresolution").set(enableSuperres, false),
+      option("--enable-palette").doc("enable palette mode").set(enablePalette, true),
+      option("--disable-palette").doc("disable palette mode").set(enablePalette, false),
+      option("--enable-intrabc").doc("enable intra block copy mode").set(enableIntraBC, true),
+      option("--disable-intrabc").doc("disable intra block copy mode").set(enableIntraBC, false),
+      option("--enable-angle-delta").doc("enable intra angle delta").set(enableAngleDelta, true),
+      option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false),
+//option("--enable-").doc("enable ").set(enableSuperres, true),
+//option("--disable-").doc("disable ").set(enableSuperres, false),
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64))
   );
   if(!clipp::parse(argc, argv, cli)) {
@@ -236,5 +259,32 @@ void Config::modify(aom_codec_ctx_t* aom) {
   // AV1E_SET_ENABLE_DIST_WTD_COMP is for video
   // AV1E_SET_ENABLE_REF_FRAME_MVS is for video
   // AV1E_SET_ALLOW_REF_FRAME_MVS is for video
+  aom_codec_control(aom, AV1E_SET_ENABLE_DUAL_FILTER, 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_CHROMA_DELTAQ, enableChromaDeltaQ ? 1 : 0);
+  // AV1E_SET_ENABLE_MASKED_COMP is for video
+  // AV1E_SET_ENABLE_ONESIDED_COMP is for video
+  // AV1E_SET_ENABLE_INTERINTRA_COMP is for video
+  // AV1E_SET_ENABLE_SMOOTH_INTERINTRA is for video
+  // AV1E_SET_ENABLE_DIFF_WTD_COMP is for video
+  // AV1E_SET_ENABLE_INTERINTER_WEDGE is for video
+  // AV1E_SET_ENABLE_GLOBAL_MOTION is for video
+  aom_codec_control(aom, AV1E_SET_ENABLE_GLOBAL_MOTION, 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_WARPED_MOTION, 0);
+  // AV1E_SET_ALLOW_WARPED_MOTION is for video
+  aom_codec_control(aom, AV1E_SET_ENABLE_FILTER_INTRA, enableFilterIntra ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_SMOOTH_INTRA, enableSmoothIntra ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_PAETH_INTRA, enablePaethIntra ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_CFL_INTRA, enableChromaFromLuma ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_SUPERRES, enableSuperres ? 1 : 0);
+  // AV1E_SET_ENABLE_OVERLAY is for video.
+  aom_codec_control(aom, AV1E_SET_ENABLE_PALETTE, enablePalette ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_INTRABC, enableIntraBC ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_DELTAQ_MODE, deltaQMode);
+  aom_codec_control(aom, AV1E_SET_DELTALF_MODE, enableDeltaLoopfilter ? 1 : 0);
+  // AV1E_SET_SINGLE_TILE_DECODING is for video.
+  // AV1E_ENABLE_MOTION_VECTOR_UNIT_TEST is for video.
+  // AV1E_SET_TIMING_INFO_TYPE is for video.
+  // AV1E_SET_FILM_GRAIN_TEST_VECTOR is for testing
+  // AV1E_SET_FILM_GRAIN_TABLE can be supported, but it is mainly for video.
 
 }

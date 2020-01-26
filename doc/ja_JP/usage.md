@@ -179,6 +179,22 @@ qとcqで守らせたい品質を指定する。値が低いほど画質はよ�
 
 フレーム内で適応的に量子化パラメータを変える機能。デフォルトでnone。主観画質を上げるのに役立つらしい。
 
+### delta q / delta lf
+
+`--delta-q [none, objective, perceptual]`
+
+スーパーブロックごとにqの値を変えることができる。デフォルトではoff。objectiveにすると客観指標がよくなり、perceptualにすると主観的によくなるらしい。
+
+`--disable-chroma-delta-q`  
+`--enable-chroma-delta-q`
+
+chromaでも有効にするかどうか
+
+`--disable-delta-lf`  
+`--enable-delta-lf`
+
+Delta Qが有効になっているとDelta LFというのも有効にできる。デフォルトでは無効。
+
 ### quantisation matrices(qm) and quant matrix flatness
 
 `--use-qm`  
@@ -210,7 +226,7 @@ PSNRとSSIMは有名なのでググってください。CDEF-distはよくわか
 
 `--lossless`
 
-このフラグをつけると、ロスレスモードでエンコードする。アルファチャンネルはこのほうがよいのでは？
+このフラグをつけると、ロスレスモードでエンコードする。アルファチャンネルをエンコードするときはこのほうがよいのでは？
 
 ## Pre process
 
@@ -238,6 +254,13 @@ PSNRとSSIMは有名なのでググってください。CDEF-distはよくわか
 デフォルトでdisable。
 
 ### Loop Restoration Filter
+
+`--disable-loop-restoration`  
+`--enable-loop-restoration`
+
+[失われてしまった高周波数領域を復活させるためのフィルタとのこと](https://www.spiedigitallibrary.org/conference-proceedings-of-spie/11137/1113718/AV1-In-loop-super-resolution-framework/10.1117/12.2534538.short?SSO=1)。
+
+dav1dで試した限り結構負荷が高いので切ってもいいかもと思い、cavifではデフォルトでoff。
 
 ## Coding parameter
 
@@ -341,4 +364,52 @@ disableにすると、左右非対称な変換と恒等変換を無効にする�
 フレーム同士の相関を見たりするフィルタをキーフレームにも掛けるかどうかを指定する。libaomではデフォルトでonになっているが、cavifでは静止画がターゲットなのでデフォルトでoffにしている。品質に問題があったらONに戻してください。
 
 
-###
+### Intraフレーム各種
+
+イントラフレームのフィルタリングを有効にするかどうか。たぶんoffにすると画質は下がる。ただ、デコーダ側で何かしらの処理は走ってたので、offにするとそのかわりデコードが速くなるかもしれない。
+
+#### フィルタ
+
+`--enable-filter-intra`  
+`--disable-filter-intra`
+
+`--enable-smooth-intra`  
+`--disable-smooth-intra`
+
+`--enable-superres`  
+`--disable-superres`
+
+以上全部デフォルトでon。
+
+#### 予測器
+
+`--enable-paeth-intra`  
+`--disable-paeth-intra`
+
+`--enable-angle-delta`  
+`--disable-angle-delta`
+
+以上全部デフォルトでon。
+
+#### CfL (Chroma prediction from Luma)
+
+`--enable-chroma-from-luma`  
+`--disable-chroma-from-luma`
+
+曰く「[どちゃくそ重いからHEVCではstrongly rejectedされたけど、現実的な範囲のものができたからAV1では有効にするぜ](https://arxiv.org/abs/1711.03951)」。デフォルトでon。
+
+モノクロ画像ではどちらを指定しても関係ないかもしれないが、ゼロの値を使って無から何かを予測している可能性はあり、offにするとモノクロでもデコードが速くなる可能性も無いではない。
+
+#### パレットモード
+
+`--enable-palette`  
+`--disable-palette`
+
+有効にすると、8色しか使えないらしい。デフォルトはoff。
+
+#### [Intra Block Copy](https://www.semanticscholar.org/paper/Intra-Block-Copy-in-HEVC-Screen-Content-Coding-Xu-Liu/5b8ef0e83b1e839a3ef62ab9821334247878444d/figure/0)
+
+`--enable-intrabc`  
+`--disable-intrabc`
+
+同じ領域があったらコピーするモードらしい。４コマ漫画で上のコマと下のコマでセリフ以外コピーしてる時とかは役に立つかもしれない。デフォルトはon。

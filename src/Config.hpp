@@ -30,6 +30,9 @@ public:
   aom_codec_enc_cfg codec{};
   aom_img_fmt_t pixFmt = AOM_IMG_FMT_I420;
   int crf = 32;
+  int deltaQMode = 0;
+  bool enableChromaDeltaQ = false;
+  bool enableDeltaLoopfilter = false;
   bool useQM;
   int qmMin = DEFAULT_QM_FIRST;
   int qmMax = DEFAULT_QM_LAST;
@@ -51,6 +54,14 @@ public:
   bool enableTX64 = true;
   bool enableFlipIDTX = true;
   int adaptiveQuantization = NO_AQ;
+  bool enableFilterIntra = true;
+  bool enableSmoothIntra = true;
+  bool enablePaethIntra = true;
+  bool enableChromaFromLuma = true;
+  bool enableSuperres = true;
+  bool enablePalette = false;
+  bool enableIntraBC = true;
+  bool enableAngleDelta = true;
   bool lossless = false;
   bool enableCDEF = false;
   bool enableRestoration = false;
