@@ -65,29 +65,40 @@ int Config::parse(int argc, char **argv) {
       option("--mirror").doc("Set mirror meta data(imir).") & (parameter("vertical").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Vertical)) | parameter("horizontal").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Horizontal))),
       option("--crop-size").doc("Set crop size.") & value("widthN/widthD,heightN/heightD").call([&](std::string const& str){ cropSize = parseFractionPair(str); }),
       option("--crop-offset").doc("Set crop offset.") & value("horizOffN/horizOffD,vertOffN/vertOffD").call([&](std::string const& str){ cropOffset = parseFractionPair(str); }),
+      // av1 sequence header
+      option("--full-still-picture-header").doc("Force to output full picture header").set(aom.full_still_picture_hdr, 1u),
       // encoding
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base, 1=high, 2=professional", aom.g_profile),
-      option("--monochrome").doc("Encode to monochrome image.").set(codec.monochrome, 1u),
-      option("--encoder-usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
-      option("--threads") & integer("Num of threads to use", aom.g_threads),
       option("--pix-fmt").doc("Pixel format of output image.") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420) | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444)),
       option("--bit-depth").doc("Bit depth of output image.") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8) | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_12)),
-      option("--bit-rate").doc("Bit rate of output image.") & integer("kilo-bits per second", aom.rc_target_bitrate),
-      option("--rate-control").doc("Rate control method") & (parameter("q").doc("Constant Quality").set(aom.rc_end_usage, AOM_Q) | parameter("cq").doc("Constrained Quality").set(aom.rc_end_usage, AOM_CQ)),
-// FIXME(ledyba-z): it looks not available for AVIF, that uses general decoding process.
-//      option("--enable-large-scale-tile").doc("Use large scale tile mode.").set(aom.large_scale_tile, 1u),
-//      option("--disable-large-scale-tile").doc("Don't use large scale tile mode.").set(aom.large_scale_tile, 0u),
-      option("--full-still-picture-header").doc("Force to output full picture header").set(aom.full_still_picture_hdr, 1u),
       option("--disable-full-color-range").doc("Use limited YUV color range.").set(fullColorRange, false),
       option("--enable-full-color-range").doc("Use full YUV color range.").set(fullColorRange, true),
-      option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63", crf),
+
+      // speeeds
+      option("--encoder-usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
+      option("--threads") & integer("Num of threads to use", aom.g_threads),
+      option("--row-mt").doc("Enable row based multi-threading of encoder").set(rowMT, true),
       option("--cpu-used").doc("Quality/Speed ratio modifier") & integer("0-8", cpuUsed),
-      option("--enable-cdef").doc("Enable Constrained Directional Enhancement Filter").set(enableCDEF, true),
-      option("--disable-cdef").doc("Disable Constrained Directional Enhancement Filter").set(enableCDEF, false),
-      option("--enable-loop-restoration").doc("Enable Loop Restoration Filter").set(enableRestoration, true),
-      option("--disable-loop-restoration").doc("Disable Loop Restoration Filter").set(enableRestoration, false),
+
+      // rate-control
+      option("--rate-control").doc("Rate control method") & (parameter("q").doc("Constant Quality").set(aom.rc_end_usage, AOM_Q) | parameter("cq").doc("Constrained Quality").set(aom.rc_end_usage, AOM_CQ)),
+      option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63", crf),
+      option("--bit-rate").doc("Bit rate of output image.") & integer("kilo-bits per second", aom.rc_target_bitrate),
+      option("--tune").doc("Quality metric to tune") & (parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR) | parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST)),
+      option("--lossless").doc("Enable lossless encoding").set(lossless, true),
+
+      // pre-process
+      option("--monochrome").doc("Encode to monochrome image.").set(codec.monochrome, 1u),
+      option("--sharpness").doc("Sharpening output") & integer("0-7", sharpness),
+
+      // coding parameter
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64)),
-      option("--tune").doc("Quality metric to tune") & (parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR) | parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST))
+
+      // post-process
+      option("--disable-cdef").doc("Disable Constrained Directional Enhancement Filter").set(enableCDEF, false),
+      option("--enable-cdef").doc("Enable Constrained Directional Enhancement Filter").set(enableCDEF, true),
+      option("--disable-loop-restoration").doc("Disable Loop Restoration Filter").set(enableRestoration, false),
+      option("--enable-loop-restoration").doc("Enable Loop Restoration Filter").set(enableRestoration, true)
   );
   if(!clipp::parse(argc, argv, cli)) {
     std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
@@ -111,13 +122,27 @@ int Config::parse(int argc, char **argv) {
 
 void Config::modify(aom_codec_ctx_t* aom) {
   //aom_codec_control(codec, AV1E_SET_DENOISE_NOISE_LEVEL, 1);
+
   // AOME_SET_ROI_MAP // FIXME: not implemented yet at libaom.
   // AOME_SET_ACTIVEMAP for internal use only
-  //
+  // AOME_SET_SCALEMODE // FIXME(ledyba-z): it can be set, but not used.
+  // AOME_SET_SPATIAL_LAYER_ID for adaptive video decoding (such as for Netflix or Youtube).
   aom_codec_control(aom, AOME_SET_CPUUSED, cpuUsed);
-  aom_codec_control(aom, AOME_SET_STATIC_THRESHOLD, 0);
+  aom_codec_control_(aom, AOME_SET_SHARPNESS, sharpness);
+  // AOME_SET_ENABLEAUTOALTREF is used only in 2nd pass(thus, is's for video).
+  // AOME_SET_ENABLEAUTOBWDREF is for video (bwd-pred frames).
+  // AOME_SET_STATIC_THRESHOLD // FIXME(ledyba-z): it can be set, but not used.
+  // AOME_SET_ARNR_MAXFRAMES is for video.
+  // AOME_SET_ARNR_STRENGTH is for video.
   aom_codec_control(aom, AOME_SET_TUNING, tune);
   aom_codec_control(aom, AOME_SET_CQ_LEVEL, crf);
+  // It always can be 0(unlimited) for AVIF.
+  aom_codec_control(aom, AOME_SET_MAX_INTRA_BITRATE_PCT, 0);
+  // AOME_SET_NUMBER_SPATIAL_LAYERS for video
+  // AV1E_SET_MAX_INTER_BITRATE_PCT for video
+  // AV1E_SET_GF_CBR_BOOST_PCT for video.(I don't know what Golden Frame is)
+  aom_codec_control(aom, AV1E_SET_LOSSLESS, lossless ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ROW_MT, rowMT ? 1 : 0);
   aom_codec_control(aom, AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
   aom_codec_control(aom, AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
 

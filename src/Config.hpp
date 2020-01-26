@@ -29,7 +29,10 @@ public:
   aom_codec_enc_cfg codec{};
   aom_img_fmt_t pixFmt = AOM_IMG_FMT_I420;
   int crf = 32;
+  bool rowMT = false;
   int cpuUsed = 1;
+  int sharpness = 0;
+  bool lossless = false;
   bool enableCDEF = false;
   bool enableRestoration = false;
   bool fullColorRange = false;
