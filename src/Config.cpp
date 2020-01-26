@@ -26,7 +26,7 @@ std::string trim(std::string str) {
   return std::move(str);
 }
 
-std::pair<uint32_t, uint32_t> parseFraction(std::string const& str) {
+std::pair<int32_t, uint32_t> parseFraction(std::string const& str) {
   auto pos = str.find('/');
   if(pos == std::string::npos) {
     return std::make_pair(std::stoi(trim(str)), 1);
@@ -38,7 +38,7 @@ std::pair<uint32_t, uint32_t> parseFraction(std::string const& str) {
     if(d == 0) {
       throw std::invalid_argument("denominator can't be 0.");
     }
-    return std::make_pair(n, d);
+    return std::make_pair(static_cast<int32_t>(n), static_cast<uint32_t>(d));
   }
 }
 
