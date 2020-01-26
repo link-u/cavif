@@ -102,6 +102,10 @@ int Config::parse(int argc, char **argv) {
       // coding parameter
       option("--tile-rows").doc("Number of tile rows") & integer("0-6", tileRows),
       option("--tile-colums").doc("Number of tile colums") & integer("0-6", tileColums),
+      option("--disable-keyframe-temporal-filtering").doc("Disable temporal filtering on key frame").set(keyframeTemporalFiltering, false),
+      option("--enable-keyframe-temporal-filtering").doc("Enable temporal filtering on key frame").set(keyframeTemporalFiltering, true),
+      option("--disable-adaptive-quantization").doc("Disable adaptive quantization").set(adaptiveQuantization, false),
+      option("--enable-adaptive-quantization").doc("Enable adaptive quantization").set(adaptiveQuantization, true),
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64))
   );
   if(!clipp::parse(argc, argv, cli)) {
@@ -132,7 +136,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   // AOME_SET_SCALEMODE // FIXME(ledyba-z): it can be set, but not used.
   // AOME_SET_SPATIAL_LAYER_ID for adaptive video decoding (such as for Netflix or Youtube).
   aom_codec_control(aom, AOME_SET_CPUUSED, cpuUsed);
-  aom_codec_control_(aom, AOME_SET_SHARPNESS, sharpness);
+  aom_codec_control(aom, AOME_SET_SHARPNESS, sharpness);
   // AOME_SET_ENABLEAUTOALTREF is used only in 2nd pass(thus, is's for video).
   // AOME_SET_ENABLEAUTOBWDREF is for video (bwd-pred frames).
   // AOME_SET_STATIC_THRESHOLD // FIXME(ledyba-z): it can be set, but not used.
@@ -149,8 +153,16 @@ void Config::modify(aom_codec_ctx_t* aom) {
   aom_codec_control(aom, AV1E_SET_ROW_MT, rowMT ? 1 : 0);
   aom_codec_control(aom, AV1E_SET_TILE_ROWS, tileRows);
   aom_codec_control(aom, AV1E_SET_TILE_COLUMNS, tileColums);
-  aom_codec_control(aom, AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
+  // AV1E_SET_ENABLE_TPL_MODEL is for video.
+  aom_codec_control(aom, AV1E_SET_ENABLE_KEYFRAME_FILTERING, keyframeTemporalFiltering ? 1 : 0);
+  // AV1E_SET_FRAME_PARALLEL_DECODING is for video. we have just one frame.
+  // AV1E_SET_ERROR_RESILIENT_MODE is for video.
+  // AV1E_SET_S_FRAME_MODE is for video.
+  aom_codec_control(aom, AV1E_SET_AQ_MODE, adaptiveQuantization ? 1 : 0);
+  // AV1E_SET_FRAME_PERIODIC_BOOST is for video.
+  // AV1E_SET_NOISE_SENSITIVITY // FIXME(ledyba-z): it can be set, but not used.
+  // AV1E_SET_TUNE_CONTENT // FIXME(ledyba-z): it can be set, but not used.
+  // AV1E_SET_CDF_UPDATE_MODE is for video.
 
   //FIXME(ledyba-z): support color profile. PNG can contain gamma correction and color profile.
   // Gamma Correction and Precision Color (PNG: The Definitive Guide)
@@ -158,7 +170,28 @@ void Config::modify(aom_codec_ctx_t* aom) {
   aom_codec_control(aom, AV1E_SET_COLOR_PRIMARIES, 2 );
   aom_codec_control(aom, AV1E_SET_MATRIX_COEFFICIENTS, 2 );
   aom_codec_control(aom, AV1E_SET_TRANSFER_CHARACTERISTICS, 2);
-  //
+
+  aom_codec_control(aom, AV1E_SET_CHROMA_SAMPLE_POSITION, 0); // see libavif-container
+
+  // AV1E_SET_MIN_GF_INTERVAL for video
   aom_codec_control(aom, AV1E_SET_COLOR_RANGE, fullColorRange ? 1 : 0);
+  // AV1E_SET_RENDER_SIZE should be the same as the output size. It's default.
+  // AV1E_SET_TARGET_SEQ_LEVEL_IDX for video.
   aom_codec_control(aom, AV1E_SET_SUPERBLOCK_SIZE, superblockSize);
+  // AOME_SET_ENABLEAUTOBWDREF is for video.
+
+  aom_codec_control(aom, AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
+  // AV1E_SET_FORCE_VIDEO_MODE must be 0 (we encode still picture), that is default.
+
+  // AV1E_SET_ENABLE_OBMC is for video, motion prediction.
+  // OBMC is "Overlapped Block Motion Compensation"
+  // https://jmvalin.ca/papers/AV1_tools.pdf
+
+  // AV1E_SET_DISABLE_TRELLIS_QUANT is for video(motion estimation).
+  // https://en.wikipedia.org/wiki/Trellis_quantization
+
+  //
+
+  //
 }

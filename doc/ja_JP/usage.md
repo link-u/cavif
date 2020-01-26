@@ -43,7 +43,7 @@
 
 `--mirror [vertical, horizontal]`
 
-表示時に反転する
+表示時に反転する。
 
 ## AV1 シーケンシャルヘッダ
 
@@ -217,14 +217,6 @@ PSNRとSSIMは有名なのでググってください。CDEF-distはよくわか
 
 ## Coding parameter
 
-### タイル分割
-
-`--tile-rows [0-6]` `--tile-colums [0-6]`
-
-画像をそれぞれ `pow(2, <tile-rows>)`, `pow(2, <tile-colums>)`個の画像に分割して独立してエンコード・デコードする。
-
-デフォルトではどちらも0で、１枚の画像として扱う。
-
 ### スーパーブロックサイズ
 
 `--superblock-size [dynamic, 128, 64]`
@@ -233,4 +225,26 @@ AV1では、画像をまずすべて同じ大きさのスーパーブロック�
 
 dynamicを指定すると、短辺が480ピクセル以上の時128x128、それ以下のときは64x64のスーパーブロックで分割する。
 
-### 
+### タイル分割
+
+`--tile-rows [0-6]` `--tile-colums [0-6]`
+
+画像をそれぞれ `pow(2, <tile-rows>)`, `pow(2, <tile-colums>)`個の画像に分割して独立してエンコード・デコードする。
+
+デフォルトではどちらも0で、１枚の画像として扱う。
+
+### キーフレーム・フィルタリング
+
+`--disable-keyfram-temporale-filtering`
+`--enable-keyframe-temporal-filtering`
+
+フレーム同士の相関を見たりするフィルタをキーフレームにも掛けるかどうかを指定する。libaomではデフォルトでonになっているが、cavifではデフォルトでoffにしている。品質に問題があったらONに戻してください。
+
+### adaptive quantization
+
+`--disable-adaptive-quantization`
+`--enable-adaptive-quantization`
+
+フレーム内で適応的に量子化パラメータを変える機能。デフォルトでoff。主観画質を上げるのに役立つらしい。
+
+###

@@ -34,6 +34,8 @@ public:
   int sharpness = 0;
   int tileRows = 0;
   int tileColums = 0;
+  bool keyframeTemporalFiltering = false;
+  bool adaptiveQuantization = false;
   bool lossless = false;
   bool enableCDEF = false;
   bool enableRestoration = false;
