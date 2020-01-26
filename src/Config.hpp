@@ -46,7 +46,10 @@ public:
   int sharpness = 0;
   int tileRows = 0;
   int tileColums = 0;
-  bool keyframeTemporalFiltering = false;
+  bool enableKeyframeTemporalFiltering = false;
+  bool enableIntraEdgeFilter = true;
+  bool enableTX64 = true;
+  bool enableFlipIDTX = true;
   int adaptiveQuantization = NO_AQ;
   bool lossless = false;
   bool enableCDEF = false;

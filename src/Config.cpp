@@ -87,6 +87,8 @@ int Config::parse(int argc, char **argv) {
       option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63", crf),
       option("--qmin").doc("Minimum (Best Quality) Quantizer") & integer("0-63", codec.rc_min_quantizer),
       option("--qmax").doc("Maximum (Worst Quality) Quantizer") & integer("0-63", codec.rc_max_quantizer),
+      option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none").set(adaptiveQuantization, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantization, int(CYCLIC_REFRESH_AQ))),
+      option("--enable-rect-partitions").doc("enable rectangular partitions").set(enableRectPartition, true),
       option("--use-qm").doc("Use QMatrix").set(useQM, true),
       option("--qm-min").doc("Min quant matrix flatness") & integer("0-15 (default: 5)", qmMin),
       option("--qm-max").doc("Max quant matrix flatness") & integer("0-15 (default: 9)", qmMax),
@@ -110,14 +112,21 @@ int Config::parse(int argc, char **argv) {
       // coding parameter
       option("--tile-rows").doc("Number of tile rows") & integer("0-6", tileRows),
       option("--tile-colums").doc("Number of tile colums") & integer("0-6", tileColums),
-      option("--disable-keyframe-temporal-filtering").doc("Disable temporal filtering on key frame").set(keyframeTemporalFiltering, false),
-      option("--enable-keyframe-temporal-filtering").doc("Enable temporal filtering on key frame").set(keyframeTemporalFiltering, true),
-      option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none").set(adaptiveQuantization, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantization, int(CYCLIC_REFRESH_AQ))),
+      option("--disable-keyframe-temporal-filtering").doc("Disable temporal filtering on key frame").set(enableKeyframeTemporalFiltering, false),
+      option("--enable-keyframe-temporal-filtering").doc("Enable temporal filtering on key frame").set(enableKeyframeTemporalFiltering, true),
       option("--disable-rect-partitions").doc("disable rectangular partitions").set(enableRectPartition, false),
+      option("--enable-ab-partitions").doc("enable ab partitions").set(enableABPartition, true),
       option("--disable-ab-partitions").doc("disable ab partitions").set(enableABPartition, false),
-      option("--disable-1to4-partitions").doc("disable 1to4 partitions").set(enable1to4Partition, false),
+      option("--disable-1to4-partitions").doc("enable 1to4 partitions").set(enable1to4Partition, true),
+      option("--enable-1to4-partitions").doc("disable 1to4 partitions").set(enable1to4Partition, false),
+      option("--enable-intra-edge-filter").doc("enable intra edge filter").set(enableIntraEdgeFilter, true),
+      option("--disable-intra-edge-filter").doc("disable intra edge filter").set(enableIntraEdgeFilter, false),
       option("--min-partition-size").doc("min partition size") & (parameter("4").set(minPartitionSize, 4) | parameter("8").set(minPartitionSize, 8) | parameter("16").set(minPartitionSize, 16) | parameter("32").set(minPartitionSize, 32) | parameter("64").set(minPartitionSize, 64) | parameter("128").set(minPartitionSize, 128)),
       option("--max-partition-size").doc("max partition size") & (parameter("4").set(maxPartitionSize, 4) | parameter("8").set(maxPartitionSize, 8) | parameter("16").set(maxPartitionSize, 16) | parameter("32").set(maxPartitionSize, 32) | parameter("64").set(maxPartitionSize, 64) | parameter("128").set(maxPartitionSize, 128)),
+      option("--enable-tx64").doc("enable 64-length transforms").set(enableTX64, true),
+      option("--disable-tx64").doc("disable 64-length transforms").set(enableTX64, false),
+      option("--enable-flip-idtx").doc("enable flip and identity transforms.").set(enableFlipIDTX, true),
+      option("--disable-flip-idtx").doc("disable flip and identity transforms.").set(enableFlipIDTX, false),
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64))
   );
   if(!clipp::parse(argc, argv, cli)) {
@@ -166,7 +175,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   aom_codec_control(aom, AV1E_SET_TILE_ROWS, tileRows);
   aom_codec_control(aom, AV1E_SET_TILE_COLUMNS, tileColums);
   // AV1E_SET_ENABLE_TPL_MODEL is for video.
-  aom_codec_control(aom, AV1E_SET_ENABLE_KEYFRAME_FILTERING, keyframeTemporalFiltering ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_KEYFRAME_FILTERING, enableKeyframeTemporalFiltering ? 1 : 0);
   // AV1E_SET_FRAME_PARALLEL_DECODING is for video. we have just one frame.
   // AV1E_SET_ERROR_RESILIENT_MODE is for video.
   // AV1E_SET_S_FRAME_MODE is for video.
@@ -220,4 +229,12 @@ void Config::modify(aom_codec_ctx_t* aom) {
   aom_codec_control(aom, AV1E_SET_ENABLE_1TO4_PARTITIONS, enable1to4Partition ? 1 : 0);
   aom_codec_control(aom, AV1E_SET_MIN_PARTITION_SIZE, minPartitionSize);
   aom_codec_control(aom, AV1E_SET_MAX_PARTITION_SIZE, maxPartitionSize);
+  aom_codec_control(aom, AV1E_SET_ENABLE_INTRA_EDGE_FILTER, enableIntraEdgeFilter ? 1 : 0);
+  // AV1E_SET_ENABLE_ORDER_HINT is for video
+  aom_codec_control(aom, AV1E_SET_ENABLE_TX64, enableTX64 ? 1 : 0);
+  aom_codec_control(aom, AV1E_SET_ENABLE_FLIP_IDTX, enableFlipIDTX ? 1 : 0);
+  // AV1E_SET_ENABLE_DIST_WTD_COMP is for video
+  // AV1E_SET_ENABLE_REF_FRAME_MVS is for video
+  // AV1E_SET_ALLOW_REF_FRAME_MVS is for video
+
 }

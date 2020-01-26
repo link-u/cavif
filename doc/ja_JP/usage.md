@@ -173,6 +173,12 @@ qとcqで守らせたい品質を指定する。値が低いほど画質はよ�
 
 `--rate control[q, cq]`や`--crf [0-63]`で品質を固定した上で、さらに利用するq level（量子化レベル）の上限と下限を指定できる。ソースを読んだ限り、たぶんcrfよりさらにキツく制御できるんだと思うが、よくわからない。
 
+### adaptive quantization
+
+`--adaptive-quantization [none, variance, complexity, cyclic]`
+
+フレーム内で適応的に量子化パラメータを変える機能。デフォルトでnone。主観画質を上げるのに役立つらしい。
+
 ### quantisation matrices(qm) and quant matrix flatness
 
 `--use-qm`  
@@ -183,47 +189,6 @@ qとcqで守らせたい品質を指定する。値が低いほど画質はよ�
 `--qm-min-v [0-15] (default: 12)`
 
 上記のqとは別にQMatricesというのを使って品質を変えることも出来るらしい。qと同じく、上がれば上がるほど品質が良いらしい。デフォルトではoff。
-
-### disable-(rect, ab, 1to4)-partitions
-
-`--disable-rect-partitions`  
-`--disable-ab-partitions`  
-`--disable-1to4-partitions`
-
-ブロック分割する時にそれぞれの分割を無効にする。デフォルトでは全部有効。
-
-rect/ab/1to4については次のAAを見よ：
-
-```
-//  Partition types.  R: Recursive
-//
-//  NONE          HORZ          VERT          SPLIT
-//  +-------+     +-------+     +---+---+     +---+---+
-//  |       |     |       |     |   |   |     | R | R |
-//  |       |     +-------+     |   |   |     +---+---+
-//  |       |     |       |     |   |   |     | R | R |
-//  +-------+     +-------+     +---+---+     +---+---+
-//
-//  HORZ_A        HORZ_B        VERT_A        VERT_B
-//  +---+---+     +-------+     +---+---+     +---+---+
-//  |   |   |     |       |     |   |   |     |   |   |
-//  +---+---+     +---+---+     +---+   |     |   +---+
-//  |       |     |   |   |     |   |   |     |   |   |
-//  +-------+     +---+---+     +---+---+     +---+---+
-//
-//  HORZ_4        VERT_4
-//  +-----+       +-+-+-+
-//  +-----+       | | | |
-//  +-----+       | | | |
-//  +-----+       +-+-+-+
-```
-
-### max/min partition size
-
-`--min-partition-size [4|8|16|32|64|128]`  
-`--max-partition-size [4|8|16|32|64|128]`
-
-上のパーティションの最小・最大サイズを指定する。デフォルトで最小は4、最大は128。
 
 ### ビットレート
 
@@ -292,17 +257,88 @@ dynamicを指定すると、短辺が480ピクセル以上の時128x128、それ
 
 デフォルトではどちらも0で、１枚の画像として扱う。
 
+### disable-(rect, ab, 1to4)-partitions
+
+`--disable-rect-partitions`  
+`--disable-ab-partitions`  
+`--disable-1to4-partitions`
+
+ブロック分割する時にそれぞれの分割を無効にする。デフォルトでは全部有効。
+
+rect/ab/1to4については次のAAを見よ：
+
+```
+//  Partition types.  R: Recursive
+//
+//  NONE          HORZ          VERT          SPLIT
+//  +-------+     +-------+     +---+---+     +---+---+
+//  |       |     |       |     |   |   |     | R | R |
+//  |       |     +-------+     |   |   |     +---+---+
+//  |       |     |       |     |   |   |     | R | R |
+//  +-------+     +-------+     +---+---+     +---+---+
+//
+//  HORZ_A        HORZ_B        VERT_A        VERT_B
+//  +---+---+     +-------+     +---+---+     +---+---+
+//  |   |   |     |       |     |   |   |     |   |   |
+//  +---+---+     +---+---+     +---+   |     |   +---+
+//  |       |     |   |   |     |   |   |     |   |   |
+//  +-------+     +---+---+     +---+---+     +---+---+
+//
+//  HORZ_4        VERT_4
+//  +-----+       +-+-+-+
+//  +-----+       | | | |
+//  +-----+       | | | |
+//  +-----+       +-+-+-+
+```
+
+### max/min partition size
+
+`--min-partition-size [4|8|16|32|64|128]`  
+`--max-partition-size [4|8|16|32|64|128]`
+
+上のパーティションの最小・最大サイズを指定する。デフォルトで最小は4、最大は128。
+
+## Intra Edge filtering
+
+`--enable-intra-edge-filter`  
+`--disable-intra-edge-filter`
+
+画像がスーパーブロックの定数倍でない限り、端っこにあまりの部分が出る。それらに対して掛けるフィルタを有効にするか否か。
+
+デフォルトではon。
+
+### TX64
+
+`--enable-tx64`  
+`--disable-tx64`
+
+64ピクセルのタイルでのTransformを許可するかしないか設定する。デフォルトでは許可。
+
+許可しない場合、64ピクセル以下のブロックになるまで必ず分割が走る。
+
+### Flip IDTX
+
+`--enable-flip-idtx`  
+`--disable-flip-idtx`
+
+AV1ではDCT以外にも[ADST](https://groups.google.com/a/webmproject.org/forum/#!topic/webm-discuss/JDxb0Qfzx7U)と呼ばれる上下左右非対称な基底を使った変換を行う事もあるし、そもそも変換を行わないこともある(IDTX; Identity TX)。
+
+disableにすると、左右非対称な変換と恒等変換を無効にする。デフォルトはもちろんenable。
+
+```
+* This will enable or disable usage of flip and identity transform
+* types in any direction. The default value is 1. Including:
+* FLIPADST_DCT, DCT_FLIPADST, FLIPADST_FLIPADST, ADST_FLIPADST,
+* FLIPADST_ADST, IDTX, V_DCT, H_DCT, V_ADST, H_ADST, V_FLIPADST,
+* H_FLIPADST
+ ```
+
 ### キーフレーム・フィルタリング
 
 `--disable-keyfram-temporale-filtering`
 `--enable-keyframe-temporal-filtering`
 
-フレーム同士の相関を見たりするフィルタをキーフレームにも掛けるかどうかを指定する。libaomではデフォルトでonになっているが、cavifではデフォルトでoffにしている。品質に問題があったらONに戻してください。
+フレーム同士の相関を見たりするフィルタをキーフレームにも掛けるかどうかを指定する。libaomではデフォルトでonになっているが、cavifでは静止画がターゲットなのでデフォルトでoffにしている。品質に問題があったらONに戻してください。
 
-### adaptive quantization
-
-`--adaptive-quantization [none, variance, complexity, cyclic]`
-
-フレーム内で適応的に量子化パラメータを変える機能。デフォルトでnone。主観画質を上げるのに役立つらしい。
 
 ###
