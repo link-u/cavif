@@ -11,5 +11,7 @@ Vcs-Browser: https://github.com/link-u/cavif
 Package: cavif
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: avif encoder, using libaom directly.
+The most significant mission of this project is
+"Make it enable to tune libaom's all encoding options to optimize
+quality/size ratio as nice as possible human beings can".
