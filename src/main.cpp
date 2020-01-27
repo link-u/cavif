@@ -108,12 +108,12 @@ int _main(int argc, char** argv) {
     convert(src, img, config.codec.g_bit_depth);
   }
 
-  uint32_t const width = img.w;
-  uint32_t const height = img.h;
+  uint32_t const width = aom_img_plane_width(&img, AOM_PLANE_Y);
+  uint32_t const height = aom_img_plane_height(&img, AOM_PLANE_Y);
 
   // initialize encoder
-  config.codec.g_w = img.w;
-  config.codec.g_h = img.h;
+  config.codec.g_w = width;
+  config.codec.g_h = height;
   // Generate just one frame.
   config.codec.g_limit = 1;
   config.codec.g_pass = AOM_RC_ONE_PASS;
