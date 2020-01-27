@@ -1,4 +1,4 @@
-cavif (0.1.0) unstable; urgency=medium
+cavif (0.1.0-20200127) unstable; urgency=medium
 
   * Initial release
   * Closes #1, supports odd-height or odd-width images.

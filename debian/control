@@ -12,6 +12,6 @@ Package: cavif
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: avif encoder, using libaom directly.
-The most significant mission of this project is
-"Make it enable to tune libaom's all encoding options to optimize
-quality/size ratio as nice as possible human beings can".
+ The most significant mission of this project is
+ "Make it enable to tune libaom's all encoding options to optimize
+ quality/size ratio as nice as possible human beings can".
