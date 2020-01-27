@@ -43,8 +43,8 @@ make cavif
 
 ```
 % cavif
-[2020/01/26 18:19:25 INFO ] cavif
-[2020/01/26 18:19:25 INFO ] libaom ver: 1.0.0-errata1-avif
+[2020/01/27 13:07:33 INFO ] cavif
+[2020/01/27 13:07:33 INFO ] libaom ver: 1.0.0-errata1-avif
 SYNOPSIS
         cavif -i <input.png> -o <output.avif> [--rotation [0|90|180|270]] [--mirror
               [vertical|horizontal]] [--crop-size <widthN/widthD,heightN/heightD>] [--crop-offset
@@ -54,7 +54,7 @@ SYNOPSIS
               [good|realtime]] [--threads <Num of threads to use>] [--row-mt] [--cpu-used <0-8>]
               [--rate-control [q|cq]] [--bit-rate <kilo-bits per second>] [--crf <0-63>] [--qmin
               <0-63>] [--qmax <0-63>] [--adaptive-quantization [none|variance|complexity|cyclic]]
-              [--enable-adaptive-quantization-b] [--enable-adaptive-quantization-b] [--delta-q
+              [--enable-adaptive-quantization-b] [--disable-adaptive-quantization-b] [--delta-q
               [off|objective|perceptual]] [--enable-chroma-delta-q] [--disable-chroma-delta-q]
               [--enable-delta-lf] [--disable-delta-lf] [--use-qm] [--qm-min <0-15 (default: 5)>]
               [--qm-max <0-15 (default: 9)>] [--qm-min-y <0-15 (default: 10)>] [--qm-min-u <0-15
@@ -124,7 +124,7 @@ OPTIONS
         --enable-adaptive-quantization-b
                     use adaptive quantize_b
 
-        --enable-adaptive-quantization-b
+        --disable-adaptive-quantization-b
                     use traditional adaptive quantization
 
         --delta-q   a mode of delta q mode feature, that allows modulating q per superblock
