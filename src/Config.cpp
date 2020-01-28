@@ -249,7 +249,10 @@ void Config::modify(aom_codec_ctx_t* aom) {
 
   aom_codec_control(aom, AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
   aom_codec_control(aom, AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
-  // AV1E_SET_FORCE_VIDEO_MODE must be 0 (we encode still picture), that is default.
+  // > By default, the encoder does not force video and allows still picture.
+  // This is not the case.
+  // https://aomedia.googlesource.com/aom/+/refs/tags/v1.0.0-errata1-avif/av1/av1_cx_iface.c#179
+  aom_codec_control(aom, AV1E_SET_FORCE_VIDEO_MODE, 0);
 
   // AV1E_SET_ENABLE_OBMC is for video, motion prediction.
   // OBMC is "Overlapped Block Motion Compensation"
