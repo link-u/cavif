@@ -135,7 +135,7 @@ YUVからRGBへの変換方法を定めているRec.2020などを読んでも扱
 
 `--threads <num-threads>`
 
-変換時に使うスレッド数を指定する。何も指定しないと理論コア数。ただし実際にマルチスレッドされている気配がない。
+変換時に使うスレッド数を指定する。何も指定しないと論理コア数。ただし実際にマルチスレッドされている気配がない。
 
 ### row based multi-threading of encoder
 
@@ -205,7 +205,7 @@ qとcqで守らせたい品質を指定する。値が低いほど画質はよ�
 
 `--delta-q [none, objective, perceptual]`
 
-スーパーブロックごとにqの値を変えることができる。デフォルトではoff。objectiveにすると客観指標がよくなり、perceptualにすると主観的によくなるらしい。
+スーパーブロックごとにqの値を変えることができる。デフォルトではnone。objectiveにすると客観指標がよくなり、perceptualにすると主観的によくなるらしい。
 
 #### Chroma Delta Q
 
@@ -219,7 +219,7 @@ chromaでも有効にするかどうか
 `--disable-delta-lf`  
 `--enable-delta-lf`
 
-Delta Qが有効になっているとDelta LoopFilterというのも有効にできる。デフォルトではoff。
+Delta Qが有効になっているとDelta LoopFilterというのも有効にできる。デフォルトではdisable。
 
 ### quantisation matrices(qm) and quant matrix flatness
 
@@ -230,7 +230,8 @@ Delta Qが有効になっているとDelta LoopFilterというのも有効にで
 `--qm-min-u [0-15] (default: 11)`  
 `--qm-min-v [0-15] (default: 12)`
 
-上記のqとは別にQMatricesというのを使って品質を変えることも出来るらしい。qと同じく、上がれば上がるほど品質が良いらしい。デフォルトではoff。
+上記のqとは別にQMatricesというのを使って品質を変えることも出来るらしい。qと同じく、上がれば上がるほど品質が良いらしい。
+デフォルトではoffで、`--use-qm`を指定して有効にした時だけ、他のオプションが意味を持つ。
 
 ### ロスレスモード
 
