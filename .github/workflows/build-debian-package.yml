@@ -1,0 +1,28 @@
+name: Build debian package on push.
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        sed -i -e 's/git\@github\.com\:/https\:\/\/github.com\//g' .gitmodules
+        git submodule init
+        git submodule sync --recursive
+        git submodule update
+        git submodule foreach bash -c "sed -i -e 's/git\@github\.com\:/https\:\/\/github.com\//g' .gitmodules || true"
+        git submodule foreach git submodule sync --recursive
+        git submodule foreach git submodule init
+        git submodule foreach git submodule update --init --force --recursive
+    - name: Install gcc-8 g++-8
+      shell: bash
+      run: |
+        sudo apt install -y gcc-8 g++-8 yasm debhelper dh-make
+    - name: build debian package
+      run: bash scripts/build-debian-package.sh
