@@ -1,12 +1,15 @@
-name: Build debian package on push.
+name: Build debian package on push or release-tags.
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
 
 jobs:
   build:
-
     runs-on: ubuntu-18.04
-
     steps:
     - uses: actions/checkout@v2
     - name: Checkout submodules
@@ -25,7 +28,17 @@ jobs:
       run: |
         sudo apt install -y gcc-8 g++-8 yasm debhelper dh-make
     - name: build debian package
-      run: bash scripts/build-debian-package.sh
+      shell: bash
+      env:
+        REF: ${{ github.ref }}
+        COMMIT: ${{ github.sha }}
+      run: |
+        if [ "${REF:0:11}" = "refs/tags/v" ]; then
+          sed -i -r "s/^(\w+) \(([0-9\.]+)(-[A-Z]+)?\)/\1 (${REF:11})/" debian/changelog
+        else
+          sed -i -r "s/^(\w+) \(([0-9\.]+)(-[A-Z]+)?\)/\1 (\2-$(date +%Y%m%d%H%M%S)${COMMIT:0:7})/" debian/changelog
+        fi
+        bash scripts/build-debian-package.sh
     - name: Get debian package name.
       shell: bash
       run: |
@@ -36,3 +49,37 @@ jobs:
       with:
         name: cavif
         path: ${{ steps.get_deb_name.outputs.filename }}
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v1
+      with:
+        name: cavif
+    - name: Get debian package name.
+      shell: bash
+      run: |
+        echo "::set-output name=filename::$(basename $(find ./cavif -type f -name \*.deb))"
+      id: get_deb_name
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: true
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        asset_path: cavif/${{ steps.get_deb_name.outputs.filename }}
+        asset_name: ${{ steps.get_deb_name.outputs.filename }}
+        asset_content_type: application/vnd.debian.binary-package
