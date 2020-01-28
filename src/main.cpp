@@ -221,22 +221,22 @@ void printSequenceHeader(avif::util::Logger& log, avif::av1::SequenceHeader& seq
   log.info("   - Sequence Level Index at OperatingPoint[0]: %d", seq.operatingPoints.at(0).seqLevelIdx);
   log.info("   - Max frame width: %d", seq.maxFrameWidth);
   log.info("   - Max frame height: %d", seq.maxFrameHeight);
-  log.info("   - Use 128x128 superblock: %d", seq.use128x128Superblock ? "Yes" : "No");
-  log.info("   - FilterIntra enabled: %d", seq.enableFilterIntra ? "Yes" : "No");
-  log.info("   - IntraEdgeFilter enabled: %d", seq.enableIntraEdgeFilter ? "Yes" : "No");
+  log.info("   - Use 128x128 superblock: %s", seq.use128x128Superblock ? "Yes" : "No");
+  log.info("   - FilterIntra enabled: %s", seq.enableFilterIntra ? "Yes" : "No");
+  log.info("   - IntraEdgeFilter enabled: %s", seq.enableIntraEdgeFilter ? "Yes" : "No");
 /*
-  log.info("   - InterIntraCompound enabled: %d", seq.enableInterintraCompound ? "Yes" : "No");
-  log.info("   - Masked Compound enabled: %d", seq.enableMaskedCompound ? "Yes" : "No");
-  log.info("   - WarpedMotion enabled: %d", seq.enableWarpedMotion ? "Yes" : "No");
-  log.info("   - DualFilter enabled: %d", seq.enableDualFilter ? "Yes" : "No");
-  log.info("   - OrderHint enabled: %d", seq.enableOrderHint ? "Yes" : "No");
-  log.info("   - JNTComp enabled: %d", seq.enableJNTComp ? "Yes" : "No");
-  log.info("   - RefFrameMVS enabled: %d", seq.enableRefFrameMVS ? "Yes" : "No");
+  log.info("   - InterIntraCompound enabled: %s", seq.enableInterintraCompound ? "Yes" : "No");
+  log.info("   - Masked Compound enabled: %s", seq.enableMaskedCompound ? "Yes" : "No");
+  log.info("   - WarpedMotion enabled: %s", seq.enableWarpedMotion ? "Yes" : "No");
+  log.info("   - DualFilter enabled: %s", seq.enableDualFilter ? "Yes" : "No");
+  log.info("   - OrderHint enabled: %s", seq.enableOrderHint ? "Yes" : "No");
+  log.info("   - JNTComp enabled: %s", seq.enableJNTComp ? "Yes" : "No");
+  log.info("   - RefFrameMVS enabled: %s", seq.enableRefFrameMVS ? "Yes" : "No");
 */
-  log.info("   - Superres enabled: %d", seq.enableSuperres ? "Yes" : "No");
-  log.info("   - CDEF enabled: %d", seq.enableCDEF ? "Yes" : "No");
-  log.info("   - Loop Restoration enabled: %d", seq.enableRestoration ? "Yes" : "No");
-  log.info("   - Film Grain Params Present: %d", seq.filmGrainParamsPresent ? "Yes" : "No");
+  log.info("   - Superres enabled: %s", seq.enableSuperres ? "Yes" : "No");
+  log.info("   - CDEF enabled: %s", seq.enableCDEF ? "Yes" : "No");
+  log.info("   - Loop Restoration enabled: %s", seq.enableRestoration ? "Yes" : "No");
+  log.info("   - Film Grain Params Present: %s", seq.filmGrainParamsPresent ? "Yes" : "No");
   log.info("   - Color Info:");
   log.info("     - High bit-depth: %s", seq.colorConfig.highBitdepth ? "Yes" : "No");
   log.info("     - Twelve bit: %s", seq.colorConfig.twelveBit ? "Yes" : "No");
@@ -248,5 +248,5 @@ void printSequenceHeader(avif::util::Logger& log, avif::av1::SequenceHeader& seq
   log.info("     - Sub sampling X: %d", seq.colorConfig.subsamplingX);
   log.info("     - Sub sampling Y: %d", seq.colorConfig.subsamplingX);
   log.info("     - Chroma sample position: %s", seq.colorConfig.chromaSamplePosition.has_value() ? std::to_string(static_cast<uint8_t>(seq.colorConfig.chromaSamplePosition.value())) : "<Unknownn>");
-  log.info("     - Separate UV Delta Q: %d", seq.colorConfig.separateUVDeltaQ ? "Yes" : "No");
+  log.info("     - Separate UV Delta Q: %s", seq.colorConfig.separateUVDeltaQ ? "Yes" : "No");
 }
