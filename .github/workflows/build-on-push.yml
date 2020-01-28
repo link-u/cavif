@@ -28,7 +28,3 @@ jobs:
       run: CXX=g++-8 CC=gcc-8 cmake -S . -B build
     - name: make
       run: env --chdir build make
-    - name: clear build dir.
-      run: rm -Rrv build
-    - name: build debian package
-      run: bash scripts/build-debian-package.sh
