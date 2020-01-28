@@ -1,0 +1,29 @@
+name: Just build on push.
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        sed -i -e 's/git\@github\.com\:/https\:\/\/github.com\//g' .gitmodules
+        git submodule sync --recursive
+        git submodule update --init --force --recursive
+    - name: Install gcc-8 g++-8
+      shell: bash
+      run: |
+        sudo apt install -y gcc-8 g++-8
+    - name: configure
+      run: CXX=g++-8 CC=gcc-8 cmake -S . -B build
+    - name: make
+      run: env --chdir build make
+    - name: clear build dir.
+      run: rm -Rrv build
+    - name: build debian package
+      run: bash scripts/build-debian-package.sh
