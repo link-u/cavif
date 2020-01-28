@@ -20,9 +20,19 @@ jobs:
         git submodule foreach git submodule sync --recursive
         git submodule foreach git submodule init
         git submodule foreach git submodule update --init --force --recursive
-    - name: Install gcc-8 g++-8
+    - name: Install gcc-8 g++-8 yasm debhelper dh-make
       shell: bash
       run: |
-        sudo apt install -y gcc-8 g++-8 yasm debhelper dh-make
+        sudo apt install -y gcc-8 g++-8 yasm
     - name: build debian package
       run: bash scripts/build-debian-package.sh
+    - name: Get debian package name.
+      shell: bash
+      run: |
+        echo "::set-output name=filename::$(basename $(find . -type f -name \*.deb))"
+      id: get_deb_name
+    - name: Upload result
+      uses: actions/upload-artifact@v1
+      with:
+        name: cavif
+        path: ${{ steps.get_deb_name.outputs.filename }}
