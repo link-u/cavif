@@ -23,7 +23,7 @@ jobs:
     - name: Install gcc-8 g++-8
       shell: bash
       run: |
-        sudo apt install -y gcc-8 g++-8
+        sudo apt install -y gcc-8 g++-8 yasm
     - name: configure
       run: CXX=g++-8 CC=gcc-8 cmake -S . -B build
     - name: make
