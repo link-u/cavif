@@ -179,9 +179,15 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
           bpp = 12;
         }
       }
-      propertiesBox.propertyContainers.properties.emplace_back(PixelInformationProperty {
-          .bitsPerChannel = {{bpp, bpp, bpp}},
-      });
+      if(frame.sequenceHeader().colorConfig.monochrome) {
+        propertiesBox.propertyContainers.properties.emplace_back(PixelInformationProperty {
+            .bitsPerChannel = {bpp},
+        });
+      } else {
+        propertiesBox.propertyContainers.properties.emplace_back(PixelInformationProperty {
+            .bitsPerChannel = {bpp, bpp, bpp},
+        });
+      }
       item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
           .essential = true,
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
