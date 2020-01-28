@@ -23,7 +23,7 @@ jobs:
     - name: Install gcc-8 g++-8 yasm debhelper dh-make
       shell: bash
       run: |
-        sudo apt install -y gcc-8 g++-8 yasm
+        sudo apt install -y gcc-8 g++-8 yasm debhelper dh-make
     - name: build debian package
       run: bash scripts/build-debian-package.sh
     - name: Get debian package name.
