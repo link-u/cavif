@@ -17,6 +17,49 @@
 
 `-o output.avif`
 
+### エンコード結果の表示
+
+`--show-result`
+
+デコードした結果を表示する。ただし、現状デコーダ側へ渡される設定（OBUシーケンスヘッダ）の内容しか表示できない。
+
+例：
+
+```
+% cavif -i hato.png -o hato.avif --show-result
+[2020/01/29 02:33:26 INFO ] cavif
+[2020/01/29 02:33:26 INFO ] libaom ver: 1.0.0-errata1-avif
+[2020/01/29 02:33:27 INFO ] Encoding: hato.png -> hato.avif
+[2020/01/29 02:35:15 INFO ] Encoding done: hato.png -> hato.avif
+[2020/01/29 02:35:15 INFO ] <Encoding Result>
+[2020/01/29 02:35:15 INFO ]  - OBU Sequence Header:
+[2020/01/29 02:35:15 INFO ]    - AV1 Profile: 0
+[2020/01/29 02:35:15 INFO ]    - Still picture: Yes
+[2020/01/29 02:35:15 INFO ]    - Reduced still picture header: Yes
+[2020/01/29 02:35:15 INFO ]    - Sequence Level Index at OperatingPoint[0]: 12
+[2020/01/29 02:35:15 INFO ]    - Max frame width: 3082
+[2020/01/29 02:35:15 INFO ]    - Max frame height: 2048
+[2020/01/29 02:35:15 INFO ]    - Use 128x128 superblock: Yes
+[2020/01/29 02:35:15 INFO ]    - FilterIntra enabled: Yes
+[2020/01/29 02:35:15 INFO ]    - IntraEdgeFilter enabled: Yes
+[2020/01/29 02:35:15 INFO ]    - Superres enabled: No
+[2020/01/29 02:35:15 INFO ]    - CDEF enabled: No
+[2020/01/29 02:35:15 INFO ]    - Loop Restoration enabled: No
+[2020/01/29 02:35:15 INFO ]    - Film Grain Params Present: No
+[2020/01/29 02:35:15 INFO ]    - Color Info:
+[2020/01/29 02:35:15 INFO ]      - High bit-depth: No
+[2020/01/29 02:35:15 INFO ]      - Twelve bit: No
+[2020/01/29 02:35:15 INFO ]      - Monochrome: No
+[2020/01/29 02:35:15 INFO ]      - Color primaries: <Unknownn>
+[2020/01/29 02:35:15 INFO ]      - Transfer characteristics: <Unknownn>
+[2020/01/29 02:35:15 INFO ]      - Matrix coefficients: <Unknownn>
+[2020/01/29 02:35:15 INFO ]      - Color range: Limited
+[2020/01/29 02:35:15 INFO ]      - Sub sampling X: 1
+[2020/01/29 02:35:15 INFO ]      - Sub sampling Y: 1
+[2020/01/29 02:35:15 INFO ]      - Chroma sample position: 0
+[2020/01/29 02:35:15 INFO ]      - Separate UV Delta Q: No
+```
+
 ## メタデータ
 
 ### 切り抜き・回転・反転

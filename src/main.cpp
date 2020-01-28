@@ -204,6 +204,7 @@ int _main(int argc, char** argv) {
       log.error(writeResult.value());
       return -1;
     }
+    log.info("Encoding done: %s -> %s", config.input, config.output);
     if (config.showResult) {
       printSequenceHeader(log, seq.value());
     }
@@ -212,6 +213,7 @@ int _main(int argc, char** argv) {
 }
 
 void printSequenceHeader(avif::util::Logger& log, avif::av1::SequenceHeader& seq) {
+  log.info("<Encoding Result>");
   log.info(" - OBU Sequence Header:");
   log.info("   - AV1 Profile: %d", seq.seqProfile);
   log.info("   - Still picture: %s", seq.stillPicture ? "Yes" : "No");
