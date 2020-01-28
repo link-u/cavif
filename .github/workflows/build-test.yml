@@ -14,7 +14,11 @@ jobs:
       run: |
         sed -i -e 's/git\@github\.com\:/https\:\/\/github.com\//g' .gitmodules
         git submodule sync --recursive
-        git submodule update --init --force --recursive
+        git submodule update
+        git submodule foreach sed -i -e 's/git\@github\.com\:/https\:\/\/github.com\//g' .gitmodules
+        git submodule foreach git git submodule sync --recursive
+        git submodule foreach git submodule update --init --force --recursive
+        git submodule foreach git submodule update
     - name: Install gcc-8 g++-8
       shell: bash
       run: |
