@@ -12,7 +12,6 @@
 std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   FILE* file = fopen(filename_.c_str(), "rb");
   if(!file) {
-    fclose(file);
     throw std::filesystem::filesystem_error("failed to open", this->filename_, std::make_error_code(static_cast<std::errc>(errno)));
   }
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
