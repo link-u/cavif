@@ -58,13 +58,13 @@ int Config::parse(int argc, char **argv) {
   using namespace clipp;
   auto& aom = this->codec;
   // input/output
-  auto io = (
+  group io = (
       required("-i", "--input").doc("Filename to input") & value("input.png", input),
       required("-o", "--output").doc("Filename to output") & value("output.avif", output)
   );
 
   // meta
-  auto meta = (
+  group meta = (
       option("--rotation").doc("Set rotation meta data(irot). Counter-clockwise.") & (parameter("0").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot0)) | parameter("90").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot90)) | parameter("180").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot180)) | parameter("270").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot270))),
       option("--mirror").doc("Set mirror meta data(imir).") & (parameter("vertical").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Vertical)) | parameter("horizontal").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Horizontal))),
       option("--crop-size").doc("Set crop size.") & value("widthN/widthD,heightN/heightD").call([&](std::string const& str){ cropSize = parseFractionPair(str); }),
@@ -77,7 +77,7 @@ int Config::parse(int argc, char **argv) {
   );
 
   // profile and pixel formats
-  auto pixelAndColor = (
+  group pixelAndColor = (
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base, 1=high, 2=professional", aom.g_profile),
       option("--pix-fmt").doc("Pixel format of output image.") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420) | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444)),
       option("--bit-depth").doc("Bit depth of output image.") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8) | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_12)),
@@ -86,7 +86,7 @@ int Config::parse(int argc, char **argv) {
   );
 
   // trade offs between speed and quality.
-  auto multiThreading = (
+  group multiThreading = (
       option("--encoder-usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
       option("--threads") & integer("Num of threads to use", aom.g_threads),
       option("--row-mt").doc("Enable row based multi-threading of encoder").set(rowMT, true),
@@ -94,7 +94,7 @@ int Config::parse(int argc, char **argv) {
   );
 
   // rate-control
-  auto rateControl= (
+  group rateControl= (
       option("--rate-control").doc("Rate control method") & (parameter("q").doc("Constant Quality").set(aom.rc_end_usage, AOM_Q) | parameter("cq").doc("Constrained Quality").set(aom.rc_end_usage, AOM_CQ)),
       option("--bit-rate").doc("Bit rate of output image.") & integer("kilo-bits per second", aom.rc_target_bitrate),
       option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63", crf),
@@ -119,13 +119,13 @@ int Config::parse(int argc, char **argv) {
   );
 
   // pre-process
-  auto preProcess = (
+  group preProcess = (
       option("--monochrome").doc("Encode to monochrome image.").set(codec.monochrome, 1u),
       option("--sharpness").doc("Sharpening output") & integer("0-7", sharpness)
   );
 
   // post-process
-  auto postProsess = (
+  group postProsess = (
       option("--disable-cdef").doc("Disable Constrained Directional Enhancement Filter").set(enableCDEF, false),
       option("--enable-cdef").doc("Enable Constrained Directional Enhancement Filter").set(enableCDEF, true),
       option("--disable-loop-restoration").doc("Disable Loop Restoration Filter").set(enableRestoration, false),
@@ -133,7 +133,7 @@ int Config::parse(int argc, char **argv) {
   );
 
   // coding parameter
-  auto codingParameters = (
+  group codingParameters = (
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64)),
       option("--tile-rows").doc("Number of tile rows") & integer("0-6", tileRows),
       option("--tile-colums").doc("Number of tile colums") & integer("0-6", tileColums),
@@ -173,7 +173,7 @@ int Config::parse(int argc, char **argv) {
       option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false)
   );
 
-  auto cli = (io, meta, av1, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters);
+  group cli = (io, meta, av1, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters);
 
   if(!clipp::parse(argc, argv, cli)) {
     std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
