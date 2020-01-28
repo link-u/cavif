@@ -17,7 +17,7 @@ jobs:
         git submodule sync --recursive
         git submodule update
         git submodule foreach bash -c "sed -i -e 's/git\@github\.com\:/https\:\/\/github.com\//g' .gitmodules || true"
-        git submodule foreach git git submodule sync --recursive
+        git submodule foreach git submodule sync --recursive
         git submodule foreach git submodule init
         git submodule foreach git submodule update --init --force --recursive
     - name: Install gcc-8 g++-8
