@@ -20,6 +20,7 @@ class Config final {
 public:
   std::string input{};
   std::string output{};
+  bool showResult = false;
 public:
   // meta
   std::optional<avif::ImageRotationBox::Rotation> rotation{};
@@ -33,7 +34,7 @@ public:
   int deltaQMode = 0;
   bool enableChromaDeltaQ = false;
   bool enableDeltaLoopfilter = false;
-  bool useQM;
+  bool useQM = false;
   int qmMin = DEFAULT_QM_FIRST;
   int qmMax = DEFAULT_QM_LAST;
   int qmMinY = DEFAULT_QM_Y;

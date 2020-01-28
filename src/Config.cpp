@@ -60,7 +60,8 @@ int Config::parse(int argc, char **argv) {
   // input/output
   group io = (
       required("-i", "--input").doc("Filename to input") & value("input.png", input),
-      required("-o", "--output").doc("Filename to output") & value("output.avif", output)
+      required("-o", "--output").doc("Filename to output") & value("output.avif", output),
+      option("--show-result").doc("Show encoding result").set(showResult, true)
   );
 
   // meta
