@@ -20,7 +20,7 @@ jobs:
         git submodule foreach git submodule sync --recursive
         git submodule foreach git submodule init
         git submodule foreach git submodule update --init --force --recursive
-    - name: Install gcc-8 g++-8
+    - name: Install gcc-8 g++-8 yasml
       shell: bash
       run: |
         sudo apt install -y gcc-8 g++-8 yasm
