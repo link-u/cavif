@@ -12,6 +12,7 @@
    - 1/2/4/8bit Gray
    - 8/16bit RGB
    - alpha channel対応（ただし現状無視される）
+
 ### 出力
 
 `-o output.avif`
@@ -257,7 +258,7 @@ Delta Qが有効になっているとDelta LoopFilterというのも有効にで
 
 ### CDEF
 
-`--disable-cdef`
+`--disable-cdef`  
 `--enable-cdef`
 
 主観画質を上げるためのポストプロセス・フィルタである[CDEF](https://arxiv.org/abs/1602.05975)を有効にするかどうか決める。デコード時に適用され、無視できないぐらい重い。
