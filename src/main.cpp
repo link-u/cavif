@@ -107,6 +107,7 @@ int _main(int argc, char** argv) {
     aom_img_alloc(&img, pixFmt, src.width(), src.height(), 1);
     convert(src, img, config.codec.g_bit_depth);
   }
+  log.info(" - Loaded: %s", config.input);
 
   uint32_t const width = aom_img_plane_width(&img, AOM_PLANE_Y);
   uint32_t const height = aom_img_plane_height(&img, AOM_PLANE_Y);
@@ -204,5 +205,6 @@ int _main(int argc, char** argv) {
       return -1;
     }
   }
+  log.info(" - Encoded: %s", config.output);
   return 0;
 }
