@@ -62,6 +62,7 @@ int Config::parse(int argc, char **argv) {
       required("-i", "--input").doc("Filename to input") & value("input.png", input),
       required("-o", "--output").doc("Filename to output") & value("output.avif", output)
   );
+
   // meta
   auto meta = (
       option("--rotation").doc("Set rotation meta data(irot). Counter-clockwise.") & (parameter("0").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot0)) | parameter("90").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot90)) | parameter("180").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot180)) | parameter("270").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot270))),
@@ -84,16 +85,16 @@ int Config::parse(int argc, char **argv) {
       option("--enable-full-color-range").doc("Use full YUV color range.").set(fullColorRange, true)
   );
 
+  // trade offs between speed and quality.
   auto multiThreading = (
-      // trade offs between speed and quality.
       option("--encoder-usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
       option("--threads") & integer("Num of threads to use", aom.g_threads),
       option("--row-mt").doc("Enable row based multi-threading of encoder").set(rowMT, true),
       option("--cpu-used").doc("Quality/Speed ratio modifier") & integer("0-8", cpuUsed)
   );
 
+  // rate-control
   auto rateControl= (
-      // rate-control
       option("--rate-control").doc("Rate control method") & (parameter("q").doc("Constant Quality").set(aom.rc_end_usage, AOM_Q) | parameter("cq").doc("Constrained Quality").set(aom.rc_end_usage, AOM_CQ)),
       option("--bit-rate").doc("Bit rate of output image.") & integer("kilo-bits per second", aom.rc_target_bitrate),
       option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63", crf),
@@ -102,7 +103,7 @@ int Config::parse(int argc, char **argv) {
       option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none").set(adaptiveQuantization, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantization, int(CYCLIC_REFRESH_AQ))),
       option("--enable-adaptive-quantization-b").doc("use adaptive quantize_b").set(enableAdaptiveQuantizationB, true),
       option("--disable-adaptive-quantization-b").doc("use traditional adaptive quantization").set(enableAdaptiveQuantizationB, false),
-      option("--delta-q").doc("a mode of delta q mode feature, that allows modulating q per superblock") & (parameter("off").doc("disable deltaQ").set(deltaQMode, int(NO_DELTA_Q)) | parameter("objective").doc("Use modulation to maximize objective quality").set(deltaQMode, int(DELTA_Q_OBJECTIVE)) | parameter("perceptual").doc("Use modulation to maximize perceptual quality").set(deltaQMode, int(DELTA_Q_PERCEPTUAL))),
+      option("--delta-q").doc("a mode of delta q mode feature, that allows modulating q per superblock") & (parameter("none").doc("disable deltaQ").set(deltaQMode, int(NO_DELTA_Q)) | parameter("objective").doc("Use modulation to maximize objective quality").set(deltaQMode, int(DELTA_Q_OBJECTIVE)) | parameter("perceptual").doc("Use modulation to maximize perceptual quality").set(deltaQMode, int(DELTA_Q_PERCEPTUAL))),
       option("--enable-chroma-delta-q").doc("enable delta quantization in chroma").set(enableChromaDeltaQ, true),
       option("--disable-chroma-delta-q").doc("disable delta quantization in chroma").set(enableChromaDeltaQ, false),
       option("--enable-delta-lf").doc("enable delta loop filter").set(enableDeltaLoopfilter, true),
@@ -117,14 +118,14 @@ int Config::parse(int argc, char **argv) {
       option("--lossless").doc("Enable lossless encoding").set(lossless, true)
   );
 
+  // pre-process
   auto preProcess = (
-      // pre-process
       option("--monochrome").doc("Encode to monochrome image.").set(codec.monochrome, 1u),
       option("--sharpness").doc("Sharpening output") & integer("0-7", sharpness)
   );
 
+  // post-process
   auto postProsess = (
-      // post-process
       option("--disable-cdef").doc("Disable Constrained Directional Enhancement Filter").set(enableCDEF, false),
       option("--enable-cdef").doc("Enable Constrained Directional Enhancement Filter").set(enableCDEF, true),
       option("--disable-loop-restoration").doc("Disable Loop Restoration Filter").set(enableRestoration, false),
