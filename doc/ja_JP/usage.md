@@ -505,8 +505,11 @@ Luma信号からChroma信号を予測する。
 
 現状では実際に有効にするには、さらに次の条件が守られていることが必要：
 
+
  - Superblockサイズが64でないと動かない（[av1_allow_palette](https://aomedia.googlesource.com/aom/+/refs/tags/v1.0.0-errata1-avif/av1/common/blockd.h#1113)）
- - 元画像の色数をカウントしてて、１ラインで使われている色の数が４色（実験的に仮で決めてる値っぽい）以下のラインが十分にないと動かない([set_screen_content_options](https://aomedia.googlesource.com/aom/+/refs/tags/v1.0.0-errata1-avif/av1/encoder/encoder.c#3857))
+ - 元画像の色数をカウントしてて、１ライン中で使われている色の数が４色以下のラインが十分にないと動かない([set_screen_content_options](https://aomedia.googlesource.com/aom/+/refs/tags/v1.0.0-errata1-avif/av1/encoder/encoder.c#3857))
+  - 「１ラインで４色」は実験的に仮で決めてる値っぽい
+  - GIMPで8色にしたらだいたい守られている条件
 
 #### [Intra Block Copy](https://www.semanticscholar.org/paper/Intra-Block-Copy-in-HEVC-Screen-Content-Coding-Xu-Liu/5b8ef0e83b1e839a3ef62ab9821334247878444d/figure/0)
 
