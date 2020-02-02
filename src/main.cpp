@@ -78,6 +78,7 @@ int _main(int argc, char** argv) {
   Config config;
   aom_codec_flags_t flags = 0;
   aom_codec_enc_config_default(av1codec, &config.codec, 0);
+  config.codec.g_threads = std::thread::hardware_concurrency();
   {
     int const parsrResult = config.parse(argc, argv);
     if(parsrResult != 0) {

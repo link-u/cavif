@@ -3,6 +3,7 @@
 //
 
 #include <iostream>
+#include <thread>
 
 #include "Config.hpp"
 
@@ -271,7 +272,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
     aom_codec_control(aom, AV1E_SET_QM_V, qmMinV);
   }
   // AV1E_SET_ENABLE_DIST_8X8 is for testing purposes
-  // AV1E_SET_NUM_TG is for video.
+  aom_codec_control(aom, AV1E_SET_NUM_TG, (1u << static_cast<uint>(tileRows)) + (1u << static_cast<uint>(tileColumns)));
   // AV1E_SET_MTU is for video.
   // AV1E_SET_ANS_WINDOW_SIZE_LOG2 is not used.
   aom_codec_control(aom, AV1E_SET_ENABLE_RECT_PARTITIONS, enableRectPartition ? 1 : 0);
