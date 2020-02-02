@@ -137,7 +137,7 @@ int Config::parse(int argc, char **argv) {
   group codingParameters = (
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64)),
       option("--tile-rows").doc("Number of tile rows") & integer("0-6", tileRows),
-      option("--tile-colums").doc("Number of tile colums") & integer("0-6", tileColums),
+      option("--tile-columns").doc("Number of tile columns") & integer("0-6", tileColumns),
       option("--disable-keyframe-temporal-filtering").doc("Disable temporal filtering on key frame").set(enableKeyframeTemporalFiltering, false),
       option("--enable-keyframe-temporal-filtering").doc("Enable temporal filtering on key frame").set(enableKeyframeTemporalFiltering, true),
       option("--enable-rect-partitions").doc("enable rectangular partitions").set(enableRectPartition, true),
@@ -220,7 +220,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   aom_codec_control(aom, AV1E_SET_LOSSLESS, lossless ? 1 : 0);
   aom_codec_control(aom, AV1E_SET_ROW_MT, rowMT ? 1 : 0);
   aom_codec_control(aom, AV1E_SET_TILE_ROWS, tileRows);
-  aom_codec_control(aom, AV1E_SET_TILE_COLUMNS, tileColums);
+  aom_codec_control(aom, AV1E_SET_TILE_COLUMNS, tileColumns);
   // AV1E_SET_ENABLE_TPL_MODEL is for video.
   aom_codec_control(aom, AV1E_SET_ENABLE_KEYFRAME_FILTERING, enableKeyframeTemporalFiltering ? 1 : 0);
   // AV1E_SET_FRAME_PARALLEL_DECODING is for video. we have just one frame.

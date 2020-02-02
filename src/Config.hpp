@@ -49,7 +49,7 @@ public:
   int cpuUsed = 1;
   int sharpness = 0;
   int tileRows = 0;
-  int tileColums = 0;
+  int tileColumns = 0;
   bool enableKeyframeTemporalFiltering = false;
   bool enableIntraEdgeFilter = true;
   bool enableTX64 = true;
