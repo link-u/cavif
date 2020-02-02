@@ -227,6 +227,6 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
 }
 
 AVIFBuilder& AVIFBuilder::setPrimaryFrame(AVIFBuilder::Frame&& frame) {
-  this->frame_= std::move(frame);
+  this->frame_ = std::move(frame);
   return *this;
 }
