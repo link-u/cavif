@@ -236,9 +236,10 @@ void Config::modify(aom_codec_ctx_t* aom) {
   //FIXME(ledyba-z): support color profile. PNG can contain gamma correction and color profile.
   // Gamma Correction and Precision Color (PNG: The Definitive Guide)
   // http://www.libpng.org/pub/png/book/chapter10.html
-  aom_codec_control(aom, AV1E_SET_COLOR_PRIMARIES, 2 );
-  aom_codec_control(aom, AV1E_SET_MATRIX_COEFFICIENTS, 2 );
-  aom_codec_control(aom, AV1E_SET_TRANSFER_CHARACTERISTICS, 2);
+  // Currently, we always use BT.2020.
+  aom_codec_control(aom, AV1E_SET_COLOR_PRIMARIES, 9 );
+  aom_codec_control(aom, AV1E_SET_MATRIX_COEFFICIENTS, 9 );
+  aom_codec_control(aom, AV1E_SET_TRANSFER_CHARACTERISTICS, 9);
 
   aom_codec_control(aom, AV1E_SET_CHROMA_SAMPLE_POSITION, 0); // see libavif-container
 
