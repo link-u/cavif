@@ -71,10 +71,10 @@ target_include_directories(cavif PRIVATE external/libaom)
 target_include_directories(cavif PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/external/libaom")
 target_include_directories(cavif PRIVATE external/libyuv/include)
 target_include_directories(cavif PRIVATE external/libavif-container/src)
-if (UNIX)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # FIXME(ledyba-z): workaround for gcc-8
     target_link_libraries(cavif PRIVATE stdc++fs)
-endif (UNIX)
+endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 ###############################################################################
 
