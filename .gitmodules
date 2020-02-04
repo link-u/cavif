@@ -13,9 +13,6 @@
 [submodule "external/libavif-container"]
 	path = external/libavif-container
 	url = git@github.com:link-u/libavif-container.git
-[submodule "sample-images"]
-	path = sample-images
-	url = git@github.com:link-u/avif-sample-images.git
 [submodule "external/zlib"]
 	path = external/zlib
 	url = git@github.com:madler/zlib.git
