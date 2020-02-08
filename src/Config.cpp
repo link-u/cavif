@@ -78,6 +78,18 @@ int Config::parse(int argc, char **argv) {
       option("--full-still-picture-header").doc("Force to output full picture header").set(aom.full_still_picture_hdr, 1u)
   );
 
+  auto scales = (
+      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL) | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO)),
+      option("--vertical-scale-mode").doc("Set vertical scale mode") & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO)),
+      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)) | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)) | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM))),
+      option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16]", codec.rc_resize_kf_denominator)),
+      option("--superres-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_NONE)) | parameter("fixed").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_FIXED)) | parameter("random").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_RANDOM)) | parameter("qthresh").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_QTHRESH)) | parameter("auto").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_AUTO))),
+      option("--superres-denominator").doc("Set resize denominator.") & (integer("[8-16]", codec.rc_superres_kf_denominator)),
+      option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63]", codec.rc_superres_kf_qthresh)),
+      option("--render-width").doc("Set render width.") & (integer("<render-width>", renderWidth)),
+      option("--render-height").doc("Set render height.") & (integer("<render-height>", renderHeight))
+   );
+
   // profile and pixel formats
   group pixelAndColor = (
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base, 1=high, 2=professional", aom.g_profile),
@@ -175,7 +187,7 @@ int Config::parse(int argc, char **argv) {
       option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false)
   );
 
-  group cli = (io, meta, av1, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters);
+  group cli = (io, meta, av1, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters);
 
   if(!clipp::parse(argc, argv, cli)) {
     std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
@@ -202,7 +214,9 @@ void Config::modify(aom_codec_ctx_t* aom) {
 
   // AOME_SET_ROI_MAP // FIXME: not implemented yet at libaom.
   // AOME_SET_ACTIVEMAP for internal use only
-  // AOME_SET_SCALEMODE // FIXME(ledyba-z): it can be set, but not used.
+  if(!(scaleMode.h_scaling_mode == AOME_NORMAL && scaleMode.v_scaling_mode == AOME_NORMAL)) {
+    aom_codec_control(aom, AOME_SET_SCALEMODE, &scaleMode);
+  }
   // AOME_SET_SPATIAL_LAYER_ID for adaptive video decoding (such as for Netflix or Youtube).
   aom_codec_control(aom, AOME_SET_CPUUSED, cpuUsed);
   aom_codec_control(aom, AOME_SET_SHARPNESS, sharpness);
@@ -246,6 +260,10 @@ void Config::modify(aom_codec_ctx_t* aom) {
   // AV1E_SET_MIN_GF_INTERVAL for video
   aom_codec_control(aom, AV1E_SET_COLOR_RANGE, fullColorRange ? 1 : 0);
   // AV1E_SET_RENDER_SIZE should be the same as the output size. It's default.
+  if(renderWidth > 0 && renderHeight > 0) {
+    int renderSize[2] = {renderWidth, renderHeight};
+    aom_codec_control(aom, AV1E_SET_RENDER_SIZE, renderSize);
+  }
   // AV1E_SET_TARGET_SEQ_LEVEL_IDX for video.
   aom_codec_control(aom, AV1E_SET_SUPERBLOCK_SIZE, superblockSize);
   // AOME_SET_ENABLEAUTOBWDREF is for video.

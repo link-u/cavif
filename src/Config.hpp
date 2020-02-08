@@ -29,6 +29,12 @@ public:
   std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropOffset{};
   // encoding
   aom_codec_enc_cfg codec{};
+  aom_scaling_mode_t scaleMode = {
+      .h_scaling_mode = AOME_NORMAL,
+      .v_scaling_mode = AOME_NORMAL,
+  };
+  int renderWidth = 0;
+  int renderHeight = 0;
   aom_img_fmt_t pixFmt = AOM_IMG_FMT_I420;
   int crf = 32;
   int deltaQMode = 0;
