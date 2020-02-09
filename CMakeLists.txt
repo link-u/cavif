@@ -47,6 +47,14 @@ set(ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(ENABLE_TOOLS OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
+# See: external/libaom/build/cmake/aom_config_defaults.cmake
+set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
+# FIXME(ledyba-z): CONFIG_DIST_8X8 conflicts with CONFIG_MULTITHREAD.
+# --- aom_configure: Detected CPU: x86_64
+# CMake Warning at external/libaom/build/cmake/util.cmake:57 (message):
+#  --- Disabled CONFIG_DIST_8X8, incompatible with CONFIG_MULTITHREAD.
+#
+set(CONFIG_DIST_8X8 1 CACHE INTERNAL "AV1 experiment flag." FORCE)
 ###############################################################################
 
 add_executable(cavif
