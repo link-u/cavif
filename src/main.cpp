@@ -101,10 +101,12 @@ int _main(int argc, char** argv) {
   if(std::holds_alternative<avif::img::Image<8>>(loadedImage)) {
     auto src = std::get<avif::img::Image<8>>(loadedImage);
     aom_img_alloc(&img, pixFmt, src.width(), src.height(), 1);
+    img.range = config.fullColorRange ? AOM_CR_FULL_RANGE : AOM_CR_STUDIO_RANGE;
     convert(src, img, config.codec.g_bit_depth);
   } else {
     auto src = std::get<avif::img::Image<16>>(loadedImage);
     aom_img_alloc(&img, pixFmt, src.width(), src.height(), 1);
+    img.range = config.fullColorRange ? AOM_CR_FULL_RANGE : AOM_CR_STUDIO_RANGE;
     convert(src, img, config.codec.g_bit_depth);
   }
 
