@@ -243,8 +243,15 @@ void Config::modify(aom_codec_ctx_t* aom) {
   // AV1E_SET_S_FRAME_MODE is for video.
   aom_codec_control(aom, AV1E_SET_AQ_MODE, adaptiveQuantization ? 1 : 0);
   // AV1E_SET_FRAME_PERIODIC_BOOST is for video.
-  // AV1E_SET_NOISE_SENSITIVITY // FIXME(ledyba-z): it can be set, but not used.
-  // AV1E_SET_TUNE_CONTENT // FIXME(ledyba-z): it can be set, but not used.
+
+  // FIXME(ledyba-z): it can be set, but not used.
+  // To check, `grep -R 'oxcf->noise_sensitivity' external/libaom/av1`
+  // aom_codec_control(aom, AV1E_SET_NOISE_SENSITIVITY, 0);
+
+  // FIXME(ledyba-z): it can be set, but not used.
+  // To check, `grep -R 'oxcf->content' external/libaom/av1`
+  // aom_codec_control(aom, AV1E_SET_TUNE_CONTENT, AOM_CONTENT_DEFAULT);
+
   // AV1E_SET_CDF_UPDATE_MODE is for video.
 
   //FIXME(ledyba-z): support color profile. PNG can contain gamma correction and color profile.
