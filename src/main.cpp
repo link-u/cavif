@@ -141,11 +141,16 @@ int _main(int argc, char** argv) {
 
   config.modify(&codec);
 
-  log.info("Encoding: %s -> %s", config.input, config.output);
 
   std::vector<std::vector<uint8_t>> packets;
-  encode(log, codec, &img, packets);
-  while(encode(log, codec, nullptr, packets) > 0); //flushing
+  {
+    log.info("Encoding: %s -> %s", config.input, config.output);
+    auto start = std::chrono::steady_clock::now();
+    encode(log, codec, &img, packets);
+    while(encode(log, codec, nullptr, packets) > 0); //flushing
+    auto finish = std::chrono::steady_clock::now();
+    log.info(" Encoded: %s -> %s in %.2f [sec]", config.input, config.output, std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() / 1000.0f);
+  }
   aom_img_free(&img);
 
   if (aom_codec_destroy(&codec) != AOM_CODEC_OK) {
@@ -207,7 +212,6 @@ int _main(int argc, char** argv) {
       log.error(writeResult.value());
       return -1;
     }
-    log.info("Encoding done: %s -> %s", config.input, config.output);
     if (config.showResult) {
       printSequenceHeader(log, seq.value());
     }
