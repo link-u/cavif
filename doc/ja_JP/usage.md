@@ -294,12 +294,20 @@ YUVからRGBへの変換方法を定めているRec.2020などを読んでも扱
 
 ### チューニング・メトリクス
 
- - `--tune [ssim|psnr|cdef-dist|daala-dist]`
+ - `--tune [ssim|psnr|cdef-dist|daala-dist|vmaf-with-preprocessing|vmaf-without-preprocessing|vmaf-max-gain]`
    - 初期値：`ssim` ([Structural Similarity](https://www.cns.nyu.edu/pub/lcv/wang03-preprint.pdf))
 
 エンコーダが画質を最適するためにパラメータをチューニングするときに、どの指標をつかって画質を評価するか指定する。
 
-[PSNRとSSIMは有名なので省略](https://dftalk.jp/?p=18111)。`cdef-dist`と`daala-dist`はv1.0.0の時点ではまだ実際には使えない様子（[#6](https://github.com/link-u/cavif/issues/6)）。
+[PSNRとSSIMは有名なので省略](https://dftalk.jp/?p=18111)。`cdef-dist`と`daala-dist`はこのコミットの時点ではまだ実際には使えない様子（[#6](https://github.com/link-u/cavif/issues/6)）。
+
+`vmaf-with-preprocessing`,`vmaf-without-preprocessing`, `vmaf-max-gain`は、Netflixの開発した客観指標、[VMAF](https://github.com/Netflix/vmaf)を使ってtuningする。それぞれの違いは調査してない。
+
+なお、VMAFを使った指標は、`vmaf-without-preprocessing`以外はassertion errorで落ちてしまう。さらに、一応動く`vmaf-with-preprocessing`も、DebugビルドだとSIGFPEを起こしてクラッシュしてしまうので（Releaseビルドだと不正確な計算でも動いてしまうようだ）、あまり信頼できないかもしれない。
+
+ - `--vmaf-model-path <path-to-model> (default: /usr/share/cavif/model/vmaf_v0.6.1.pkl)`
+
+VMAFはSVMを使って実装されている。その学習済みモデルのパスを指定する。Debian packageで入れた場合`/usr/share/cavif/model/`以下（ソース上では[external/vmaf/model](https://github.com/Netflix/vmaf/tree/master/model)以下）に他のモデルもあるが、現状互換性はなく、`vmaf_v0.6.1.pkl`か`vmaf_4k_v0.6.1.pkl`しか実際には使えない。
 
 ### レートコントロール・アルゴリズム
 
@@ -529,7 +537,7 @@ disableにすると、左右非対称な変換と恒等変換を無効にする�
 
 ### キーフレーム・フィルタリング
 
- - `--disable-keyfram-temporale-filtering`（初期値）
+ - `--disable-keyfram-temporal-filtering`（初期値）
  - `--enable-keyframe-temporal-filtering`
 
 フレーム同士の相関を見たりするフィルタをキーフレームにも掛けるかどうかを指定する。libaomではデフォルトでonになっているが、cavifでは静止画がターゲットなのでデフォルトでoffにしている。品質に問題があったらenableに戻してください。
