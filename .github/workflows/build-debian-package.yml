@@ -23,16 +23,22 @@ jobs:
         git submodule foreach git submodule sync --recursive
         git submodule foreach git submodule init
         git submodule foreach git submodule update --init --force --recursive
-    - name: Install gcc-8 g++-8 yasm debhelper dh-make
+    - name: Install dependencies
       shell: bash
       run: |
-        sudo apt install -y gcc-8 g++-8 yasm debhelper dh-make
+        sudo apt install -y gcc-8 g++-8 yasm debhelper dh-make python3-venv python3-pip python3-setuptools
+        python3 -m venv venv
+        source venv/bin/activate
+        pip3 install wheel
+        pip3 install meson
+        pip3 install ninja
     - name: build debian package
       shell: bash
       env:
         REF: ${{ github.ref }}
         COMMIT: ${{ github.sha }}
       run: |
+        source venv/bin/activate
         if [ "${REF:0:11}" = "refs/tags/v" ]; then
           sed -i -r "s/^(\w+) \(([0-9\.]+)(-[A-Z]+)?\)/\1 (${REF:11})/" debian/changelog
         else
