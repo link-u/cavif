@@ -37,5 +37,5 @@ jobs:
     - name: make
       shell: bash
       run: |
-      source venv/bin/activate
-      env --chdir build make
+        source venv/bin/activate
+        env --chdir build make
