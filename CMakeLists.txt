@@ -42,12 +42,22 @@ set(FMT_TEST OFF CACHE BOOL "" FORCE)
 set(FMT_FUZZ OFF CACHE BOOL "" FORCE)
 add_subdirectory(external/fmt EXCLUDE_FROM_ALL)
 ###############################################################################
-set(CONFIG_AV1_DECODER 0 CACHE STRING "Enable AV1 decoder." FORCE)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo/CMakeLists.txt.in"
+               "${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo/CMakeLists.txt" @ONLY)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -S "${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo" -B "${CMAKE_BINARY_DIR}/external/vmaf-repo" )
+execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external/vmaf-repo")
+execute_process(COMMAND ${CMAKE_COMMAND} --install . WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external/vmaf-repo")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo" EXCLUDE_FROM_ALL)
+# FIXME(ledyba-z): It's need to link libvmaf.so to libaom with find_library
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_BINARY_DIR}/lib")
+include_directories("${CMAKE_BINARY_DIR}/include")
+link_libraries("${CMAKE_BINARY_DIR}/lib")
+###############################################################################
 set(ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(ENABLE_TOOLS OFF CACHE BOOL "" FORCE)
-add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
 # See: external/libaom/build/cmake/aom_config_defaults.cmake
+set(CONFIG_TUNE_VMAF 1 CACHE INTERNAL "Enable encoding tuning for VMAF." FORCE)
 set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
 # FIXME(ledyba-z): CONFIG_DIST_8X8 conflicts with CONFIG_MULTITHREAD.
 # --- aom_configure: Detected CPU: x86_64
@@ -55,6 +65,9 @@ set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
 #  --- Disabled CONFIG_DIST_8X8, incompatible with CONFIG_MULTITHREAD.
 #
 set(CONFIG_DIST_8X8 1 CACHE INTERNAL "AV1 experiment flag." FORCE)
+set(CONFIG_AV1_DECODER 0 CACHE STRING "Enable AV1 decoder." FORCE)
+add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
+add_dependencies(aom vmaf_repo)
 ###############################################################################
 
 add_executable(cavif
@@ -70,6 +83,7 @@ add_executable(cavif
         src/AVIFBuilder.cpp
         src/AVIFBuilder.hpp
 )
+
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)
 target_link_libraries(cavif PRIVATE fmt::fmt)

@@ -17,3 +17,6 @@
 	path = external/zlib
 	url = git@github.com:madler/zlib.git
 	ignore = dirty
+[submodule "external/vmaf"]
+	path = external/vmaf
+	url = git@github.com:Netflix/vmaf.git
