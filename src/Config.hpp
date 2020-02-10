@@ -79,6 +79,7 @@ public:
   bool fullColorRange = false;
   aom_superblock_size_t superblockSize = AOM_SUPERBLOCK_SIZE_DYNAMIC;
   aom_tune_metric tune = AOM_TUNE_SSIM;
+  std::string vmafModelPath = "";
 public:
   Config() = default;
   Config(Config&&) noexcept = default;

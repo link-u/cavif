@@ -128,7 +128,8 @@ int Config::parse(int argc, char **argv) {
       option("--qm-min-y").doc("Min quant matrix flatness for Y") & integer("0-15 (default: 10)", qmMinY),
       option("--qm-min-u").doc("Min quant matrix flatness for U") & integer("0-15 (default: 11)", qmMinU),
       option("--qm-min-v").doc("Min quant matrix flatness for V") & integer("0-15 (default: 12)", qmMinV),
-      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR)  | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST)),
+      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR)  | parameter("cdef-dist").doc("cdef-dist").set(tune, AOM_TUNE_CDEF_DIST) | parameter("daala-dist").doc("daala-dist").set(tune, AOM_TUNE_DAALA_DIST) | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-with-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN)),
+      option("--vmaf-model-path").doc("VMAF model file path to tuning image quality.") & value("<path-to-vmaf-model-file>", vmafModelPath),
       option("--lossless").doc("Enable lossless encoding").set(lossless, true)
   );
 
@@ -209,152 +210,169 @@ int Config::parse(int argc, char **argv) {
   return 0;
 }
 
+
 void Config::modify(aom_codec_ctx_t* aom) {
+  #define set(param, expr) \
+    if(aom_codec_control(aom, param, (expr)) != AOM_CODEC_OK) { \
+      throw std::invalid_argument(std::string("Failed to set [" #param "] : ") + aom_codec_error_detail(aom)); \
+    }
+
   //aom_codec_control(codec, AV1E_SET_DENOISE_NOISE_LEVEL, 1);
 
-  // AOME_SET_ROI_MAP // FIXME: not implemented yet at libaom.
-  // AOME_SET_ACTIVEMAP for internal use only
+  //FIXME: not implemented yet at libaom.
+  // It can be useful for manga images.
+  //aom_codec_control(codec, AOME_SET_ROI_MAP, ...);
+
+  (void)AOME_SET_ACTIVEMAP; // for internal use only
   if(!(scaleMode.h_scaling_mode == AOME_NORMAL && scaleMode.v_scaling_mode == AOME_NORMAL)) {
-    aom_codec_control(aom, AOME_SET_SCALEMODE, &scaleMode);
+    set(AOME_SET_SCALEMODE, &scaleMode);
   }
-  // AOME_SET_SPATIAL_LAYER_ID for adaptive video decoding (such as for Netflix or Youtube).
-  aom_codec_control(aom, AOME_SET_CPUUSED, cpuUsed);
-  aom_codec_control(aom, AOME_SET_SHARPNESS, sharpness);
-  // AOME_SET_ENABLEAUTOALTREF is used only in 2nd pass(thus, is's for video).
-  // AOME_SET_ENABLEAUTOBWDREF is for video (bwd-pred frames).
-  // AOME_SET_STATIC_THRESHOLD is for video.
-  // AOME_SET_ARNR_MAXFRAMES is for video.
-  // AOME_SET_ARNR_STRENGTH is for video.
-  aom_codec_control(aom, AOME_SET_TUNING, tune);
-  aom_codec_control(aom, AOME_SET_CQ_LEVEL, crf);
+  (void)AOME_SET_SPATIAL_LAYER_ID; // for adaptive video decoding (such as for Netflix or Youtube).
+  set(AOME_SET_CPUUSED, cpuUsed);
+  set(AOME_SET_SHARPNESS, sharpness);
+  (void)AOME_SET_ENABLEAUTOALTREF; // is used only in 2nd pass(thus, is's for video).
+  (void)AOME_SET_ENABLEAUTOBWDREF; // is for video (bwd-pred frames).
+  (void)AOME_SET_STATIC_THRESHOLD; // is for video.
+  (void)AOME_SET_ARNR_MAXFRAMES; // is for video.
+  (void)AOME_SET_ARNR_STRENGTH; // is for video.
+  set(AOME_SET_TUNING, tune);
+  set(AOME_SET_CQ_LEVEL, crf);
   // It always can be 0(unlimited) for AVIF.
-  aom_codec_control(aom, AOME_SET_MAX_INTRA_BITRATE_PCT, 0);
-  // AOME_SET_NUMBER_SPATIAL_LAYERS for video
-  // AV1E_SET_MAX_INTER_BITRATE_PCT for video
-  // AV1E_SET_GF_CBR_BOOST_PCT for video.(I don't know what Golden Frame is)
-  aom_codec_control(aom, AV1E_SET_LOSSLESS, lossless ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ROW_MT, rowMT ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_TILE_ROWS, tileRows);
-  aom_codec_control(aom, AV1E_SET_TILE_COLUMNS, tileColumns);
-  // AV1E_SET_ENABLE_TPL_MODEL is for video.
-  aom_codec_control(aom, AV1E_SET_ENABLE_KEYFRAME_FILTERING, enableKeyframeTemporalFiltering ? 1 : 0);
-  // AV1E_SET_FRAME_PARALLEL_DECODING is for video. we have just one frame.
-  // AV1E_SET_ERROR_RESILIENT_MODE is for video.
-  // AV1E_SET_S_FRAME_MODE is for video.
-  aom_codec_control(aom, AV1E_SET_AQ_MODE, adaptiveQuantization ? 1 : 0);
-  // AV1E_SET_FRAME_PERIODIC_BOOST is for video.
+  set(AOME_SET_MAX_INTRA_BITRATE_PCT, 0);
+  (void)AOME_SET_NUMBER_SPATIAL_LAYERS; // for video
+  (void)AV1E_SET_MAX_INTER_BITRATE_PCT; // for video
+  (void)AV1E_SET_GF_CBR_BOOST_PCT; // for video.(I don't know what Golden Frame is)
+  set(AV1E_SET_LOSSLESS, lossless ? 1 : 0);
+  set(AV1E_SET_ROW_MT, rowMT ? 1 : 0);
+  set(AV1E_SET_TILE_ROWS, tileRows);
+  set(AV1E_SET_TILE_COLUMNS, tileColumns);
+  (void)AV1E_SET_ENABLE_TPL_MODEL; // is for video.
+  set(AV1E_SET_ENABLE_KEYFRAME_FILTERING, enableKeyframeTemporalFiltering ? 1 : 0);
+  (void)AV1E_SET_FRAME_PARALLEL_DECODING; // is for video. we have just one frame.
+  (void)AV1E_SET_ERROR_RESILIENT_MODE; // is for video.
+  (void)AV1E_SET_S_FRAME_MODE; // is for video.
+  set(AV1E_SET_AQ_MODE, adaptiveQuantization ? 1 : 0);
+  (void)AV1E_SET_FRAME_PERIODIC_BOOST; // is for video.
 
-  // FIXME(ledyba-z): it can be set, but not used.
+  //FIXME(ledyba-z): it can be set, but not used.
   // To check, `grep -R 'oxcf->noise_sensitivity' external/libaom/av1`
-  // aom_codec_control(aom, AV1E_SET_NOISE_SENSITIVITY, 0);
+  // control(AV1E_SET_NOISE_SENSITIVITY, 0);
 
-  // FIXME(ledyba-z): it can be set, but not used.
+  //FIXME(ledyba-z): it can be set, but not used.
   // To check, `grep -R 'oxcf->content' external/libaom/av1`
-  // aom_codec_control(aom, AV1E_SET_TUNE_CONTENT, AOM_CONTENT_DEFAULT);
+  // control(AV1E_SET_TUNE_CONTENT, AOM_CONTENT_DEFAULT);
 
-  // AV1E_SET_CDF_UPDATE_MODE is for video.
+  (void)AV1E_SET_CDF_UPDATE_MODE; // is for video.
 
   //FIXME(ledyba-z): support color profile. PNG can contain gamma correction and color profile.
   // Gamma Correction and Precision Color (PNG: The Definitive Guide)
   // http://www.libpng.org/pub/png/book/chapter10.html
   // Currently, we always use BT.2020.
-  aom_codec_control(aom, AV1E_SET_COLOR_PRIMARIES, 9 );
-  aom_codec_control(aom, AV1E_SET_MATRIX_COEFFICIENTS, 9 );
-  aom_codec_control(aom, AV1E_SET_TRANSFER_CHARACTERISTICS, 9);
+  set(AV1E_SET_COLOR_PRIMARIES, 9 );
+  set(AV1E_SET_MATRIX_COEFFICIENTS, 9 );
+  set(AV1E_SET_TRANSFER_CHARACTERISTICS, 9);
 
-  aom_codec_control(aom, AV1E_SET_CHROMA_SAMPLE_POSITION, 0); // see libavif-container
+  set(AV1E_SET_CHROMA_SAMPLE_POSITION, 0); // see libavif-container
 
-  // AV1E_SET_MIN_GF_INTERVAL for video
-  aom_codec_control(aom, AV1E_SET_COLOR_RANGE, fullColorRange ? 1 : 0);
-  // AV1E_SET_RENDER_SIZE should be the same as the output size. It's default.
+  (void)AV1E_SET_MIN_GF_INTERVAL; // for video
+  set(AV1E_SET_COLOR_RANGE, fullColorRange ? 1 : 0);
+  (void)AV1E_SET_RENDER_SIZE; // should be the same as the output size. It's default.
   if(renderWidth > 0 && renderHeight > 0) {
     int renderSize[2] = {renderWidth, renderHeight};
-    aom_codec_control(aom, AV1E_SET_RENDER_SIZE, renderSize);
+    set(AV1E_SET_RENDER_SIZE, renderSize);
   }
-  // AV1E_SET_TARGET_SEQ_LEVEL_IDX for video.
-  aom_codec_control(aom, AV1E_SET_SUPERBLOCK_SIZE, superblockSize);
-  // AOME_SET_ENABLEAUTOBWDREF is for video.
+  (void)AV1E_SET_TARGET_SEQ_LEVEL_IDX; // for video.
+  set(AV1E_SET_SUPERBLOCK_SIZE, superblockSize);
+  (void)AOME_SET_ENABLEAUTOBWDREF; // is for video.
 
-  aom_codec_control(aom, AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
-  // > By default, the encoder does not force video and allows still picture.
-  // This is not the case.
-  // https://aomedia.googlesource.com/aom/+/refs/tags/v1.0.0-errata1-avif/av1/av1_cx_iface.c#179
-  aom_codec_control(aom, AV1E_SET_FORCE_VIDEO_MODE, 0);
+  set(AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
+  set(AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
 
-  // AV1E_SET_ENABLE_OBMC is for video, motion prediction.
+  // we are working for images.
+  set(AV1E_SET_FORCE_VIDEO_MODE, 0);
+
+  (void)AV1E_SET_ENABLE_OBMC; // is for video, motion prediction.
   // OBMC is "Overlapped Block Motion Compensation"
   // https://jmvalin.ca/papers/AV1_tools.pdf
 
-  // AV1E_SET_DISABLE_TRELLIS_QUANT is for video(motion estimation).
+  (void)AV1E_SET_DISABLE_TRELLIS_QUANT; // is for video(motion estimation).
   // https://en.wikipedia.org/wiki/Trellis_quantization
 
   if(useQM) {
-    aom_codec_control(aom, AV1E_SET_ENABLE_QM, 1);
-    aom_codec_control(aom, AV1E_SET_QM_MIN, qmMin);
-    aom_codec_control(aom, AV1E_SET_QM_MAX, qmMax);
-    aom_codec_control(aom, AV1E_SET_QM_Y, qmMinY);
-    aom_codec_control(aom, AV1E_SET_QM_U, qmMinU);
-    aom_codec_control(aom, AV1E_SET_QM_V, qmMinV);
+    set(AV1E_SET_ENABLE_QM, 1);
+    set(AV1E_SET_QM_MIN, qmMin);
+    set(AV1E_SET_QM_MAX, qmMax);
+    set(AV1E_SET_QM_Y, qmMinY);
+    set(AV1E_SET_QM_U, qmMinU);
+    set(AV1E_SET_QM_V, qmMinV);
   }
-  // AV1E_SET_ENABLE_DIST_8X8 is for testing purposes
-  aom_codec_control(aom, AV1E_SET_NUM_TG, (1u << static_cast<uint>(tileRows)) + (1u << static_cast<uint>(tileColumns)));
-  // AV1E_SET_MTU is for video.
-  // AV1E_SET_ANS_WINDOW_SIZE_LOG2 is not used.
-  aom_codec_control(aom, AV1E_SET_ENABLE_RECT_PARTITIONS, enableRectPartition ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_AB_PARTITIONS, enableABPartition ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_1TO4_PARTITIONS, enable1to4Partition ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_MIN_PARTITION_SIZE, minPartitionSize);
-  aom_codec_control(aom, AV1E_SET_MAX_PARTITION_SIZE, maxPartitionSize);
-  aom_codec_control(aom, AV1E_SET_ENABLE_INTRA_EDGE_FILTER, enableIntraEdgeFilter ? 1 : 0);
-  // AV1E_SET_ENABLE_ORDER_HINT is for video
-  aom_codec_control(aom, AV1E_SET_ENABLE_TX64, enableTX64 ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_FLIP_IDTX, enableFlipIDTX ? 1 : 0);
-  // AV1E_SET_ENABLE_DIST_WTD_COMP is for video
-  // AV1E_SET_ENABLE_REF_FRAME_MVS is for video
-  // AV1E_SET_ALLOW_REF_FRAME_MVS is for video
-  aom_codec_control(aom, AV1E_SET_ENABLE_DUAL_FILTER, 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_CHROMA_DELTAQ, enableChromaDeltaQ ? 1 : 0);
-  // AV1E_SET_ENABLE_MASKED_COMP is for video
-  // AV1E_SET_ENABLE_ONESIDED_COMP is for video
-  // AV1E_SET_ENABLE_INTERINTRA_COMP is for video
-  // AV1E_SET_ENABLE_SMOOTH_INTERINTRA is for video
-  // AV1E_SET_ENABLE_DIFF_WTD_COMP is for video
-  // AV1E_SET_ENABLE_INTERINTER_WEDGE is for video
-  // AV1E_SET_ENABLE_GLOBAL_MOTION is for video
-  aom_codec_control(aom, AV1E_SET_ENABLE_GLOBAL_MOTION, 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_WARPED_MOTION, 0);
-  // AV1E_SET_ALLOW_WARPED_MOTION is for video
-  aom_codec_control(aom, AV1E_SET_ENABLE_FILTER_INTRA, enableFilterIntra ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_SMOOTH_INTRA, enableSmoothIntra ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_PAETH_INTRA, enablePaethIntra ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_CFL_INTRA, enableChromaFromLuma ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_SUPERRES, enableSuperres ? 1 : 0);
-  // AV1E_SET_ENABLE_OVERLAY is for video.
-  aom_codec_control(aom, AV1E_SET_ENABLE_PALETTE, enablePalette ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_ENABLE_INTRABC, enableIntraBC ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_DELTAQ_MODE, deltaQMode);
-  aom_codec_control(aom, AV1E_SET_DELTALF_MODE, enableDeltaLoopfilter ? 1 : 0);
-  // AV1E_SET_SINGLE_TILE_DECODING is for video.
-  // AV1E_ENABLE_MOTION_VECTOR_UNIT_TEST is for video.
-  // AV1E_SET_TIMING_INFO_TYPE is for video.
-  // AV1E_SET_FILM_GRAIN_TEST_VECTOR is for testing
-  // AV1E_SET_FILM_GRAIN_TABLE can be supported, but it is mainly for video.
-  // AV1E_SET_DENOISE_NOISE_LEVEL can be supported, but it is mainly for video.
-  // AV1E_SET_DENOISE_BLOCK_SIZE can be supported, but it is mainly for video.
-  aom_codec_control(aom, AV1E_SET_REDUCED_TX_TYPE_SET, useReducedTXSet ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_INTRA_DCT_ONLY, useDCTOnly ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_INTRA_DEFAULT_TX_ONLY, useDefaultTXOnly ? 1 : 0);
-  aom_codec_control(aom, AV1E_SET_QUANT_B_ADAPT, enableAdaptiveQuantizationB ? 1 : 0);
-  // AV1E_SET_GF_MAX_PYRAMID_HEIGHT is for video.
-  // AV1E_SET_MAX_REFERENCE_FRAMES is for video.
-  // AV1E_SET_REDUCED_REFERENCE_SET is for video.
-  // AV1E_SET_COEFF_COST_UPD_FREQ may be for video, because it mentions tile decoding.
-  // AV1E_SET_MODE_COST_UPD_FREQ may be for video, because it mentions tile decoding.
-  // AV1E_SET_MV_COST_UPD_FREQ may be for video, because it mentions tile decoding.
-  // AV1E_SET_TIER_MASK for video, because still picture always has 1 control point.
-  // AV1E_SET_MIN_CR is for video. My GDB says that.
-  // AV1E_SET_SVC_LAYER_ID is for video.
-  // AV1E_SET_SVC_PARAMS is for video.
-  // AV1E_SET_SVC_REF_FRAME_CONFIG is for video.
+  (void)AV1E_SET_ENABLE_DIST_8X8; // is for testing purposes
+
+  set(AV1E_SET_NUM_TG, (1u << static_cast<uint>(tileRows)) + (1u << static_cast<uint>(tileColumns)));
+
+  (void)AV1E_SET_MTU; // is not needed to set, because AV1E_SET_NUM_TG is already set.
+  (void)AV1E_SET_ANS_WINDOW_SIZE_LOG2; // is not used.
+  set(AV1E_SET_ENABLE_RECT_PARTITIONS, enableRectPartition ? 1 : 0);
+  set(AV1E_SET_ENABLE_AB_PARTITIONS, enableABPartition ? 1 : 0);
+  set(AV1E_SET_ENABLE_1TO4_PARTITIONS, enable1to4Partition ? 1 : 0);
+  set(AV1E_SET_MIN_PARTITION_SIZE, minPartitionSize);
+  set(AV1E_SET_MAX_PARTITION_SIZE, maxPartitionSize);
+  set(AV1E_SET_ENABLE_INTRA_EDGE_FILTER, enableIntraEdgeFilter ? 1 : 0);
+  (void)AV1E_SET_ENABLE_ORDER_HINT; // is for video
+  set(AV1E_SET_ENABLE_TX64, enableTX64 ? 1 : 0);
+  set(AV1E_SET_ENABLE_FLIP_IDTX, enableFlipIDTX ? 1 : 0);
+  (void)AV1E_SET_ENABLE_DIST_WTD_COMP; // is for video
+  (void)AV1E_SET_ENABLE_REF_FRAME_MVS; // is for video
+  (void)AV1E_SET_ALLOW_REF_FRAME_MVS; // is for video
+  set(AV1E_SET_ENABLE_DUAL_FILTER, 0);
+  set(AV1E_SET_ENABLE_CHROMA_DELTAQ, enableChromaDeltaQ ? 1 : 0);
+  (void)AV1E_SET_ENABLE_MASKED_COMP; // is for video
+  (void)AV1E_SET_ENABLE_ONESIDED_COMP; // is for video
+  (void)AV1E_SET_ENABLE_INTERINTRA_COMP; // is for video
+  (void)AV1E_SET_ENABLE_SMOOTH_INTERINTRA; // is for video
+  (void)AV1E_SET_ENABLE_DIFF_WTD_COMP; // is for video
+  (void)AV1E_SET_ENABLE_INTERINTER_WEDGE; // is for video
+  (void)AV1E_SET_ENABLE_GLOBAL_MOTION; // is for video
+  set(AV1E_SET_ENABLE_GLOBAL_MOTION, 0);
+  set(AV1E_SET_ENABLE_WARPED_MOTION, 0);
+  (void)AV1E_SET_ALLOW_WARPED_MOTION; // is for video
+  set(AV1E_SET_ENABLE_FILTER_INTRA, enableFilterIntra ? 1 : 0);
+  set(AV1E_SET_ENABLE_SMOOTH_INTRA, enableSmoothIntra ? 1 : 0);
+  set(AV1E_SET_ENABLE_PAETH_INTRA, enablePaethIntra ? 1 : 0);
+  set(AV1E_SET_ENABLE_CFL_INTRA, enableChromaFromLuma ? 1 : 0);
+  set(AV1E_SET_ENABLE_SUPERRES, enableSuperres ? 1 : 0);
+  (void)AV1E_SET_ENABLE_OVERLAY; // is for video.
+  set(AV1E_SET_ENABLE_PALETTE, enablePalette ? 1 : 0);
+  set(AV1E_SET_ENABLE_INTRABC, enableIntraBC ? 1 : 0);
+  set(AV1E_SET_DELTAQ_MODE, deltaQMode);
+  set(AV1E_SET_DELTALF_MODE, enableDeltaLoopfilter ? 1 : 0);
+  (void)AV1E_SET_SINGLE_TILE_DECODING; // is for video.
+  (void)AV1E_ENABLE_MOTION_VECTOR_UNIT_TEST; // is for video.
+  (void)AV1E_SET_TIMING_INFO_TYPE; // is for video.
+  (void)AV1E_SET_FILM_GRAIN_TEST_VECTOR; // is for testing
+  (void)AV1E_SET_FILM_GRAIN_TABLE; // can be supported, but it is mainly for video.
+  (void)AV1E_SET_DENOISE_NOISE_LEVEL; // can be supported, but it is mainly for video.
+  (void)AV1E_SET_DENOISE_BLOCK_SIZE; // can be supported, but it is mainly for video.
+  set(AV1E_SET_REDUCED_TX_TYPE_SET, useReducedTXSet ? 1 : 0);
+  set(AV1E_SET_INTRA_DCT_ONLY, useDCTOnly ? 1 : 0);
+  set(AV1E_SET_INTRA_DEFAULT_TX_ONLY, useDefaultTXOnly ? 1 : 0);
+  set(AV1E_SET_QUANT_B_ADAPT, enableAdaptiveQuantizationB ? 1 : 0);
+  (void)AV1E_SET_GF_MAX_PYRAMID_HEIGHT; // is for video.
+  (void)AV1E_SET_MAX_REFERENCE_FRAMES; // is for video.
+  (void)AV1E_SET_REDUCED_REFERENCE_SET; // is for video.
+  (void)AV1E_SET_COEFF_COST_UPD_FREQ; // may be for video, because it mentions tile decoding.
+  (void)AV1E_SET_MODE_COST_UPD_FREQ; // may be for video, because it mentions tile decoding.
+  (void)AV1E_SET_MV_COST_UPD_FREQ; // may be for video, because it mentions tile decoding.
+  (void)AV1E_SET_TIER_MASK; // for video, because still picture always has 1 control point.
+  (void)AV1E_SET_MIN_CR; // is for video. My GDB says that.
+  (void)AV1E_SET_SVC_LAYER_ID; // is for video.
+  (void)AV1E_SET_SVC_PARAMS; // is for video.
+  (void)AV1E_SET_SVC_REF_FRAME_CONFIG; // is for video.
+  if(!vmafModelPath.empty()) {
+    set(AV1E_SET_VMAF_MODEL_PATH, vmafModelPath.c_str());
+  }
+  (void)AV1E_ENABLE_EXT_TILE_DEBUG;// is for debugging.
+  (void)AV1E_ENABLE_SB_MULTIPASS_UNIT_TEST;// is for unit test.
+
+  #undef set
 }
