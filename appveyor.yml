@@ -17,7 +17,7 @@ build_script:
 
       C:\msys64\usr\bin\bash -lc "cd cavif && mkdir build && cd build && cmake .. -G 'MSYS Makefiles' -DCMAKE_CXX_FLAGS=-static && make -j4 && strip cavif.exe"
 
-      7z a cavif-win64.7z "C:\msys64\home\appveyor\cavif\build\*.exe"artifacts:
+      7z a cavif-win64.7z "C:\msys64\home\appveyor\cavif\build\*.exe"
 
 artifacts:
   - path: cavif-win64.7z
