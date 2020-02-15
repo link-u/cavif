@@ -14,10 +14,10 @@ private:
   std::string filename_;
 public:
   PNGReader() = delete;
-  PNGReader(PNGReader const&) = default;
-  PNGReader(PNGReader&&) = default;
-  PNGReader& operator=(PNGReader const&) = default;
-  PNGReader& operator=(PNGReader&&) = default;
+  PNGReader(PNGReader const&) = delete;
+  PNGReader(PNGReader&&) = delete;
+  PNGReader& operator=(PNGReader const&) = delete;
+  PNGReader& operator=(PNGReader&&) = delete;
   ~PNGReader() noexcept = default;
 
 public:

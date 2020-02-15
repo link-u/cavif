@@ -14,7 +14,7 @@
 #include <thread>
 
 #include "Config.hpp"
-#include "img/Convert.hpp"
+#include "img/Convertion.hpp"
 
 namespace {
 
