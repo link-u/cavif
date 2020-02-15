@@ -10,9 +10,9 @@ avif encoder, using [libaom](https://aomedia.googlesource.com/aom/) directly.
 
 The most significant mission of this project is "**Make it enable to tune libaom's all encoding options to optimize quality/size ratio as nice as possible human beings can**".
 
-AVIF(AV1 Image File Format)は、動画フォーマットであるAV1のキーフレームを流用して圧縮する静止画フォーマットです。
+[AVIF(AV1 Image File Format)]((https://aomediacodec.github.io/av1-avif/))は、動画フォーマットである[AV1](https://aomediacodec.github.io/av1-spec/av1-spec.pdf)のキーフレームを流用して圧縮する静止画フォーマットです。
 
-cavifは、ラッパーを介さずlibaomを直接叩くavifのエンコーディング・コマンドです。このプロジェクトの唯一にして最大の使命は、 **libaomの静止画に関する全エンコードオプションを操作できるようにして、現生人類が達成可能な最高の圧縮効率を実現する手段を提供すること** です。
+cavifは、ラッパーを介さず[libaom](https://aomedia.googlesource.com/aom/)を直接叩くavifのエンコーディング・コマンドです。このプロジェクトの唯一にして最大の使命は、 **libaomの静止画に関する全エンコードオプションを仔細に操作できるようにして、現生人類が現時点で達成可能な最高の圧縮効率を実現する手段を提供すること** です。
 
 ## basic usage
 
