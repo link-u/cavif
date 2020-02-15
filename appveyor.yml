@@ -17,5 +17,16 @@ build_script:
 
       C:\msys64\usr\bin\bash -lc "cd cavif && mkdir build && cd build && cmake .. -G 'MSYS Makefiles' -DCMAKE_CXX_FLAGS=-static && make -j4 && strip cavif.exe"
 
-      7z a cavif.7z "C:\msys64\home\appveyor\cavif\build\*.exe"artifacts:
-  - path: cavif.7z
+      7z a cavif-win64.7z "C:\msys64\home\appveyor\cavif\build\*.exe"artifacts:
+
+artifacts:
+  - path: cavif-win64.7z
+
+deploy:
+  - provider: GitHub
+    artifact: cavif-win64.7z           # upload all NuGet packages to release assets
+    draft: true
+    prerelease: true
+    on:
+      branch: master                # release from master branch only
+      APPVEYOR_REPO_TAG: true       # deploy on tag push only
