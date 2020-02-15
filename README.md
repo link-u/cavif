@@ -6,7 +6,13 @@
 
 avif encoder, using [libaom](https://aomedia.googlesource.com/aom/) directly.
 
+[avif (AV1 Image File Format)](https://aomediacodec.github.io/av1-avif/) is a still picture format uses a keyframe of [AV1](https://aomediacodec.github.io/av1-spec/av1-spec.pdf).
+
 The most significant mission of this project is "**Make it enable to tune libaom's all encoding options to optimize quality/size ratio as nice as possible human beings can**".
+
+AVIF(AV1 Image File Format)は、動画フォーマットであるAV1のキーフレームを流用して圧縮する静止画フォーマットです。
+
+cavifは、ラッパーを介さずlibaomを直接叩くavifのエンコーディング・コマンドです。このプロジェクトの唯一にして最大の使命は、 **libaomの静止画に関する全エンコードオプションを操作できるようにして、現生人類が達成可能な最高の圧縮効率を実現する手段を提供すること** です。
 
 ## basic usage
 
@@ -16,7 +22,9 @@ cavif -i <output.png> -o <input.avif>
 
 Example avif files are available in [AOMediaCodec/av1-avif](https://github.com/AOMediaCodec/av1-avif/tree/master/testFiles) or [link-u/avif-sample-images](https://github.com/link-u/avif-sample-images).
 
- - [日本語のドキュメント](./doc/ja_JP/README.md)
+[日本語の詳しいドキュメントはこちら](./doc/ja_JP/README.md)。
+
+(Japanese documentation is [here](./doc/ja_JP/README.md))
 
 ## how to build
 
