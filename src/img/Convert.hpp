@@ -36,36 +36,28 @@ void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
   }
 }
 
+template <uint8_t rgbBits, uint8_t yuvBits>
+void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
+  if (dst.range == AOM_CR_FULL_RANGE) {
+    convert<rgbBits, yuvBits, true>(src, dst);
+  } else {
+    convert<rgbBits, yuvBits, false>(src, dst);
+  }
+}
 
 template <size_t rgbBits>
 void convert(avif::img::Image<rgbBits>& src, aom_image& dst, int const yuvBits) {
-  if (dst.range == AOM_CR_STUDIO_RANGE) {
-    switch (yuvBits) {
-      case 8:
-        convert<rgbBits, 8, false>(src, dst);
-        break;
-      case 10:
-        convert<rgbBits, 10, false>(src, dst);
-        break;
-      case 12:
-        convert<rgbBits, 12, false>(src, dst);
-        break;
-      default:
-        throw std::invalid_argument(fmt::format("Unsupported YUV bit-depth: {}", dst.bit_depth));
-    }
-  } else {
-    switch (yuvBits) {
-      case 8:
-        convert<rgbBits, 8, true>(src, dst);
-        break;
-      case 10:
-        convert<rgbBits, 10, true>(src, dst);
-        break;
-      case 12:
-        convert<rgbBits, 12, true>(src, dst);
-        break;
-      default:
-        throw std::invalid_argument(fmt::format("Unsupported YUV bit-depth: {}", dst.bit_depth));
-    }
+  switch (yuvBits) {
+    case 8:
+      convert<rgbBits, 8>(src, dst);
+      break;
+    case 10:
+      convert<rgbBits, 10>(src, dst);
+      break;
+    case 12:
+      convert<rgbBits, 12>(src, dst);
+      break;
+    default:
+      throw std::invalid_argument(fmt::format("Unsupported YUV bit-depth: {}", dst.bit_depth));
   }
 }
