@@ -38,10 +38,15 @@ void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
 
 template <uint8_t rgbBits, uint8_t yuvBits>
 void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
-  if (dst.range == AOM_CR_FULL_RANGE) {
-    convert<rgbBits, yuvBits, true>(src, dst);
-  } else {
-    convert<rgbBits, yuvBits, false>(src, dst);
+  switch(dst.range) {
+    case AOM_CR_STUDIO_RANGE:
+      convert<rgbBits, yuvBits, false>(src, dst);
+      break;
+    case AOM_CR_FULL_RANGE:
+      convert<rgbBits, yuvBits, true>(src, dst);
+      break;
+    default:
+      throw std::invalid_argument(fmt::format("Unsupported color range type: {}", dst.range));
   }
 }
 
