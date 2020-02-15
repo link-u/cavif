@@ -53,6 +53,7 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   // These color_type don't have an alpha channel then fill it with 0xff.
   switch(color_type) {
     case PNG_COLOR_TYPE_RGB:
+    case PNG_COLOR_TYPE_GRAY:
     case PNG_COLOR_TYPE_PALETTE:
       pixelOrder = avif::img::PixelOrder::RGB;
       if(bit_depth == 16) {
@@ -62,7 +63,6 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
       }
       break;
     case PNG_COLOR_TYPE_RGB_ALPHA:
-    case PNG_COLOR_TYPE_GRAY:
     case PNG_COLOR_TYPE_GRAY_ALPHA:
       pixelOrder = avif::img::PixelOrder::RGBA;
       if(bit_depth == 16) {
