@@ -308,7 +308,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   }
   (void)AV1E_SET_ENABLE_DIST_8X8; // is for testing purposes
 
-  set(AV1E_SET_NUM_TG, (1u << static_cast<uint>(tileRows)) + (1u << static_cast<uint>(tileColumns)));
+  set(AV1E_SET_NUM_TG, (1u << static_cast<unsigned int>(tileRows)) + (1u << static_cast<unsigned int>(tileColumns)));
 
   (void)AV1E_SET_MTU; // is not needed to set, because AV1E_SET_NUM_TG is already set.
   (void)AV1E_SET_ANS_WINDOW_SIZE_LOG2; // is not used.
