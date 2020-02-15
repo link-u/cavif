@@ -1,7 +1,8 @@
 # cavif
 
 ![Build](https://github.com/link-u/cavif/workflows/Just%20build%20on%20push./badge.svg)  
-![Debian Package](https://github.com/link-u/cavif/workflows/Build%20debian%20package%20on%20push%20or%20release-tags./badge.svg)
+![Debian Package](https://github.com/link-u/cavif/workflows/Build%20debian%20package%20on%20push%20or%20release-tags./badge.svg)  
+[![Build status](https://ci.appveyor.com/api/projects/status/x48kwu58xihsij1b?svg=true)](https://ci.appveyor.com/project/ledyba-z/cavif)
 
 avif encoder, using [libaom](https://aomedia.googlesource.com/aom/) directly.
 
