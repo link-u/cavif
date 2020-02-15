@@ -7,7 +7,6 @@
 #include <system_error>
 #include <fmt/format.h>
 #include <png.h>
-#include <cassert>
 
 std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   FILE* file = fopen(filename_.c_str(), "rb");
@@ -72,7 +71,7 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
       }
       break;
     default:
-      assert("Never to come here.");
+      throw std::logic_error(fmt::format("Unknown bit depth: {}", bit_depth));
   }
   switch(color_type) {
     case PNG_COLOR_TYPE_RGB:
@@ -84,7 +83,7 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
       png_set_gray_to_rgb(png);
       break;
     default:
-      assert("Never to come here.");
+      throw std::logic_error(fmt::format("Unknown color format: {}", color_type));
   }
   png_read_update_info(png, info);
   std::vector<uint8_t> data;

@@ -2,7 +2,6 @@
 // Created by psi on 2020/01/18.
 //
 
-#include <cassert>
 #include <stdexcept>
 #include <fmt/format.h>
 #include "avif/img/Image.hpp"
