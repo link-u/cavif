@@ -9,30 +9,35 @@
 
 template <uint8_t rgbBits, uint8_t yuvBits, bool isFullRange>
 void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
-  switch (dst.fmt) {
-    case AOM_IMG_FMT_I420:
-    case AOM_IMG_FMT_I42016:
-      avif::img::FromRGB<rgbBits, yuvBits, isFullRange>().toI420(src,
-                                                    dst.planes[0], dst.stride[0],
-                                                    dst.planes[1], dst.stride[1],
-                                                    dst.planes[2], dst.stride[2]);
-      break;
-    case AOM_IMG_FMT_I422:
-    case AOM_IMG_FMT_I42216:
-      avif::img::FromRGB<rgbBits, yuvBits, isFullRange>().toI422(src,
-                                                    dst.planes[0], dst.stride[0],
-                                                    dst.planes[1], dst.stride[1],
-                                                    dst.planes[2], dst.stride[2]);
-      break;
-    case AOM_IMG_FMT_I444:
-    case AOM_IMG_FMT_I44416:
-      avif::img::FromRGB<rgbBits, yuvBits, isFullRange>().toI444(src,
-                                                    dst.planes[0], dst.stride[0],
-                                                    dst.planes[1], dst.stride[1],
-                                                    dst.planes[2], dst.stride[2]);
-      break;
-    default:
-      throw std::invalid_argument(fmt::format("Unsupported image format: {:08x}", dst.fmt));
+  if(dst.monochrome) {
+    avif::img::FromRGB<rgbBits, yuvBits, isFullRange>().toI400(src,
+                                                               dst.planes[0], dst.stride[0]);
+  } else {
+    switch (dst.fmt) {
+      case AOM_IMG_FMT_I420:
+      case AOM_IMG_FMT_I42016:
+        avif::img::FromRGB<rgbBits, yuvBits, isFullRange>().toI420(src,
+                                                                   dst.planes[0], dst.stride[0],
+                                                                   dst.planes[1], dst.stride[1],
+                                                                   dst.planes[2], dst.stride[2]);
+        break;
+      case AOM_IMG_FMT_I422:
+      case AOM_IMG_FMT_I42216:
+        avif::img::FromRGB<rgbBits, yuvBits, isFullRange>().toI422(src,
+                                                                   dst.planes[0], dst.stride[0],
+                                                                   dst.planes[1], dst.stride[1],
+                                                                   dst.planes[2], dst.stride[2]);
+        break;
+      case AOM_IMG_FMT_I444:
+      case AOM_IMG_FMT_I44416:
+        avif::img::FromRGB<rgbBits, yuvBits, isFullRange>().toI444(src,
+                                                                   dst.planes[0], dst.stride[0],
+                                                                   dst.planes[1], dst.stride[1],
+                                                                   dst.planes[2], dst.stride[2]);
+        break;
+      default:
+        throw std::invalid_argument(fmt::format("Unsupported image format: {:08x}", dst.fmt));
+    }
   }
 }
 
