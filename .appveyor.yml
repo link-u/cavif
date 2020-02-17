@@ -25,6 +25,8 @@ artifacts:
 deploy:
   - provider: GitHub
     artifact: cavif-win64.7z           # upload all NuGet packages to release assets
+    auth_token:
+      secure: 6RWyb41pgswyIKDuHakAndlcVgz7uH/OiuVyYem5Q2DCqQpFxzN9ShIchT94NYQg
     draft: true
     prerelease: true
     on:
