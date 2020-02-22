@@ -1,8 +1,19 @@
 # cavif
 
-![Build](https://github.com/link-u/cavif/workflows/Just%20build%20on%20push./badge.svg)  
-![Debian Package](https://github.com/link-u/cavif/workflows/Build%20debian%20package%20on%20push%20or%20release-tags./badge.svg)  
-[![Build status](https://ci.appveyor.com/api/projects/status/x48kwu58xihsij1b?svg=true)](https://ci.appveyor.com/project/ledyba-z/cavif)
+## Status
+
+### Build
+
+|         | Status |
+|--|---|
+| Linux   | ![Build on Linux](https://github.com/link-u/cavif/workflows/Build%20on%20Linux/badge.svg)                                                |
+|--|---|
+| Linux(.deb)   | ![Build debian package](https://github.com/link-u/cavif/workflows/Build%20debian%20package/badge.svg) |
+| macOS   | ![Build on macOS](https://github.com/link-u/cavif/workflows/Build%20on%20macOS/badge.svg) |
+| Windows | [![Build status](https://ci.appveyor.com/api/projects/status/x48kwu58xihsij1b?svg=true)](https://ci.appveyor.com/project/ledyba-z/cavif) |
+
+
+## Description (en)
 
 avif encoder, using [libaom](https://aomedia.googlesource.com/aom/) directly.
 
@@ -10,21 +21,13 @@ avif encoder, using [libaom](https://aomedia.googlesource.com/aom/) directly.
 
 The most significant mission of this project is "**Make it enable to tune libaom's all encoding options to optimize quality/size ratio as nice as possible human beings can**".
 
+## Description (ja)
+
 [AVIF(AV1 Image File Format)]((https://aomediacodec.github.io/av1-avif/))は、動画フォーマットである[AV1](https://aomediacodec.github.io/av1-spec/av1-spec.pdf)のキーフレームを流用して圧縮する静止画フォーマットです。
 
 cavifは、ラッパーを介さず[libaom](https://aomedia.googlesource.com/aom/)を直接叩くavifのエンコーディング・コマンドです。このプロジェクトの唯一にして最大の使命は、 **libaomの静止画に関する全エンコードオプションを仔細に操作できるようにして、現生人類が現時点で達成可能な最高の圧縮効率を実現する手段を提供すること** です。
 
-## basic usage
-
-```bash
-cavif -i <output.png> -o <input.avif>
-```
-
-Example avif files are available in [AOMediaCodec/av1-avif](https://github.com/AOMediaCodec/av1-avif/tree/master/testFiles) or [link-u/avif-sample-images](https://github.com/link-u/avif-sample-images).
-
-[日本語の詳しいドキュメントはこちら](./doc/ja_JP/README.md)。
-
-(Japanese documentation is [here](./doc/ja_JP/README.md))
+# Usage
 
 ## how to build
 
@@ -50,6 +53,18 @@ CXX=g++-8 CC=gcc-8 cmake ..
 # build cavif binary.
 make cavif
 ```
+
+## basic usage
+
+```bash
+cavif -i <output.png> -o <input.avif>
+```
+
+Example avif files are available in [AOMediaCodec/av1-avif](https://github.com/AOMediaCodec/av1-avif/tree/master/testFiles) or [link-u/avif-sample-images](https://github.com/link-u/avif-sample-images).
+
+[日本語の詳しいドキュメントはこちら](./doc/ja_JP/README.md)。
+
+(Japanese documentation is [here](./doc/ja_JP/README.md))
 
 ## SYNOPSIS
 

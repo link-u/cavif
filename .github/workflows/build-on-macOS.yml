@@ -29,10 +29,12 @@ jobs:
     - name: configure
       shell: bash
       run: |
+        export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
         source venv/bin/activate
         cmake -S . -B build
     - name: make
       shell: bash
       run: |
+        export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
         source venv/bin/activate
         env --chdir build make
