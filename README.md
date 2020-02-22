@@ -21,6 +21,8 @@ The most significant mission of this project is "**Make it enable to tune libaom
 
 cavifは、ラッパーを介さず[libaom](https://aomedia.googlesource.com/aom/)を直接叩くavifのエンコーディング・コマンドです。このプロジェクトの唯一にして最大の使命は、 **libaomの静止画に関する全エンコードオプションを仔細に操作できるようにして、現生人類が現時点で達成可能な最高の圧縮効率を実現する手段を提供すること** です。
 
+[日本語の詳しいドキュメントはこちら](./doc/ja_JP/README.md)。
+
 # Usage
 
 ## how to build
@@ -56,9 +58,7 @@ cavif -i <output.png> -o <input.avif>
 
 Example avif files are available in [AOMediaCodec/av1-avif](https://github.com/AOMediaCodec/av1-avif/tree/master/testFiles) or [link-u/avif-sample-images](https://github.com/link-u/avif-sample-images).
 
-[日本語の詳しいドキュメントはこちら](./doc/ja_JP/README.md)。
-
-(Japanese documentation is [here](./doc/ja_JP/README.md))
+(Currently, detailed documentation is only in [Japanese](./doc/ja_JP/README.md))
 
 ## SYNOPSIS
 
