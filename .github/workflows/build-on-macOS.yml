@@ -38,4 +38,4 @@ jobs:
       run: |
         export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
         source venv/bin/activate
-        env --chdir build make
+        (cd build && make)
