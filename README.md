@@ -1,17 +1,11 @@
 # cavif
 
-## Status
-
-### Build
-
 |         | Status |
 |--|---|
 | Linux   | ![Build on Linux](https://github.com/link-u/cavif/workflows/Build%20on%20Linux/badge.svg)                                                |
-|--|---|
 | Linux(.deb)   | ![Build debian package](https://github.com/link-u/cavif/workflows/Build%20debian%20package/badge.svg) |
 | macOS   | ![Build on macOS](https://github.com/link-u/cavif/workflows/Build%20on%20macOS/badge.svg) |
 | Windows | [![Build status](https://ci.appveyor.com/api/projects/status/x48kwu58xihsij1b?svg=true)](https://ci.appveyor.com/project/ledyba-z/cavif) |
-
 
 ## Description (en)
 
