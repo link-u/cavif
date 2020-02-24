@@ -122,7 +122,7 @@ OPTIONS
                     Attach alpha plane.
 
         --attach-depth
-                    Attach alpha plane.
+                    Attach depth plane.
 
         --encode-target
                     Encode alpha image.
