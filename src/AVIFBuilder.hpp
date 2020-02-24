@@ -23,6 +23,7 @@ public:
     ,data_(std::move(data))
     {
     }
+    static Frame load(avif::util::Logger& log, std::string const& path);
   public:
     [[ nodiscard ]] avif::av1::SequenceHeader const& sequenceHeader() const { return this->sequenceHeader_; }
     [[ nodiscard ]] std::vector<uint8_t> const& configOBU() const { return this->configOBU_; }
@@ -30,16 +31,17 @@ public:
   };
 
 private:
-private:
+  avif::util::Logger& log_;
   Config& config_;
   uint32_t const width_;
   uint32_t const height_;
   std::optional<Frame> frame_{};
+  std::optional<Frame> alpha_{};
   avif::FileBox fileBox_{};
 
 public:
   AVIFBuilder() = delete;
-  explicit AVIFBuilder(Config& config, uint32_t width, uint32_t height);
+  explicit AVIFBuilder(avif::util::Logger& log, Config& config, uint32_t width, uint32_t height);
   ~AVIFBuilder() noexcept = default;
   AVIFBuilder& operator=(AVIFBuilder const&) = delete;
   AVIFBuilder& operator=(AVIFBuilder&&) = delete;
@@ -48,9 +50,13 @@ public:
 
 public:
   AVIFBuilder& setPrimaryFrame(Frame&& frame);
-  [[ nodiscard ]] avif::FileBox build();
+  AVIFBuilder& setAlphaFrame(Frame&& frame);
+  [[ nodiscard ]] std::vector<uint8_t> build();
 
-  void fillPrimaryFrameInfo(Frame const& frame);
+private:
+  [[ nodiscard ]] avif::FileBox buildFileBox();
+  void linkAuxImages(const uint32_t from, const uint32_t to);
+  void fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const& frame, std::optional<std::string> const& auxType = {});
 };
 
 

@@ -156,7 +156,7 @@ int _main(int argc, char** argv) {
     return -1;
   }
   {
-    AVIFBuilder builder(config, width, height);
+    AVIFBuilder builder(log, config, width, height);
     std::shared_ptr<avif::av1::Parser::Result> result = avif::av1::Parser(log, packets[0]).parse();
     if (!result->ok()) {
       log.error(result->error());
@@ -186,20 +186,12 @@ int _main(int argc, char** argv) {
     if (!seq.has_value()) {
       throw std::logic_error("No sequence header OBU.");
     }
-    builder.setPrimaryFrame(AVIFBuilder::Frame(seq.value(), std::move(configOBUs), mdat));
-    avif::FileBox fileBox = builder.build();
-    {
-      avif::util::StreamWriter pass1;
-      avif::Writer(log, pass1).write(fileBox);
+    builder.setPrimaryFrame(AVIFBuilder::Frame(seq.value(), std::move(configOBUs), std::move(mdat)));
+    if(config.alphaInput.has_value()) {
+      log.info("Attaching %s as Alpha plane.", config.alphaInput.value());
+      builder.setAlphaFrame(AVIFBuilder::Frame::load(log, config.alphaInput.value()));
     }
-    for (size_t i = 0; i < fileBox.metaBox.itemLocationBox.items.size(); ++i) {
-      size_t const offset = fileBox.mediaDataBoxes.at(i).offset;
-      fileBox.metaBox.itemLocationBox.items.at(i).baseOffset = offset;
-    }
-    avif::util::StreamWriter out;
-    avif::Writer(log, out).write(fileBox);
-    std::vector<uint8_t> data = out.buffer();
-    std::copy(std::begin(mdat), std::end(mdat), std::next(std::begin(data), fileBox.mediaDataBoxes.at(0).offset));
+    std::vector<uint8_t> data = builder.build();
     std::optional<std::string> writeResult = avif::util::writeFile(config.output, data);
     if (writeResult.has_value()) {
       log.error(writeResult.value());

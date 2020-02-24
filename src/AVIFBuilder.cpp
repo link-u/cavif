@@ -2,20 +2,67 @@
 // Created by psi on 2020/01/07.
 //
 
+#include <utility>
+#include <memory>
+
+#include <avif/util/StreamWriter.hpp>
+#include <avif/util/File.hpp>
+
+#include <avif/Writer.hpp>
+#include <avif/Parser.hpp>
+#include <avif/Query.hpp>
+
+#include <avif/av1/Parser.hpp>
+#include <avif/av1/Query.hpp>
+#include <avif/util/FourCC.hpp>
+
 #include "AVIFBuilder.hpp"
 #include "Config.hpp"
 
-#include <utility>
+AVIFBuilder::Frame AVIFBuilder::Frame::load(avif::util::Logger& log, std::string const& path) {
+  std::variant<std::vector<uint8_t>, std::string> file = avif::util::readFile(path);
+  if(std::holds_alternative<std::string>(file)) {
+    log.fatal(std::get<std::string>(file));
+  }
+  std::shared_ptr<avif::Parser::Result> result = avif::Parser(log, std::get<std::vector<uint8_t>>(file)).parse();
+  if(!result->ok()) {
+    log.fatal(result->error());
+  }
+  avif::FileBox const& fileBox = result->fileBox();
+  std::optional<uint32_t> primaryItemID{};
+  if(!fileBox.metaBox.primaryItemBox.has_value()) {
+    primaryItemID = fileBox.metaBox.primaryItemBox.value().itemID;
+  }
+  namespace query = avif::util::query;
+  std::optional<avif::AV1CodecConfigurationRecordBox> av1Config = query::findProperty<avif::AV1CodecConfigurationRecordBox>(fileBox, primaryItemID);
+  if(!av1Config.has_value()) {
+    log.fatal("AV1 config not found: {}", path);
+  }
+  std::vector<uint8_t> configOBUs = av1Config.value().av1Config.configOBUs;
+  std::shared_ptr<avif::av1::Parser::Result> av1result = avif::av1::Parser(log, configOBUs).parse();
+  if(!av1result->ok()) {
+    log.fatal(av1result->error());
+  }
+  std::pair<size_t, size_t> region = query::findItemRegion(fileBox, primaryItemID);
+  auto beg = std::begin(result->buffer());
+  std::vector<uint8_t> mdat = std::vector<uint8_t>(std::next(beg, region.first), std::next(beg, region.second));
+  namespace av1query = avif::av1::util::query;
+  std::optional<avif::av1::SequenceHeader> seq = av1query::find<avif::av1::SequenceHeader>(av1result->packets());
+  if(!seq.has_value()) {
+    log.fatal("Sequence header not found.");
+  }
+  return AVIFBuilder::Frame(std::move(seq.value()), std::move(configOBUs), std::move(mdat));
+}
 
-AVIFBuilder::AVIFBuilder(Config& config, uint32_t width, uint32_t height)
-:config_(config)
+AVIFBuilder::AVIFBuilder(avif::util::Logger& log, Config& config, uint32_t width, uint32_t height)
+:log_(log)
+,config_(config)
 ,width_(width)
 ,height_(height)
 {
 }
 
-
-avif::FileBox AVIFBuilder::build() {
+avif::FileBox AVIFBuilder::buildFileBox() {
   if(!this->frame_.has_value()){
     throw std::runtime_error("No primary frame.");
   }
@@ -55,28 +102,89 @@ avif::FileBox AVIFBuilder::build() {
       }
     }
   }
-  this->fillPrimaryFrameInfo(frame);
-
+  {
+    // Fill metabox
+    MetaBox& metaBox = this->fileBox_.metaBox;
+    metaBox.setFullBoxHeader(0, 0);
+    { // fill HandlerBox
+      HandlerBox& handlerBox = metaBox.handlerBox;
+      handlerBox.setFullBoxHeader(0u, 0u);
+      handlerBox.name = "cavif - https://github.com/link-u/cavif";
+      handlerBox.handler = "pict";
+    }
+  }
+  this->fillFrameInfo(1, frame);
+  if(this->alpha_.has_value()) {
+    this->fillFrameInfo(2, alpha_.value(), "urn:mpeg:mpegB:cicp:systems:auxiliary:alpha");
+    this->linkAuxImages(2, 1);
+  }
   return this->fileBox_;
 }
 
-void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
+void AVIFBuilder::linkAuxImages(uint32_t const from, uint32_t const to) {
+  using namespace avif;
+  if(!this->fileBox_.metaBox.itemReferenceBox.has_value()) {
+    ItemReferenceBox box{
+        .references = std::vector<SingleItemTypeReferenceBoxLarge>{},
+    };
+    box.setFullBoxHeader(1, 0);
+    this->fileBox_.metaBox.itemReferenceBox = box;
+  }
+  auto& refs = std::get<std::vector<SingleItemTypeReferenceBoxLarge>>(this->fileBox_.metaBox.itemReferenceBox.value().references);
+  for(auto& ref : refs) {
+    if(ref.fromItemID == from) {
+      for(auto const& oldTo : ref.toItemIDs) {
+        if(oldTo == to) {
+          return;
+        }
+      }
+      ref.toItemIDs.emplace_back(to);
+      return;
+    }
+  }
+  auto box = SingleItemTypeReferenceBoxLarge{
+      .fromItemID = from,
+      .toItemIDs = {to},
+  };
+  box.hdr.type = avif::util::str2uint("auxl");
+  refs.emplace_back(box);
+}
+
+std::vector<uint8_t> AVIFBuilder::build() {
+  avif::FileBox fileBox = this->buildFileBox();
+  { // pass1: calc positions
+    avif::util::StreamWriter pass1;
+    avif::Writer(log_, pass1).write(fileBox);
+  }
+  for (size_t i = 0; i < fileBox.metaBox.itemLocationBox.items.size(); ++i) {
+    size_t const offset = fileBox.mediaDataBoxes.at(i).offset;
+    fileBox.metaBox.itemLocationBox.items.at(i).baseOffset = offset;
+  }
+  avif::util::StreamWriter out;
+  avif::Writer(log_, out).write(fileBox);
+  std::vector<uint8_t> data = out.buffer();
+  auto beg = std::begin(data);
+  if(frame_.has_value()) {
+    Frame& frame = frame_.value();
+    std::copy(std::begin(frame.data()), std::end(frame.data()), std::next(beg, fileBox.mediaDataBoxes.at(0).offset));
+  }
+  if(alpha_.has_value()){
+    Frame& frame = alpha_.value();
+    std::copy(std::begin(frame.data()), std::end(frame.data()), std::next(beg, fileBox.mediaDataBoxes.at(1).offset));
+  }
+  return std::move(data);
+}
+
+void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const& frame, std::optional<std::string> const& auxType) {
   using namespace avif;
   MetaBox& metaBox = this->fileBox_.metaBox;
-  metaBox.setFullBoxHeader(0, 0);
-  { // fill HandlerBox
-    HandlerBox& handlerBox = metaBox.handlerBox;
-    handlerBox.setFullBoxHeader(0u, 0u);
-    handlerBox.name = "cavif - https://github.com/link-u/cavif";
-    handlerBox.handler = "pict";
-  }
   { // fill ItemInfoBox
     ItemInfoBox& itemInfoBox = metaBox.itemInfoBox;
     itemInfoBox.setFullBoxHeader(1, 0);
     {
       ItemInfoEntry entry{};
       entry.setFullBoxHeader(2, 0);
-      entry.itemID = 1;
+      entry.itemID = itemID;
       entry.itemType = "av01";
       entry.itemProtectionIndex = 0;
       entry.itemName = "Image";
@@ -90,7 +198,7 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
     locationBox.lengthSize = 4;
     locationBox.baseOffsetSize = 4;
     locationBox.items.emplace_back(ItemLocationBox::Item{
-        .itemID = 1,
+        .itemID = itemID,
         .dataReferenceIndex = 0,
         .baseOffset = 0,// TODO: fill it after.
         .extents = {{
@@ -101,15 +209,15 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
         }},
     });
   }
-  {
+  if(!auxType.has_value()) { // Primary Image!
     PrimaryItemBox pitm{};
-    pitm.itemID = 1;
+    pitm.itemID = itemID;
     metaBox.primaryItemBox = pitm;
   }
   { // fill ItemPropertiesBox
     ItemPropertyAssociation assoc{};
     ItemPropertyAssociation::Item item{};
-    item.itemID = 1;
+    item.itemID = itemID;
     ItemPropertiesBox& propertiesBox = metaBox.itemPropertiesBox;
     {
       // FIXME(ledyba-z): Is it really correct?
@@ -217,6 +325,15 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }
+    if(auxType.has_value()) {
+      propertiesBox.propertyContainers.properties.emplace_back(AuxiliaryTypeProperty {
+        .auxType = auxType.value(),
+      });
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
+          .essential = true,
+          .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
+      });
+    }
     assoc.items.emplace_back(item);
     propertiesBox.associations.emplace_back(assoc);
   }
@@ -226,7 +343,13 @@ void AVIFBuilder::fillPrimaryFrameInfo(const AVIFBuilder::Frame& frame) {
   });
 }
 
+
 AVIFBuilder& AVIFBuilder::setPrimaryFrame(AVIFBuilder::Frame&& frame) {
   this->frame_ = std::move(frame);
+  return *this;
+}
+
+AVIFBuilder& AVIFBuilder::setAlphaFrame(AVIFBuilder::Frame&& frame) {
+  this->alpha_ = std::move(frame);
   return *this;
 }

@@ -19,6 +19,7 @@ class Config final {
   friend class Configurator;
 public:
   std::string input{};
+  std::optional<std::string> alphaInput{};
   std::string output{};
   enum EncodeTarget {
     Image,
