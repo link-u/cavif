@@ -8,6 +8,8 @@
 #include <avif/util/StreamWriter.hpp>
 #include <avif/util/File.hpp>
 
+#include <avif/Constants.hpp>
+
 #include <avif/Writer.hpp>
 #include <avif/Parser.hpp>
 #include <avif/Query.hpp>
@@ -115,7 +117,7 @@ avif::FileBox AVIFBuilder::buildFileBox() {
   }
   this->fillFrameInfo(1, frame);
   if(this->alpha_.has_value()) {
-    this->fillFrameInfo(2, alpha_.value(), "urn:mpeg:mpegB:cicp:systems:auxiliary:alpha");
+    this->fillFrameInfo(2, alpha_.value(), avif::kAlphaAuxType);
     this->linkAuxImages(2, 1);
   }
   return this->fileBox_;
