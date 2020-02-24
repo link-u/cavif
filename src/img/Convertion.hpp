@@ -115,7 +115,7 @@ void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
 
 template <size_t rgbBits>
 void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
-  aom_img_fmt_t const pixFmt = config.codec.g_bit_depth ?
+  aom_img_fmt_t const pixFmt = config.codec.g_bit_depth == 8 ?
         config.pixFmt :
         static_cast<aom_img_fmt_t>(config.pixFmt | static_cast<unsigned int>(AOM_IMG_FMT_HIGHBITDEPTH));
   aom_img_alloc(&dst, pixFmt, src.width(), src.height(), 1);
