@@ -16,6 +16,40 @@
 
  - `-o output.avif`（必須）
 
+### エンコードターゲット
+
+ - `--encode-target [image|alpha]`
+
+入力されるpngのうちの、imageとalphaのどちらを利用してエンコードするかを指定する。次のオプションとセットで使う。また、よほどの理由がない限りは`--monochrome`も指定する。
+
+なお、`--encode-target alpha`を指定するときは、入力されるPNGにalphaチャンネルが無いとエラーになる。
+
+### Alpha/Depth画像の付与
+
+ - `--attach-alpha <input-alpha.avif>`
+ - `--attach-depth <input-depth.avif>`
+
+alphaチャンネルやdepthチャンネルの画像を付与する。入力の拡張子がavifな事からわかるように、alpha付き/depth付きのAVIF画像を生成するには、２回ないし３回エンコードする必要がある。
+
+#### 例：alpha付きのAVIF画像を作る
+
+```bash
+cavif -i <input.png> -o <output-alpha.avif> --encode-target alpha --monochrome
+cavif -i <input.png> -o <output.avif> --encode-target image --attach-alpha <output-alpha.avif>
+```
+
+なお、`--attach-alpha`される画像は`<input.png>`からエンコードしたものでなくてもよい。
+
+#### 例：depthもalphaも追加する
+
+```bash
+cavif -i <input.png> -o <output-alpha.avif> --encode-target alpha --monochrome
+cavif -i <depth.png> -o <output-depth.avif> --encode-target image --monochrome
+cavif -i <input.png> -o <output.avif> --encode-target image --attach-alpha <output-alpha.avif> --attch-depth <output-depth.avif>
+```
+
+depth画像もモノクロでなければならないことに注意。
+
 ### エンコード結果の表示
 
  - `--show-result`
