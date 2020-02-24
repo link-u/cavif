@@ -76,7 +76,6 @@ int _main(int argc, char** argv) {
   }
 
   Config config;
-  aom_codec_flags_t flags = 0;
   aom_codec_enc_config_default(av1codec, &config.codec, 0);
   config.codec.g_threads = std::thread::hardware_concurrency();
   {
@@ -93,23 +92,12 @@ int _main(int argc, char** argv) {
   std::variant<avif::img::Image<8>, avif::img::Image<16>> loadedImage = PNGReader(config.input).read();
 
   aom_image_t img;
-  aom_img_fmt_t pixFmt = config.pixFmt;
-  if(config.codec.g_bit_depth > 8) {
-    pixFmt = static_cast<aom_img_fmt_t>(pixFmt | static_cast<unsigned int>(AOM_IMG_FMT_HIGHBITDEPTH));
-    flags = flags | AOM_CODEC_USE_HIGHBITDEPTH;
-  }
   if(std::holds_alternative<avif::img::Image<8>>(loadedImage)) {
     auto src = std::get<avif::img::Image<8>>(loadedImage);
-    aom_img_alloc(&img, pixFmt, src.width(), src.height(), 1);
-    img.range = config.fullColorRange ? AOM_CR_FULL_RANGE : AOM_CR_STUDIO_RANGE;
-    img.monochrome = config.codec.monochrome ? 1 : 0;
-    convert(src, img, config.codec.g_bit_depth);
+    convert(config, src, img);
   } else {
     auto src = std::get<avif::img::Image<16>>(loadedImage);
-    aom_img_alloc(&img, pixFmt, src.width(), src.height(), 1);
-    img.range = config.fullColorRange ? AOM_CR_FULL_RANGE : AOM_CR_STUDIO_RANGE;
-    img.monochrome = config.codec.monochrome ? 1 : 0;
-    convert(src, img, config.codec.g_bit_depth);
+    convert(config, src, img);
   }
 
   uint32_t const width = aom_img_plane_width(&img, AOM_PLANE_Y);
@@ -137,12 +125,15 @@ int _main(int argc, char** argv) {
 
   aom_codec_ctx_t codec{};
 
+  aom_codec_flags_t flags = 0;
+  if(config.codec.g_bit_depth > 8) {
+    flags = AOM_CODEC_USE_HIGHBITDEPTH;
+  }
   if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &config.codec, flags)) {
     log.fatal("Failed to initialize encoder: %s", aom_codec_error_detail(&codec));
   }
 
   config.modify(&codec);
-
 
   std::vector<std::vector<uint8_t>> packets;
   {

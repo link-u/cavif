@@ -7,8 +7,10 @@
 #include "avif/img/Image.hpp"
 #include "avif/img/Conversion.hpp"
 
+namespace detail {
+
 template <uint8_t rgbBits, uint8_t yuvBits, bool isFullRange>
-void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
+void convertImage(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if(dst.monochrome) {
     avif::img::FromRGB<rgbBits, yuvBits, isFullRange>().toI400(src,
                                                                dst.planes[0], dst.stride[0]);
@@ -41,33 +43,80 @@ void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
   }
 }
 
-template <uint8_t rgbBits, uint8_t yuvBits>
+template <uint8_t rgbBits, uint8_t yuvBits, bool isFullRange>
+void convertAlpha(avif::img::Image<rgbBits>& src, aom_image& dst) {
+  if (dst.monochrome) {
+    avif::img::FromAlpha<rgbBits, yuvBits, isFullRange>().toI400(src,
+                                                                 dst.planes[0], dst.stride[0]);
+  } else {
+    throw std::invalid_argument("Alpha image should be monochrome");
+  }
+}
+
+}
+
+template <Config::EncodeTarget target, uint8_t rgbBits, uint8_t yuvBits, bool isFullRange>
+void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
+  switch (target) {
+    case Config::EncodeTarget::Image:
+      detail::convertImage<rgbBits, yuvBits, isFullRange>(src, dst);
+      break;
+    case Config::EncodeTarget::Alpha:
+      detail::convertAlpha<rgbBits, yuvBits, isFullRange>(src, dst);
+      break;
+    default:
+      throw std::invalid_argument(fmt::format("Unsupported EncodeTarget: {}", target));
+  }
+}
+
+template <Config::EncodeTarget target, uint8_t rgbBits, uint8_t yuvBits>
 void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
   switch(dst.range) {
     case AOM_CR_STUDIO_RANGE:
-      convert<rgbBits, yuvBits, false>(src, dst);
+      convert<target, rgbBits, yuvBits, false>(src, dst);
       break;
     case AOM_CR_FULL_RANGE:
-      convert<rgbBits, yuvBits, true>(src, dst);
+      convert<target, rgbBits, yuvBits, true>(src, dst);
       break;
     default:
       throw std::invalid_argument(fmt::format("Unsupported color range type: {}", dst.range));
   }
 }
 
-template <size_t rgbBits>
-void convert(avif::img::Image<rgbBits>& src, aom_image& dst, int const yuvBits) {
-  switch (yuvBits) {
+template <Config::EncodeTarget target, size_t rgbBits>
+void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
+  switch (dst.bit_depth) {
     case 8:
-      convert<rgbBits, 8>(src, dst);
+      convert<target, rgbBits, 8>(src, dst);
       break;
     case 10:
-      convert<rgbBits, 10>(src, dst);
+      convert<target, rgbBits, 10>(src, dst);
       break;
     case 12:
-      convert<rgbBits, 12>(src, dst);
+      convert<target, rgbBits, 12>(src, dst);
       break;
     default:
       throw std::invalid_argument(fmt::format("Unsupported YUV bit-depth: {}", dst.bit_depth));
+  }
+}
+
+template <size_t rgbBits>
+void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
+  aom_img_fmt_t const pixFmt = config.codec.g_bit_depth ?
+        config.pixFmt :
+        static_cast<aom_img_fmt_t>(config.pixFmt | static_cast<unsigned int>(AOM_IMG_FMT_HIGHBITDEPTH));
+  aom_img_alloc(&dst, pixFmt, src.width(), src.height(), 1);
+  dst.range = config.fullColorRange ? AOM_CR_FULL_RANGE : AOM_CR_STUDIO_RANGE;
+  dst.monochrome = config.codec.monochrome ? 1 : 0;
+  dst.bit_depth = config.codec.g_bit_depth;
+  switch (config.encodeTarget) {
+    case Config::EncodeTarget::Image:
+      convert<Config::EncodeTarget::Image, rgbBits>(src, dst);
+      break;
+    case Config::EncodeTarget::Alpha:
+      convert<Config::EncodeTarget::Alpha, rgbBits>(src, dst);
+      break;
+    default:
+      assert(false && "[BUG] Unkown encoder target.");
   }
 }

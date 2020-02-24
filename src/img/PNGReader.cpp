@@ -51,8 +51,15 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   avif::img::PixelOrder pixelOrder = avif::img::PixelOrder::RGB;
   // These color_type don't have an alpha channel then fill it with 0xff.
   switch(color_type) {
+    case PNG_COLOR_TYPE_GRAY:
+      pixelOrder = avif::img::PixelOrder::Mono;
+      if(bit_depth == 16) {
+        bytesPerPixel = 2;
+      } else {
+        bytesPerPixel = 1;
+      }
+      break;
     case PNG_COLOR_TYPE_RGB:
-    case PNG_COLOR_TYPE_GRAY: // FIXME(ledyba-z): Handle gray image as gray image.
     case PNG_COLOR_TYPE_PALETTE:
       pixelOrder = avif::img::PixelOrder::RGB;
       if(bit_depth == 16) {
@@ -61,8 +68,15 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
         bytesPerPixel = 3;
       }
       break;
+    case PNG_COLOR_TYPE_GRAY_ALPHA:
+      pixelOrder = avif::img::PixelOrder::MonoA;
+      if(bit_depth == 16) {
+        bytesPerPixel = 4;
+      } else {
+        bytesPerPixel = 2;
+      }
+      break;
     case PNG_COLOR_TYPE_RGB_ALPHA:
-    case PNG_COLOR_TYPE_GRAY_ALPHA: // FIXME(ledyba-z): Handle gray image as gray image.
       pixelOrder = avif::img::PixelOrder::RGBA;
       if(bit_depth == 16) {
         bytesPerPixel = 8;
@@ -72,19 +86,6 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
       break;
     default:
       throw std::logic_error(fmt::format("Unknown bit depth: {}", bit_depth));
-  }
-  // FIXME(ledyba-z): Handle gray image as gray image.
-  switch(color_type) {
-    case PNG_COLOR_TYPE_RGB:
-    case PNG_COLOR_TYPE_PALETTE:
-    case PNG_COLOR_TYPE_RGB_ALPHA:
-      break;
-    case PNG_COLOR_TYPE_GRAY:
-    case PNG_COLOR_TYPE_GRAY_ALPHA:
-      png_set_gray_to_rgb(png);
-      break;
-    default:
-      throw std::logic_error(fmt::format("Unknown color format: {}", color_type));
   }
   png_read_update_info(png, info);
   std::vector<uint8_t> data;

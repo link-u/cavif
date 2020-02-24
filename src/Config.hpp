@@ -20,6 +20,11 @@ class Config final {
 public:
   std::string input{};
   std::string output{};
+  enum EncodeTarget {
+    Image,
+    Alpha
+  };
+  EncodeTarget encodeTarget = EncodeTarget::Image;
   bool showResult = false;
 public:
   // meta
