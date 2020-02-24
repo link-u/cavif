@@ -63,6 +63,7 @@ int Config::parse(int argc, char **argv) {
       required("-i", "--input").doc("Filename to input") & value("input.png", input),
       required("-o", "--output").doc("Filename to output") & value("output.avif", output),
       option("--attach-alpha").doc("Attach alpha plane.") & value("input-alpha.avif").call([&](std::string const &str){ alphaInput = str; }),
+      option("--attach-depth").doc("Attach alpha plane.") & value("input-depth.avif").call([&](std::string const &str){ depthInput = str; }),
       option("--encode-target").doc("Encode alpha image.") & (parameter("image").set(encodeTarget, EncodeTarget::Image).doc("Encode image planes") | parameter("alpha").set(encodeTarget, EncodeTarget::Alpha).doc("Encode alpha planes")),
       option("--show-result").doc("Show encoding result").set(showResult, true)
   );

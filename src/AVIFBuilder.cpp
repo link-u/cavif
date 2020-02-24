@@ -116,9 +116,16 @@ avif::FileBox AVIFBuilder::buildFileBox() {
     }
   }
   this->fillFrameInfo(1, frame);
+  size_t nextID = 2;
   if(this->alpha_.has_value()) {
-    this->fillFrameInfo(2, alpha_.value(), avif::kAlphaAuxType);
-    this->linkAuxImages(2, 1);
+    this->fillFrameInfo(nextID, alpha_.value(), avif::kAlphaAuxType());
+    this->linkAuxImages(nextID, 1);
+    ++nextID;
+  }
+  if(this->depth_.has_value()) {
+    this->fillFrameInfo(nextID, depth_.value(), avif::kDepthAuxType());
+    this->linkAuxImages(nextID, 1);
+    ++nextID;
   }
   return this->fileBox_;
 }
@@ -353,5 +360,10 @@ AVIFBuilder& AVIFBuilder::setPrimaryFrame(AVIFBuilder::Frame&& frame) {
 
 AVIFBuilder& AVIFBuilder::setAlphaFrame(AVIFBuilder::Frame&& frame) {
   this->alpha_ = std::move(frame);
+  return *this;
+}
+
+AVIFBuilder& AVIFBuilder::setDepthFrame(AVIFBuilder::Frame&& frame) {
+  this->depth_ = std::move(frame);
   return *this;
 }

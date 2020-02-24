@@ -20,6 +20,7 @@ class Config final {
 public:
   std::string input{};
   std::optional<std::string> alphaInput{};
+  std::optional<std::string> depthInput{};
   std::string output{};
   enum EncodeTarget {
     Image,

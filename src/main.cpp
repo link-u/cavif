@@ -191,6 +191,10 @@ int _main(int argc, char** argv) {
       log.info("Attaching %s as Alpha plane.", config.alphaInput.value());
       builder.setAlphaFrame(AVIFBuilder::Frame::load(log, config.alphaInput.value()));
     }
+    if(config.depthInput.has_value()) {
+      log.info("Attaching %s as Depth plane.", config.depthInput.value());
+      builder.setDepthFrame(AVIFBuilder::Frame::load(log, config.depthInput.value()));
+    }
     std::vector<uint8_t> data = builder.build();
     std::optional<std::string> writeResult = avif::util::writeFile(config.output, data);
     if (writeResult.has_value()) {

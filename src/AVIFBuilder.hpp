@@ -37,6 +37,7 @@ private:
   uint32_t const height_;
   std::optional<Frame> frame_{};
   std::optional<Frame> alpha_{};
+  std::optional<Frame> depth_{};
   avif::FileBox fileBox_{};
 
 public:
@@ -51,6 +52,7 @@ public:
 public:
   AVIFBuilder& setPrimaryFrame(Frame&& frame);
   AVIFBuilder& setAlphaFrame(Frame&& frame);
+  AVIFBuilder& setDepthFrame(Frame&& frame);
   [[ nodiscard ]] std::vector<uint8_t> build();
 
 private:
