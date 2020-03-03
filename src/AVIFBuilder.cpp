@@ -21,6 +21,44 @@
 #include "AVIFBuilder.hpp"
 #include "Config.hpp"
 
+namespace {
+
+enum AVIFProfile : uint8_t {
+  Baseline = 0,
+  Advanced = 1,
+  Unspecified = 255,
+};
+
+AVIFProfile calcProfile(AVIFBuilder::Frame& frame) {
+  // https://aomediacodec.github.io/av1-avif/#baseline-profile
+  // The AV1 profile shall be the Main Profile and the level shall be 5.1 or lower.
+  if(frame.sequenceHeader().seqProfile == 0) {
+    bool baseProfile = true;
+    for(auto const& operatingPoint : frame.sequenceHeader().operatingPoints) {
+      baseProfile &= operatingPoint.seqLevelIdx <= 13;
+    }
+    if (baseProfile) {
+      return Baseline;
+    }
+  }
+  // https://aomediacodec.github.io/av1-avif/#advanced-profile
+  // 6.4. AVIF Advanced Profile
+  // The AV1 profile shall be the High Profile and the level shall be 6.0 or lower.
+  if(frame.sequenceHeader().seqProfile == 1) {
+    bool advancedProfile = true;
+    for(auto const& operatingPoint : frame.sequenceHeader().operatingPoints) {
+      advancedProfile &= operatingPoint.seqLevelIdx <= 16;
+    }
+    if (advancedProfile) {
+      return Advanced;
+    }
+  }
+  return Unspecified;
+}
+
+
+}
+
 AVIFBuilder::Frame AVIFBuilder::Frame::load(avif::util::Logger& log, std::string const& path) {
   std::variant<std::vector<uint8_t>, std::string> file = avif::util::readFile(path);
   if(std::holds_alternative<std::string>(file)) {
@@ -80,28 +118,24 @@ avif::FileBox AVIFBuilder::buildFileBox() {
     fileTypeBox.compatibleBrands.emplace_back("mif1");
     // https://aomediacodec.github.io/av1-avif/#profiles-constraints
     fileTypeBox.compatibleBrands.emplace_back("miaf");
-    // https://aomediacodec.github.io/av1-avif/#baseline-profile
-    // The AV1 profile shall be the Main Profile and the level shall be 5.1 or lower.
-    if(config_.codec.g_profile == 0) {
-      bool baseProfile = true;
-      for(auto const& operatingPoint : frame.sequenceHeader().operatingPoints) {
-        baseProfile &= operatingPoint.seqLevelIdx <= 13;
-      }
-      if (baseProfile) {
-        fileTypeBox.compatibleBrands.emplace_back("MA1B");
+    AVIFProfile profile = calcProfile(frame);
+    if(this->alpha_.has_value()) {
+      AVIFProfile alphaProfile = calcProfile(this->alpha_.value();
+      if(alphaProfile != profile) {
+        profile = Unspecified;
       }
     }
-    // https://aomediacodec.github.io/av1-avif/#advanced-profile
-    // 6.4. AVIF Advanced Profile
-    // The AV1 profile shall be the High Profile and the level shall be 6.0 or lower.
-    if(config_.codec.g_profile == 1) {
-      bool advancedProfile = true;
-      for(auto const& operatingPoint : frame.sequenceHeader().operatingPoints) {
-        advancedProfile &= operatingPoint.seqLevelIdx <= 16;
+    if(this->depth_.has_value()) {
+      AVIFProfile depthProfile = calcProfile(this->depth_.value();
+      if(depthProfile != profile) {
+        profile = Unspecified;
       }
-      if (advancedProfile) {
-        fileTypeBox.compatibleBrands.emplace_back("MA1A");
-      }
+    }
+    // Set a maximum compatible profile.
+    if(profile == Baseline) {
+      fileTypeBox.compatibleBrands.emplace_back("MA1B");
+    }else if(profile == Advanced) {
+      fileTypeBox.compatibleBrands.emplace_back("MA1A");
     }
   }
   {
