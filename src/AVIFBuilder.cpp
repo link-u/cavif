@@ -120,13 +120,13 @@ avif::FileBox AVIFBuilder::buildFileBox() {
     fileTypeBox.compatibleBrands.emplace_back("miaf");
     AVIFProfile profile = calcProfile(frame);
     if(this->alpha_.has_value()) {
-      AVIFProfile alphaProfile = calcProfile(this->alpha_.value();
+      AVIFProfile alphaProfile = calcProfile(this->alpha_.value());
       if(alphaProfile != profile) {
         profile = Unspecified;
       }
     }
     if(this->depth_.has_value()) {
-      AVIFProfile depthProfile = calcProfile(this->depth_.value();
+      AVIFProfile depthProfile = calcProfile(this->depth_.value());
       if(depthProfile != profile) {
         profile = Unspecified;
       }
