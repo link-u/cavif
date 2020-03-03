@@ -85,7 +85,7 @@ int Config::parse(int argc, char **argv) {
   group color = (
       option("--color-primaries").doc("Set color primaries information value.") & (integer("Value defined in H.273").set(colorPrimaries)),
       option("--transfer-characteristics").doc("Set transfer characteristics information value.") & (integer("Value defined in H.273").set(transferCharacteristics)),
-      option("--color-primaries").doc("Set matrix coefficients information value.") & (integer("Value defined in H.273").set(matrixCoefficients))
+      option("--matrix-coefficients").doc("Set matrix coefficients information value.") & (integer("Value defined in H.273").set(matrixCoefficients))
   );
 
   auto scales = (
