@@ -34,6 +34,10 @@ public:
   std::optional<avif::ImageMirrorBox::Axis> mirrorAxis{};
   std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropSize{};
   std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropOffset{};
+  // color
+  uint8_t colorPrimaries = 1;
+  uint8_t transferCharacteristics = 13;
+  uint8_t matrixCoefficients = 9;
   // encoding
   aom_codec_enc_cfg codec{};
   aom_scaling_mode_t scaleMode = {

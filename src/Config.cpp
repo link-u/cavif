@@ -81,6 +81,13 @@ int Config::parse(int argc, char **argv) {
       option("--full-still-picture-header").doc("Force to output full picture header").set(aom.full_still_picture_hdr, 1u)
   );
 
+  // colors
+  group color = (
+      option("--color-primaries").doc("Set color primaries information value.") & (integer("Value defined in H.273").set(colorPrimaries)),
+      option("--transfer-characteristics").doc("Set transfer characteristics information value.") & (integer("Value defined in H.273").set(transferCharacteristics)),
+      option("--color-primaries").doc("Set matrix coefficients information value.") & (integer("Value defined in H.273").set(matrixCoefficients))
+  );
+
   auto scales = (
       option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL) | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO)),
       option("--vertical-scale-mode").doc("Set vertical scale mode") & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO)),
@@ -271,9 +278,9 @@ void Config::modify(aom_codec_ctx_t* aom) {
   // Gamma Correction and Precision Color (PNG: The Definitive Guide)
   // http://www.libpng.org/pub/png/book/chapter10.html
   //
-  set(AV1E_SET_COLOR_PRIMARIES, 1); // sRGB(aka BT.709)
-  set(AV1E_SET_TRANSFER_CHARACTERISTICS, 13); // sRGB
-  set(AV1E_SET_MATRIX_COEFFICIENTS, 9 ); // Currently, we always use BT.2020.
+  set(AV1E_SET_COLOR_PRIMARIES, colorPrimaries);
+  set(AV1E_SET_TRANSFER_CHARACTERISTICS, transferCharacteristics);
+  set(AV1E_SET_MATRIX_COEFFICIENTS, matrixCoefficients);
 
   set(AV1E_SET_CHROMA_SAMPLE_POSITION, 0); // see libavif-container
 
