@@ -9,6 +9,7 @@
 #include <png.h>
 
 std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
+  // See http://www.libpng.org/pub/png/libpng-manual.txt
   FILE* file = fopen(filename_.c_str(), "rb");
   if(!file) {
     throw std::filesystem::filesystem_error("failed to open", this->filename_, std::make_error_code(static_cast<std::errc>(errno)));
@@ -30,8 +31,6 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   png_byte color_type = png_get_color_type(png, info);
   png_byte bit_depth  = png_get_bit_depth(png, info);
 
-  // Read any color_type into 8bit depth, RGBA format.
-  // See http://www.libpng.org/pub/png/libpng-manual.txt
   int bytesPerPixel = 3;
 
   if(color_type == PNG_COLOR_TYPE_PALETTE) {
@@ -43,6 +42,7 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   if(color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
     png_set_expand_gray_1_2_4_to_8(png);
   }
+
 
   if(png_get_valid(png, info, PNG_INFO_tRNS)) {
     png_set_tRNS_to_alpha(png);
