@@ -48,6 +48,10 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
     png_set_tRNS_to_alpha(png);
   }
 
+  if(bit_depth == 16) {
+      png_set_swap(png);
+  }
+
   avif::img::PixelOrder pixelOrder = avif::img::PixelOrder::RGB;
   // These color_type don't have an alpha channel then fill it with 0xff.
   switch(color_type) {
