@@ -10,7 +10,7 @@
    - 対応フォーマット
      - 1/2/4/8bit Gray
      - 8/16bit RGB
-     - alpha channel対応（ただし現状無視される）
+     - alpha channel対応（alpha channelをエンコードするには、次の`--encode-target alpha`を指定する）
 
 ### 出力
 
@@ -20,7 +20,7 @@
 
  - `--encode-target [image|alpha]`
 
-入力されるpngのうちの、imageとalphaのどちらを利用してエンコードするかを指定する。次のオプションとセットで使う。また、よほどの理由がない限りは`--monochrome`も指定する。
+入力されるpngのうちの、imageとalphaのどちらを利用してエンコードするかを指定する。次のオプションとセットで使う。
 
 なお、`--encode-target alpha`を指定するときは、入力されるPNGにalphaチャンネルが無いとエラーになる。
 
@@ -29,7 +29,9 @@
  - `--attach-alpha <input-alpha.avif>`
  - `--attach-depth <input-depth.avif>`
 
-alphaチャンネルやdepthチャンネルの画像を付与する。入力の拡張子がavifな事からわかるように、alpha付き/depth付きのAVIF画像を生成するには、２回ないし３回エンコードする必要がある。
+alphaチャンネルやdepthチャンネルの画像を付与する。なお、depth/alphaとも、モノクロ画像でなければならない。入力の拡張子がavifな事からわかるように、alpha付き/depth付きのAVIF画像を生成するには、２回ないし３回に分けてエンコードする必要がある。
+
+画像の解像度やbit深度、色域（`full-range` or `limited-range`）は、現状の規格上は本体の画像とは異なっていても構わない事になっているが、libavifなどではサポートする予定はなさそう([Issue](https://github.com/AOMediaCodec/libavif/issues/86))。
 
 #### 例：alpha付きのAVIF画像を作る
 
@@ -45,7 +47,7 @@ cavif -i <input.png> -o <output.avif> --encode-target image --attach-alpha <outp
 ```bash
 cavif -i <input.png> -o <output-alpha.avif> --encode-target alpha --monochrome
 cavif -i <depth.png> -o <output-depth.avif> --encode-target image --monochrome
-cavif -i <input.png> -o <output.avif> --encode-target image --attach-alpha <output-alpha.avif> --attch-depth <output-depth.avif>
+cavif -i <input.png> -o <output.avif> --encode-target image --attach-alpha <output-alpha.avif> --attach-depth <output-depth.avif>
 ```
 
 depth画像もモノクロでなければならないことに注意。
@@ -176,7 +178,7 @@ depth画像もモノクロでなければならないことに注意。
 
  - `--full-still-picture-header`を指定しないと、基本的にassertion errorで落ちる。
    - 落ちないようにも出来るのだが、さらに追加でオプションを２つ指定しないといけないので実装してない。
- - Frame Superresolutionと組み合わせると、パラメータの組み合わせによってはvalidationで落ちる時がある。
+ - Frame Super-resolutionと組み合わせると、パラメータの組み合わせによってはvalidationで落ちる時がある。
 
 ### Frame super-resolution
 
@@ -204,7 +206,7 @@ depth画像もモノクロでなければならないことに注意。
  - `--superres-qthresh [0-63]`
    - デフォルト：0（しきい値を設定しない）
 
-`--superres-mode [qthres]`を指定した時の、q値のしきい値を設定する。q値がこの値を下回った時にだけsuperresフィルタが有効になる。その時の倍率はq値によってエンコーダが自動で決定する（アルゴリズムはよくわからん）。
+`--superres-mode qthresh`を指定した時の、q値のしきい値を設定する。q値がこの値を下回った時にだけsuperresフィルタが有効になる。その時の倍率はq値によってエンコーダが自動で決定する（アルゴリズムはよくわからん）。
 
 注意：
 
@@ -301,7 +303,7 @@ YUVからRGBへの変換方法を定めているRec.2020などを読んでも扱
  - `--encoder-usage [good, realtime]`
    - 初期値：good（品質優先）
 
-エンコーダのモードを指定する。goodの方が遅いが画質はよく、realtimeの方が速いが画質はおざなり。
+エンコーダのモードを指定する。`good`の方が遅いが画質はよく、`realtime`の方が速いが画質はおざなり。
 
 ### 利用スレッド数
 
@@ -478,7 +480,7 @@ AV1では、画像をまずすべて同じ大きさのスーパーブロック�
 
 ### タイル分割
 
- - `--tile-rows [0-6]` `--tile-columns [0-6]`
+ - `--tile-rows [0-6]`, `--tile-columns [0-6]`
    - 初期値：両方とも`0`
 
 画像をそれぞれ `pow(2, <tile-rows>)`, `pow(2, <tile-columns>)`個の画像に分割して独立してエンコード・デコードする。
