@@ -290,7 +290,7 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
       }
       propertiesBox.propertyContainers.properties.emplace_back(clap);
       item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
-          .essential = false,
+          .essential = true,
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }
@@ -299,7 +299,7 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
           .angle = config_.rotation.value(),
       });
       item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
-          .essential = false,
+          .essential = true,
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }
@@ -308,7 +308,7 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
           .axis = config_.mirrorAxis.value(),
       });
       item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
-          .essential = false,
+          .essential = true,
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }
