@@ -287,6 +287,8 @@ AV1のプロファイルを指定する。[プロファイルごとに使える�
 
 使えるビット深度とピクセルフォーマットとプロファイルの組み合わせに制限があるので注意。
 
+## カラーマネジメント
+
 ### 色域
 
  - `--disable-full-color-range`（初期値）
@@ -294,7 +296,51 @@ AV1のプロファイルを指定する。[プロファイルごとに使える�
 
 例えば通常の8bitのYUVのフォーマットでは、Yの値として16-235、UとVの値として16-240しか使わないが、このフラグをenableにすると0-255のすべてを使うようになる。10/12ビットでも同様。デフォルトではfalse。
 
-YUVからRGBへの変換方法を定めているRec.2020などを読んでも扱いが書いておらず、根拠がよくわからない。
+計算方法の詳細については、[H.273](https://www.itu.int/rec/T-REC-H.273-201612-I/en)を参照してほしい。
+
+### Color Primaries
+
+```
+--color-primaries 
+         [<Value defined in H.273>|
+          bt709|unspecified|bt470m|
+          bt470bg|bt601|ntsc|smpte240m|
+          generic-film|bt2020|bt2100|xyz|
+          smpte428|smpte431|smpte432|ebu3213]
+```
+
+それぞれの色空間において、R,G,Bの原色とWhiteが[CIE-XYZ色空間](https://ja.wikipedia.org/wiki/CIE_1931_%E8%89%B2%E7%A9%BA%E9%96%93)のどこに対応するかを定める。それぞれの名前の他、H.273で定義されている定数をそのまま指定することもできる。
+
+詳細については、[H.273](https://www.itu.int/rec/T-REC-H.273-201612-I/en)を参照してほしい。
+
+### Transfer Characteristics
+
+```
+--transfer-characteristics 
+         [<Value defined in H.273>|
+          bt709|unspecified|bt470m|
+          bt470bg|bt601|ntsc|smpte240m|
+          linear|log100|log100sqrt10|
+          iec61966|bt1361|sRGB|
+          bt2020|bt2020-10bit|bt2020-12bit|
+          smpte2084|bt2100pq|smpte428|bt2100hlg|arib-b67]
+```
+
+いわゆる「[ガンマ補正](https://ja.wikipedia.org/wiki/%E3%82%AC%E3%83%B3%E3%83%9E%E5%80%A4)」の方法を定める。それぞれの名前の他、H.273で定義されている定数をそのまま指定することもできる。
+
+詳細については、[H.273](https://www.itu.int/rec/T-REC-H.273-201612-I/en)を参照してほしい。
+
+### Matrix Coefficients
+
+```
+--matrix-coefficients
+         [<Value defined in H.273>|bt709|sYCC|
+          unspecified|us-fcc|bt601|ntsc|smpte240m|bt2020]
+```
+
+RGBからYUVに変換する行列の係数を指定する。それぞれの名前の他、H.273で定義されている定数をそのまま指定することもできる。
+
+詳細については、[H.273](https://www.itu.int/rec/T-REC-H.273-201612-I/en)を参照してほしい。
 
 ## 速度と品質のトレードオフ
 

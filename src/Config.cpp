@@ -83,9 +83,59 @@ int Config::parse(int argc, char **argv) {
 
   // colors
   group color = (
-      option("--color-primaries").doc("Set color primaries information value.") & (integer("Value defined in H.273").set(colorPrimaries)),
-      option("--transfer-characteristics").doc("Set transfer characteristics information value.") & (integer("Value defined in H.273").set(transferCharacteristics)),
-      option("--matrix-coefficients").doc("Set matrix coefficients information value.") & (integer("Value defined in H.273").set(matrixCoefficients))
+      option("--color-primaries").doc("Set color primaries information value.") & (
+          integer("Value defined in H.273").set(colorPrimaries).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
+          parameter("bt709").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("Rec. ITU-R BT.709-6") |
+          parameter("unspecified").set<uint8_t&, uint8_t>(colorPrimaries, 2u).doc("Image characteristics are unknown or are determined by the application.") |
+          parameter("bt470m").set<uint8_t&, uint8_t>(colorPrimaries, 4u).doc("Rec. ITU-R BT.470-6 System M (historical)") |
+          parameter("bt470bg").set<uint8_t&, uint8_t>(colorPrimaries, 5u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
+          parameter("bt601").set<uint8_t&, uint8_t>(colorPrimaries, 5u).doc("Rec. ITU-R BT.601-7 625") |
+          parameter("ntsc").set<uint8_t&, uint8_t>(colorPrimaries, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("smpte240m").set<uint8_t&, uint8_t>(colorPrimaries, 7u).doc("SMPTE 240M (1999) (historical)") |
+          parameter("generic-film").set<uint8_t&, uint8_t>(colorPrimaries, 8u).doc("Generic film (colour filters using Illuminant C)") |
+          parameter("bt2020").set<uint8_t&, uint8_t>(colorPrimaries, 9u).doc("Rec. ITU-R BT.2020-2") |
+          parameter("bt2100").set<uint8_t&, uint8_t>(colorPrimaries, 9u).doc("Rec. ITU-R BT.2100-0") |
+          parameter("xyz").set<uint8_t&, uint8_t>(colorPrimaries, 10u).doc("(CIE 1931 XYZ as in ISO 11664-1)") |
+          parameter("smpte428").set<uint8_t&, uint8_t>(colorPrimaries, 10u).doc("SMPTE ST 428-1") |
+          parameter("smpte431").set<uint8_t&, uint8_t>(colorPrimaries, 11u).doc("SMPTE RP 431-2 (2011)") |
+          parameter("smpte432").set<uint8_t&, uint8_t>(colorPrimaries, 12u).doc("SMPTE EG 432-1 (2010)") |
+          parameter("ebu3213").set<uint8_t&, uint8_t>(colorPrimaries, 22u).doc("EBU Tech. 3213-E (1975)")
+      ),
+      option("--transfer-characteristics").doc("Set transfer characteristics information value.") & (
+          integer("Value defined in H.273").set(transferCharacteristics).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
+          parameter("bt709").set<uint8_t&, uint8_t>(transferCharacteristics, 1u).doc("Rec. ITU-R BT.709-6") |
+          parameter("unspecified").set<uint8_t&, uint8_t>(transferCharacteristics, 2u).doc("Image characteristics are unknown or are determined by the application.") |
+          parameter("bt470m").set<uint8_t&, uint8_t>(transferCharacteristics, 4u).doc("Rec. ITU-R BT.470-6 System M (historical)") |
+          parameter("bt470bg").set<uint8_t&, uint8_t>(transferCharacteristics, 5u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
+          parameter("bt601").set<uint8_t&, uint8_t>(transferCharacteristics, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("ntsc").set<uint8_t&, uint8_t>(transferCharacteristics, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("smpte240m").set<uint8_t&, uint8_t>(transferCharacteristics, 7u).doc("SMPTE 240M (1999) (historical)") |
+          parameter("linear").set<uint8_t&, uint8_t>(transferCharacteristics, 8u).doc("Linear transfer characteristics") |
+          parameter("log100").set<uint8_t&, uint8_t>(transferCharacteristics, 9u).doc("Logarithmic transfer characteristic (100:1 range)") |
+          parameter("log100sqrt10").set<uint8_t&, uint8_t>(transferCharacteristics, 10u).doc("Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)") |
+          parameter("iec61966").set<uint8_t&, uint8_t>(transferCharacteristics, 11u).doc("IEC 61966-2-4") |
+          parameter("bt1361").set<uint8_t&, uint8_t>(transferCharacteristics, 12u).doc("Rec. ITU-R BT.1361-0 extended colour gamut system (historical)") |
+          parameter("sRGB").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("bt2020").set<uint8_t&, uint8_t>(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
+          parameter("bt2020-10bit").set<uint8_t&, uint8_t>(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
+          parameter("bt2020-12bit").set<uint8_t&, uint8_t>(transferCharacteristics, 15u).doc("Rec. ITU-R BT.2020-2 (12-bit system)") |
+          parameter("smpte2084").set<uint8_t&, uint8_t>(transferCharacteristics, 16u).doc("SMPTE ST 2084 for 10-, 12-, 14- and 16-bit systems") |
+          parameter("bt2100pq").set<uint8_t&, uint8_t>(transferCharacteristics, 16u).doc("Rec. ITU-R BT.2100-0 perceptual quantization (PQ) system") |
+          parameter("smpte428").set<uint8_t&, uint8_t>(transferCharacteristics, 17u).doc("SMPTE ST 428-1") |
+          parameter("bt2100hlg").set<uint8_t&, uint8_t>(transferCharacteristics, 18u).doc("Rec. ITU-R BT.2100-0 hybrid log-gamma (HLG) system") |
+          parameter("arib-b67").set<uint8_t&, uint8_t>(transferCharacteristics, 18u).doc("ARIB STD-B67")
+      ),
+      option("--matrix-coefficients").doc("Set matrix coefficients information value.") & (
+          integer("Value defined in H.273").set(matrixCoefficients).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
+          parameter("bt709").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("Rec. ITU-R BT.709-6") |
+          parameter("sYCC").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sYCC") |
+          parameter("unspecified").set<uint8_t&, uint8_t>(matrixCoefficients, 2u).doc("Image characteristics are unknown or are determined by the application") |
+          parameter("us-fcc").set<uint8_t&, uint8_t>(matrixCoefficients, 4u).doc("United States Federal Communications Commission (2003)") |
+          parameter("bt601").set<uint8_t&, uint8_t>(matrixCoefficients, 5u).doc("Rec. ITU-R BT.601-7 625") |
+          parameter("ntsc").set<uint8_t&, uint8_t>(matrixCoefficients, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("smpte240m").set<uint8_t&, uint8_t>(matrixCoefficients, 7u).doc("SMPTE 240M") |
+          parameter("bt2020").set<uint8_t&, uint8_t>(matrixCoefficients, 9u).doc("Rec. ITU-R BT.2020-2 (non-constant luminance)")
+      )
   );
 
   auto scales = (
@@ -198,7 +248,7 @@ int Config::parse(int argc, char **argv) {
       option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false)
   );
 
-  group cli = (io, meta, av1, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters);
+  group cli = (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters);
 
   if(!clipp::parse(argc, argv, cli)) {
     std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;

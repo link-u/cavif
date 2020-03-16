@@ -73,14 +73,20 @@ cavif -i <input.png> -o <output.avif> --encode-target image --attach-alpha <outp
 
 ```
 % cavif
-[2020/02/25 06:34:24 INFO ] cavif
-[2020/02/25 06:34:24 INFO ] libaom ver: 1.0.0-errata1-avif-259-gfc038664e
+[2020/03/16 19:13:17 INFO ] cavif
+[2020/03/16 19:13:17 INFO ] libaom ver: 1.0.0-errata1-avif-259-gfc038664e
 SYNOPSIS
         cavif -i <input.png> -o <output.avif> [--attach-alpha <input-alpha.avif>] [--attach-depth
               <input-depth.avif>] [--encode-target [image|alpha]] [--show-result] [--rotation
               [0|90|180|270]] [--mirror [vertical|horizontal]] [--crop-size
               <widthN/widthD,heightN/heightD>] [--crop-offset
               <horizOffN/horizOffD,vertOffN/vertOffD>] [--full-still-picture-header]
+              [--color-primaries (<Value defined in
+              H.273>|bt709|unspecified|bt470m|bt470bg|bt601|ntsc|smpte240m|generic-film|bt2020|bt2100|xyz|smpte428|smpte431|smpte432|ebu3213)]
+              [--transfer-characteristics (<Value defined in
+              H.273>|bt709|unspecified|bt470m|bt470bg|bt601|ntsc|smpte240m|linear|log100|log100sqrt10|iec61966|bt1361|sRGB|bt2020|bt2020-10bit|bt2020-12bit|smpte2084|bt2100pq|smpte428|bt2100hlg|arib-b67)]
+              [--matrix-coefficients (<Value defined in
+              H.273>|bt709|sYCC|unspecified|us-fcc|bt601|ntsc|smpte240m|bt2020)]
               [--horizontal-scale-mode [1/1|4/5|3/5|1/2]] [--vertical-scale-mode [1/1|4/5|3/5|1/2]]
               [--resize-mode [none|fixed|random]] [--resize-denominator <[8-16]>] [--superres-mode
               [none|fixed|random|qthresh|auto]] [--superres-denominator <[8-16]>]
@@ -141,6 +147,76 @@ OPTIONS
         --full-still-picture-header
                     Force to output full picture header
 
+        --color-primaries
+                    Set color primaries information value.
+
+        <Value defined in H.273>
+                    See https://www.itu.int/rec/T-REC-H.273-201612-I/en
+
+        bt709       Rec. ITU-R BT.709-6
+        unspecified Image characteristics are unknown or are determined by the application.
+        bt470m      Rec. ITU-R BT.470-6 System M (historical)
+        bt470bg     Rec. ITU-R BT.470-6 System B, G (historical)
+        bt601       Rec. ITU-R BT.601-7 625
+        ntsc        Rec. ITU-R BT.1700-0 NTSC
+        smpte240m   SMPTE 240M (1999) (historical)
+        generic-film
+                    Generic film (colour filters using Illuminant C)
+
+        bt2020      Rec. ITU-R BT.2020-2
+        bt2100      Rec. ITU-R BT.2100-0
+        xyz         (CIE 1931 XYZ as in ISO 11664-1)
+        smpte428    SMPTE ST 428-1
+        smpte431    SMPTE RP 431-2 (2011)
+        smpte432    SMPTE EG 432-1 (2010)
+        ebu3213     EBU Tech. 3213-E (1975)
+        --transfer-characteristics
+                    Set transfer characteristics information value.
+
+        <Value defined in H.273>
+                    See https://www.itu.int/rec/T-REC-H.273-201612-I/en
+
+        bt709       Rec. ITU-R BT.709-6
+        unspecified Image characteristics are unknown or are determined by the application.
+        bt470m      Rec. ITU-R BT.470-6 System M (historical)
+        bt470bg     Rec. ITU-R BT.470-6 System B, G (historical)
+        bt601       Rec. ITU-R BT.1700-0 NTSC
+        ntsc        Rec. ITU-R BT.1700-0 NTSC
+        smpte240m   SMPTE 240M (1999) (historical)
+        linear      Linear transfer characteristics
+        log100      Logarithmic transfer characteristic (100:1 range)
+        log100sqrt10
+                    Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)
+
+        iec61966    IEC 61966-2-4
+        bt1361      Rec. ITU-R BT.1361-0 extended colour gamut system (historical)
+        sRGB        IEC 61966-2-1 sRGB or sYCC
+        bt2020      Rec. ITU-R BT.2020-2 (10-bit system)
+        bt2020-10bit
+                    Rec. ITU-R BT.2020-2 (10-bit system)
+
+        bt2020-12bit
+                    Rec. ITU-R BT.2020-2 (12-bit system)
+
+        smpte2084   SMPTE ST 2084 for 10-, 12-, 14- and 16-bit systems
+        bt2100pq    Rec. ITU-R BT.2100-0 perceptual quantization (PQ) system
+        smpte428    SMPTE ST 428-1
+        bt2100hlg   Rec. ITU-R BT.2100-0 hybrid log-gamma (HLG) system
+        arib-b67    ARIB STD-B67
+        --matrix-coefficients
+                    Set matrix coefficients information value.
+
+        <Value defined in H.273>
+                    See https://www.itu.int/rec/T-REC-H.273-201612-I/en
+
+        bt709       Rec. ITU-R BT.709-6
+        sYCC        IEC 61966-2-1 sYCC
+        unspecified Image characteristics are unknown or are determined by the application
+        us-fcc      United States Federal Communications Commission (2003)
+        bt601       Rec. ITU-R BT.601-7 625
+        ntsc        Rec. ITU-R BT.1700-0 NTSC
+        smpte240m   SMPTE 240M
+        bt2020      Rec. ITU-R BT.2020-2 (non-constant luminance)
         --horizontal-scale-mode
                     Set horizontal scale mode
 
@@ -327,28 +403,28 @@ OPTIONS
                     use reduced tx set, transforms w/o flip (4) + Identity (1).
 
         --enable-filter-intra
-                    enable
+                    enable 
 
         --disable-filter-intra
-                    disable
+                    disable 
 
         --enable-smooth-intra
-                    enable
+                    enable 
 
         --disable-smooth-intra
-                    disable
+                    disable 
 
         --enable-paeth-intra
-                    enable
+                    enable 
 
         --disable-paeth-intra
-                    disable
+                    disable 
 
         --enable-chroma-from-luma
-                    enable
+                    enable 
 
         --disable-chroma-from-luma
-                    disable
+                    disable 
 
         --enable-superres
                     enable frame superresolution
@@ -377,8 +453,6 @@ OPTIONS
 
 ## TODO
 
- - Support:
-   - Color profiles
  - Add more and more command-line flags.
 
 # Related repositories
