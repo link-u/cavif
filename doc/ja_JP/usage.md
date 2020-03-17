@@ -334,7 +334,7 @@ AV1のプロファイルを指定する。[プロファイルごとに使える�
 
 ```
 --matrix-coefficients
-         [<Value defined in H.273>|bt709|sYCC|
+         [<Value defined in H.273>|bt709|sYCC|sRGB|
           unspecified|us-fcc|bt601|ntsc|smpte240m|bt2020]
 ```
 

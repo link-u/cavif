@@ -73,8 +73,8 @@ cavif -i <input.png> -o <output.avif> --encode-target image --attach-alpha <outp
 
 ```
 % cavif
-[2020/03/16 19:13:17 INFO ] cavif
-[2020/03/16 19:13:17 INFO ] libaom ver: 1.0.0-errata1-avif-259-gfc038664e
+[2020/03/17 19:57:05 INFO ] cavif
+[2020/03/17 19:57:05 INFO ] libaom ver: 1.0.0-errata1-avif-259-gfc038664e
 SYNOPSIS
         cavif -i <input.png> -o <output.avif> [--attach-alpha <input-alpha.avif>] [--attach-depth
               <input-depth.avif>] [--encode-target [image|alpha]] [--show-result] [--rotation
@@ -86,7 +86,7 @@ SYNOPSIS
               [--transfer-characteristics (<Value defined in
               H.273>|bt709|unspecified|bt470m|bt470bg|bt601|ntsc|smpte240m|linear|log100|log100sqrt10|iec61966|bt1361|sRGB|bt2020|bt2020-10bit|bt2020-12bit|smpte2084|bt2100pq|smpte428|bt2100hlg|arib-b67)]
               [--matrix-coefficients (<Value defined in
-              H.273>|bt709|sYCC|unspecified|us-fcc|bt601|ntsc|smpte240m|bt2020)]
+              H.273>|bt709|sYCC|sYCC|unspecified|us-fcc|bt601|ntsc|smpte240m|bt2020)]
               [--horizontal-scale-mode [1/1|4/5|3/5|1/2]] [--vertical-scale-mode [1/1|4/5|3/5|1/2]]
               [--resize-mode [none|fixed|random]] [--resize-denominator <[8-16]>] [--superres-mode
               [none|fixed|random|qthresh|auto]] [--superres-denominator <[8-16]>]
@@ -211,6 +211,7 @@ OPTIONS
 
         bt709       Rec. ITU-R BT.709-6
         sYCC        IEC 61966-2-1 sYCC
+        sYCC        IEC 61966-2-1 sRGB
         unspecified Image characteristics are unknown or are determined by the application
         us-fcc      United States Federal Communications Commission (2003)
         bt601       Rec. ITU-R BT.601-7 625
