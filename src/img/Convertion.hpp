@@ -7,11 +7,11 @@
 #include "avif/img/Image.hpp"
 #include "avif/img/Conversion.hpp"
 
-using MatrixType = avif::av1::SequenceHeader::ColorConfig::MatrixCoefficients;
+using MatrixCoefficients = avif::img::MatrixCoefficients;
 
 namespace detail {
 
-template <MatrixType matrixType, uint8_t rgbBits, uint8_t yuvBits, bool fromMonoRGB, bool isFullRange>
+template <MatrixCoefficients matrixType, uint8_t rgbBits, uint8_t yuvBits, bool fromMonoRGB, bool isFullRange>
 void convertImage(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if(dst.monochrome) {
     avif::img::FromRGB<matrixType, rgbBits, yuvBits, fromMonoRGB, isFullRange>().toI400(src,
@@ -45,7 +45,7 @@ void convertImage(avif::img::Image<rgbBits>& src, aom_image& dst) {
   }
 }
 
-template <MatrixType matrixType, uint8_t rgbBits, uint8_t yuvBits, bool fromMonoRGB>
+template <MatrixCoefficients matrixType, uint8_t rgbBits, uint8_t yuvBits, bool fromMonoRGB>
 void convertImage(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if(dst.range == AOM_CR_FULL_RANGE) {
     convertImage<matrixType, rgbBits, yuvBits, fromMonoRGB, true>(src, dst);
@@ -54,7 +54,7 @@ void convertImage(avif::img::Image<rgbBits>& src, aom_image& dst) {
   }
 }
 
-template <MatrixType matrixType, uint8_t rgbBits, uint8_t yuvBits>
+template <MatrixCoefficients matrixType, uint8_t rgbBits, uint8_t yuvBits>
 void convertImage(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if(src.isMonochrome()) {
     convertImage<matrixType, rgbBits, yuvBits, true>(src, dst);
@@ -63,7 +63,7 @@ void convertImage(avif::img::Image<rgbBits>& src, aom_image& dst) {
   }
 }
 
-template <MatrixType matrixType, uint8_t rgbBits, uint8_t yuvBits, bool isFullRange>
+template <MatrixCoefficients matrixType, uint8_t rgbBits, uint8_t yuvBits, bool isFullRange>
 void convertAlpha(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if (dst.monochrome) {
     avif::img::FromAlpha<matrixType, rgbBits, yuvBits, isFullRange>().toI400(src,
@@ -73,7 +73,7 @@ void convertAlpha(avif::img::Image<rgbBits>& src, aom_image& dst) {
   }
 }
 
-template <MatrixType matrixType, uint8_t rgbBits, uint8_t yuvBits>
+template <MatrixCoefficients matrixType, uint8_t rgbBits, uint8_t yuvBits>
 void convertAlpha(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if(dst.range == AOM_CR_FULL_RANGE) {
     convertAlpha<matrixType, rgbBits, yuvBits, true>(src, dst);
@@ -84,7 +84,7 @@ void convertAlpha(avif::img::Image<rgbBits>& src, aom_image& dst) {
 
 }
 
-template <MatrixType matrixType, Config::EncodeTarget target, uint8_t rgbBits, uint8_t yuvBits>
+template <MatrixCoefficients matrixType, Config::EncodeTarget target, uint8_t rgbBits, uint8_t yuvBits>
 void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
   switch (target) {
     case Config::EncodeTarget::Image:
@@ -98,7 +98,7 @@ void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
   }
 }
 
-template <MatrixType matrixType, Config::EncodeTarget target, size_t rgbBits>
+template <MatrixCoefficients matrixType, Config::EncodeTarget target, size_t rgbBits>
 void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
   switch (dst.bit_depth) {
     case 8:
@@ -115,7 +115,7 @@ void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
   }
 }
 
-template <MatrixType matrixType, size_t rgbBits>
+template <MatrixCoefficients matrixType, size_t rgbBits>
 void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
   switch (config.encodeTarget) {
     case Config::EncodeTarget::Image:
@@ -138,46 +138,46 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
   dst.range = config.fullColorRange ? AOM_CR_FULL_RANGE : AOM_CR_STUDIO_RANGE;
   dst.monochrome = config.codec.monochrome ? 1 : 0;
   dst.bit_depth = config.codec.g_bit_depth;
-  switch (static_cast<MatrixType>(config.matrixCoefficients)) {
-    case MatrixType::MC_IDENTITY:
-      convert<MatrixType::MC_IDENTITY, rgbBits>(config, src, dst);
+  switch (static_cast<MatrixCoefficients>(config.matrixCoefficients)) {
+    case MatrixCoefficients::MC_IDENTITY:
+      convert<MatrixCoefficients::MC_IDENTITY, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_BT_709:
-      convert<MatrixType::MC_BT_709, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_BT_709:
+      convert<MatrixCoefficients::MC_BT_709, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_FCC:
-      convert<MatrixType::MC_FCC, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_FCC:
+      convert<MatrixCoefficients::MC_FCC, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_BT_470_B_G:
-      convert<MatrixType::MC_BT_470_B_G, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_BT_470_B_G:
+      convert<MatrixCoefficients::MC_BT_470_B_G, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_BT_601:
-      convert<MatrixType::MC_BT_601, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_BT_601:
+      convert<MatrixCoefficients::MC_BT_601, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_SMPTE_240:
-      convert<MatrixType::MC_SMPTE_240, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_SMPTE_240:
+      convert<MatrixCoefficients::MC_SMPTE_240, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_SMPTE_YCGCO:
-      convert<MatrixType::MC_SMPTE_YCGCO, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_SMPTE_YCGCO:
+      convert<MatrixCoefficients::MC_SMPTE_YCGCO, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_UNSPECIFIED:
-    case MatrixType::MC_BT_2020_NCL:
-      convert<MatrixType::MC_BT_2020_NCL, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_UNSPECIFIED:
+    case MatrixCoefficients::MC_BT_2020_NCL:
+      convert<MatrixCoefficients::MC_BT_2020_NCL, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_BT_2020_CL:
-      convert<MatrixType::MC_BT_2020_CL, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_BT_2020_CL:
+      convert<MatrixCoefficients::MC_BT_2020_CL, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_SMPTE_2085:
-      convert<MatrixType::MC_SMPTE_2085, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_SMPTE_2085:
+      convert<MatrixCoefficients::MC_SMPTE_2085, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_CHROMAT_NCL:
-      convert<MatrixType::MC_CHROMAT_NCL, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_CHROMAT_NCL:
+      convert<MatrixCoefficients::MC_CHROMAT_NCL, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_CHROMAT_CL:
-      convert<MatrixType::MC_CHROMAT_CL, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_CHROMAT_CL:
+      convert<MatrixCoefficients::MC_CHROMAT_CL, rgbBits>(config, src, dst);
       break;
-    case MatrixType::MC_ICTCP:
-      convert<MatrixType::MC_ICTCP, rgbBits>(config, src, dst);
+    case MatrixCoefficients::MC_ICTCP:
+      convert<MatrixCoefficients::MC_ICTCP, rgbBits>(config, src, dst);
       break;
     default:
       assert(false && "Unknown matrix coefficients");

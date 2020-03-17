@@ -453,6 +453,8 @@ OPTIONS
 
 ## TODO
 
+ - ICC Profile
+ - Exif Profile
  - Add more and more command-line flags.
 
 # Related repositories
