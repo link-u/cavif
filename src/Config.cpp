@@ -86,6 +86,8 @@ int Config::parse(int argc, char **argv) {
       option("--color-primaries").doc("Set color primaries information value.") & (
           integer("Value defined in H.273").set(colorPrimaries).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
           parameter("bt709").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("Rec. ITU-R BT.709-6") |
+          parameter("sRGB").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("sYCC").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("unspecified").set<uint8_t&, uint8_t>(colorPrimaries, 2u).doc("Image characteristics are unknown or are determined by the application.") |
           parameter("bt470m").set<uint8_t&, uint8_t>(colorPrimaries, 4u).doc("Rec. ITU-R BT.470-6 System M (historical)") |
           parameter("bt470bg").set<uint8_t&, uint8_t>(colorPrimaries, 5u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
@@ -116,6 +118,7 @@ int Config::parse(int argc, char **argv) {
           parameter("iec61966").set<uint8_t&, uint8_t>(transferCharacteristics, 11u).doc("IEC 61966-2-4") |
           parameter("bt1361").set<uint8_t&, uint8_t>(transferCharacteristics, 12u).doc("Rec. ITU-R BT.1361-0 extended colour gamut system (historical)") |
           parameter("sRGB").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("sYCC").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("bt2020").set<uint8_t&, uint8_t>(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
           parameter("bt2020-10bit").set<uint8_t&, uint8_t>(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
           parameter("bt2020-12bit").set<uint8_t&, uint8_t>(transferCharacteristics, 15u).doc("Rec. ITU-R BT.2020-2 (12-bit system)") |
@@ -128,10 +131,11 @@ int Config::parse(int argc, char **argv) {
       option("--matrix-coefficients").doc("Set matrix coefficients information value.") & (
           integer("Value defined in H.273").set(matrixCoefficients).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
           parameter("bt709").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("Rec. ITU-R BT.709-6") |
-          parameter("sYCC").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sYCC") |
-          parameter("sRGB").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB") |
+          parameter("sRGB").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("sYCC").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("unspecified").set<uint8_t&, uint8_t>(matrixCoefficients, 2u).doc("Image characteristics are unknown or are determined by the application") |
           parameter("us-fcc").set<uint8_t&, uint8_t>(matrixCoefficients, 4u).doc("United States Federal Communications Commission (2003)") |
+          parameter("bt470bg").set<uint8_t&, uint8_t>(matrixCoefficients, 4u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
           parameter("bt601").set<uint8_t&, uint8_t>(matrixCoefficients, 5u).doc("Rec. ITU-R BT.601-7 625") |
           parameter("ntsc").set<uint8_t&, uint8_t>(matrixCoefficients, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
           parameter("smpte240m").set<uint8_t&, uint8_t>(matrixCoefficients, 7u).doc("SMPTE 240M") |

@@ -303,7 +303,7 @@ AV1のプロファイルを指定する。[プロファイルごとに使える�
 ```
 --color-primaries 
          [<Value defined in H.273>|
-          bt709|unspecified|bt470m|
+          bt709|sRGB|sYCC|unspecified|bt470m|
           bt470bg|bt601|ntsc|smpte240m|
           generic-film|bt2020|bt2100|xyz|
           smpte428|smpte431|smpte432|ebu3213]
@@ -338,8 +338,8 @@ AV1のプロファイルを指定する。[プロファイルごとに使える�
 
 ```
 --matrix-coefficients
-         [<Value defined in H.273>|bt709|sYCC|sRGB|
-          unspecified|us-fcc|bt601|ntsc|smpte240m|bt2020]
+         [<Value defined in H.273>|bt709|sRGB|sYCC|
+          unspecified|us-fcc|bt470bg|bt601|ntsc|smpte240m|bt2020]
 ```
 
 - デフォルト値：`bt709`
