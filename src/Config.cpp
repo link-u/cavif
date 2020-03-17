@@ -129,6 +129,7 @@ int Config::parse(int argc, char **argv) {
           integer("Value defined in H.273").set(matrixCoefficients).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
           parameter("bt709").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("Rec. ITU-R BT.709-6") |
           parameter("sYCC").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sYCC") |
+          parameter("sYCC").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB") |
           parameter("unspecified").set<uint8_t&, uint8_t>(matrixCoefficients, 2u).doc("Image characteristics are unknown or are determined by the application") |
           parameter("us-fcc").set<uint8_t&, uint8_t>(matrixCoefficients, 4u).doc("United States Federal Communications Commission (2003)") |
           parameter("bt601").set<uint8_t&, uint8_t>(matrixCoefficients, 5u).doc("Rec. ITU-R BT.601-7 625") |
