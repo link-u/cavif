@@ -382,12 +382,12 @@ RGBからYUVに変換する行列の係数を指定する。それぞれの名�
 
 ### チューニング・メトリクス
 
- - `--tune [ssim|psnr|cdef-dist|daala-dist|vmaf-with-preprocessing|vmaf-without-preprocessing|vmaf-max-gain]`
+ - `--tune [ssim|psnr|vmaf-with-preprocessing|vmaf-without-preprocessing|vmaf-max-gain]`
    - 初期値：`ssim` ([Structural Similarity](https://www.cns.nyu.edu/pub/lcv/wang03-preprint.pdf))
 
 エンコーダが画質を最適するためにパラメータをチューニングするときに、どの指標をつかって画質を評価するか指定する。
 
-[PSNRとSSIMは有名なので省略](https://dftalk.jp/?p=18111)。`cdef-dist`と`daala-dist`はこのコミットの時点ではまだ実際には使えない様子（[#6](https://github.com/link-u/cavif/issues/6)）。
+[PSNRとSSIMは有名なので省略](https://dftalk.jp/?p=18111)。
 
 `vmaf-with-preprocessing`,`vmaf-without-preprocessing`, `vmaf-max-gain`は、Netflixの開発した客観指標、[VMAF](https://github.com/Netflix/vmaf)を使ってtuningする。それぞれの違いは調査してない。
 

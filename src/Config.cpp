@@ -272,6 +272,9 @@ int Config::parse(int argc, char **argv) {
       cropOffset = std::make_pair(std::make_pair(0,1), std::make_pair(0,1));
     }
   }
+  // MEMO(ledyba-z): These qp offset parameters are only used in video.
+  //codec.use_fixed_qp_offsets = 1;
+  //codec.fixed_qp_offsets[0] = 0;
   return 0;
 }
 
@@ -438,6 +441,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   }
   (void)AV1E_ENABLE_EXT_TILE_DEBUG;// is for debugging.
   (void)AV1E_ENABLE_SB_MULTIPASS_UNIT_TEST;// is for unit test.
+  (void)AV1E_SET_GF_MIN_PYRAMID_HEIGHT; // is for video.
 
   #undef set
 }
