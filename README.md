@@ -73,8 +73,8 @@ cavif -i <input.png> -o <output.avif> --encode-target image --attach-alpha <outp
 
 ```
 % cavif
-[2020/03/17 19:57:05 INFO ] cavif
-[2020/03/17 19:57:05 INFO ] libaom ver: 1.0.0-errata1-avif-259-gfc038664e
+[2020/03/18 16:04:09 INFO ] cavif
+[2020/03/18 16:04:09 INFO ] libaom ver: 1.0.0-errata1-avif-414-g0cfdca944
 SYNOPSIS
         cavif -i <input.png> -o <output.avif> [--attach-alpha <input-alpha.avif>] [--attach-depth
               <input-depth.avif>] [--encode-target [image|alpha]] [--show-result] [--rotation
@@ -82,11 +82,11 @@ SYNOPSIS
               <widthN/widthD,heightN/heightD>] [--crop-offset
               <horizOffN/horizOffD,vertOffN/vertOffD>] [--full-still-picture-header]
               [--color-primaries (<Value defined in
-              H.273>|bt709|unspecified|bt470m|bt470bg|bt601|ntsc|smpte240m|generic-film|bt2020|bt2100|xyz|smpte428|smpte431|smpte432|ebu3213)]
+              H.273>|bt709|sRGB|sYCC|unspecified|bt470m|bt470bg|bt601|ntsc|smpte240m|generic-film|bt2020|bt2100|xyz|smpte428|smpte431|smpte432|ebu3213)]
               [--transfer-characteristics (<Value defined in
-              H.273>|bt709|unspecified|bt470m|bt470bg|bt601|ntsc|smpte240m|linear|log100|log100sqrt10|iec61966|bt1361|sRGB|bt2020|bt2020-10bit|bt2020-12bit|smpte2084|bt2100pq|smpte428|bt2100hlg|arib-b67)]
+              H.273>|bt709|unspecified|bt470m|bt470bg|bt601|ntsc|smpte240m|linear|log100|log100sqrt10|iec61966|bt1361|sRGB|sYCC|bt2020|bt2020-10bit|bt2020-12bit|smpte2084|bt2100pq|smpte428|bt2100hlg|arib-b67)]
               [--matrix-coefficients (<Value defined in
-              H.273>|bt709|sYCC|sYCC|unspecified|us-fcc|bt601|ntsc|smpte240m|bt2020)]
+              H.273>|bt709|sRGB|sYCC|unspecified|us-fcc|bt470bg|bt601|ntsc|smpte240m|bt2020)]
               [--horizontal-scale-mode [1/1|4/5|3/5|1/2]] [--vertical-scale-mode [1/1|4/5|3/5|1/2]]
               [--resize-mode [none|fixed|random]] [--resize-denominator <[8-16]>] [--superres-mode
               [none|fixed|random|qthresh|auto]] [--superres-denominator <[8-16]>]
@@ -102,7 +102,7 @@ SYNOPSIS
               [--enable-delta-lf] [--disable-delta-lf] [--use-qm] [--qm-min <0-15 (default: 5)>]
               [--qm-max <0-15 (default: 9)>] [--qm-min-y <0-15 (default: 10)>] [--qm-min-u <0-15
               (default: 11)>] [--qm-min-v <0-15 (default: 12)>] [--tune
-              [ssim|psnr|cdef-dist|daala-dist|vmaf-with-preprocessing|vmaf-without-preprocessing|vmaf-max-gain]]
+              [ssim|psnr|vmaf-with-preprocessing|vmaf-without-preprocessing|vmaf-max-gain]]
               [--vmaf-model-path <<path-to-vmaf-model-file>>] [--lossless] [--monochrome]
               [--sharpness <0-7>] [--disable-cdef] [--enable-cdef] [--disable-loop-restoration]
               [--enable-loop-restoration] [--superblock-size [dynamic|128|64]] [--tile-rows <0-6>]
@@ -154,6 +154,8 @@ OPTIONS
                     See https://www.itu.int/rec/T-REC-H.273-201612-I/en
 
         bt709       Rec. ITU-R BT.709-6
+        sRGB        IEC 61966-2-1 sRGB or sYCC
+        sYCC        IEC 61966-2-1 sRGB or sYCC
         unspecified Image characteristics are unknown or are determined by the application.
         bt470m      Rec. ITU-R BT.470-6 System M (historical)
         bt470bg     Rec. ITU-R BT.470-6 System B, G (historical)
@@ -191,6 +193,7 @@ OPTIONS
         iec61966    IEC 61966-2-4
         bt1361      Rec. ITU-R BT.1361-0 extended colour gamut system (historical)
         sRGB        IEC 61966-2-1 sRGB or sYCC
+        sYCC        IEC 61966-2-1 sRGB or sYCC
         bt2020      Rec. ITU-R BT.2020-2 (10-bit system)
         bt2020-10bit
                     Rec. ITU-R BT.2020-2 (10-bit system)
@@ -210,10 +213,11 @@ OPTIONS
                     See https://www.itu.int/rec/T-REC-H.273-201612-I/en
 
         bt709       Rec. ITU-R BT.709-6
-        sYCC        IEC 61966-2-1 sYCC
-        sYCC        IEC 61966-2-1 sRGB
+        sRGB        IEC 61966-2-1 sRGB or sYCC
+        sYCC        IEC 61966-2-1 sRGB or sYCC
         unspecified Image characteristics are unknown or are determined by the application
         us-fcc      United States Federal Communications Commission (2003)
+        bt470bg     Rec. ITU-R BT.470-6 System B, G (historical)
         bt601       Rec. ITU-R BT.601-7 625
         ntsc        Rec. ITU-R BT.1700-0 NTSC
         smpte240m   SMPTE 240M
@@ -308,8 +312,6 @@ OPTIONS
         --tune      Quality metric to tune
         ssim        structural similarity
         psnr        peak signal-to-noise ratio
-        cdef-dist   cdef-dist
-        daala-dist  daala-dist
         vmaf-with-preprocessing
                     vmaf-with-preprocessing
 
