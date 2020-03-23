@@ -43,13 +43,24 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
     png_set_expand_gray_1_2_4_to_8(png);
   }
 
-
   if(png_get_valid(png, info, PNG_INFO_tRNS)) {
     png_set_tRNS_to_alpha(png);
   }
 
   if(bit_depth == 16) {
       png_set_swap(png);
+  }
+
+  avif::img::ColorProfile colorProfile;
+  if (png_get_valid(png, info, PNG_INFO_iCCP)) {
+    png_charp name = {};
+    int compression_type = {};
+    png_bytep profdata = {};
+    png_uint_32 proflen = {};
+    if(PNG_INFO_iCCP == png_get_iCCP(png, info, &name, &compression_type, &profdata, &proflen)) {
+      std::vector<uint8_t> data(profdata, profdata + proflen);
+      colorProfile = avif::img::ICCProfile(std::move(data));
+    }
   }
 
   avif::img::PixelOrder pixelOrder = avif::img::PixelOrder::RGB;
@@ -103,8 +114,8 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   fclose(file);
   png_destroy_read_struct(&png, &info, nullptr);
   if(bit_depth == 16) {
-    return avif::img::Image<16>(pixelOrder, width, height, bytesPerPixel, width * bytesPerPixel, std::move(data));
+    return avif::img::Image<16>(std::move(colorProfile), pixelOrder, width, height, bytesPerPixel, width * bytesPerPixel, std::move(data));
   } else {
-    return avif::img::Image<8>(pixelOrder, width, height, bytesPerPixel, width * bytesPerPixel, std::move(data));
+    return avif::img::Image<8>(std::move(colorProfile), pixelOrder, width, height, bytesPerPixel, width * bytesPerPixel, std::move(data));
   }
 }

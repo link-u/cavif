@@ -74,6 +74,17 @@ AVIFBuilder::Frame AVIFBuilder::Frame::load(avif::util::Logger& log, std::string
     primaryItemID = fileBox.metaBox.primaryItemBox.value().itemID;
   }
   namespace query = avif::util::query;
+  avif::img::ColorProfile colorProfile;
+  std::optional<avif::ColourInformationBox> colr = query::findProperty<avif::ColourInformationBox>(fileBox, primaryItemID);
+  if(colr.has_value()) {
+    auto profile = colr.value().profile;
+    if(std::holds_alternative<avif::ColourInformationBox::RestrictedICC>(profile)) {
+      colorProfile = avif::img::RestrictedICCProfile(std::get<avif::ColourInformationBox::RestrictedICC>(profile).payload);
+    } else if(std::holds_alternative<avif::ColourInformationBox::UnrestrictedICC>(profile)) {
+      colorProfile = avif::img::RestrictedICCProfile(std::get<avif::ColourInformationBox::UnrestrictedICC>(profile).payload);
+    }
+  }
+
   std::optional<avif::AV1CodecConfigurationRecordBox> av1Config = query::findProperty<avif::AV1CodecConfigurationRecordBox>(fileBox, primaryItemID);
   if(!av1Config.has_value()) {
     log.fatal("AV1 config not found: {}", path);
@@ -91,7 +102,7 @@ AVIFBuilder::Frame AVIFBuilder::Frame::load(avif::util::Logger& log, std::string
   if(!seq.has_value()) {
     log.fatal("Sequence header not found.");
   }
-  return AVIFBuilder::Frame(std::move(seq.value()), std::move(configOBUs), std::move(mdat));
+  return AVIFBuilder::Frame(colorProfile, std::move(seq.value()), std::move(configOBUs), std::move(mdat));
 }
 
 AVIFBuilder::AVIFBuilder(avif::util::Logger& log, Config& config, uint32_t width, uint32_t height)
@@ -341,6 +352,20 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
       }
       item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
           .essential = true,
+          .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
+      });
+    }
+    {
+      if(std::holds_alternative<avif::img::ICCProfile>(frame.colorProfile())) {
+        auto const& icc = std::get<avif::img::ICCProfile>(frame.colorProfile());
+        propertiesBox.propertyContainers.properties.emplace_back(ColourInformationBox {
+            .profile = ColourInformationBox::UnrestrictedICC{
+                .payload = icc.payload(),
+            }
+        });
+      }
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
+          .essential = false,
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }

@@ -92,12 +92,15 @@ int _main(int argc, char** argv) {
   std::variant<avif::img::Image<8>, avif::img::Image<16>> loadedImage = PNGReader(config.input).read();
 
   aom_image_t img;
+  avif::img::ColorProfile colorProfile;
   if(std::holds_alternative<avif::img::Image<8>>(loadedImage)) {
     auto src = std::get<avif::img::Image<8>>(loadedImage);
     convert(config, src, img);
+    colorProfile = src.colorProfile();
   } else {
     auto src = std::get<avif::img::Image<16>>(loadedImage);
     convert(config, src, img);
+    colorProfile = src.colorProfile();
   }
 
   uint32_t const width = aom_img_plane_width(&img, AOM_PLANE_Y);
@@ -186,7 +189,7 @@ int _main(int argc, char** argv) {
     if (!seq.has_value()) {
       throw std::logic_error("No sequence header OBU.");
     }
-    builder.setPrimaryFrame(AVIFBuilder::Frame(seq.value(), std::move(configOBUs), std::move(mdat)));
+    builder.setPrimaryFrame(AVIFBuilder::Frame(colorProfile, seq.value(), std::move(configOBUs), std::move(mdat)));
     if(config.alphaInput.has_value()) {
       log.info("Attaching %s as Alpha plane.", config.alphaInput.value());
       builder.setAlphaFrame(AVIFBuilder::Frame::load(log, config.alphaInput.value()));

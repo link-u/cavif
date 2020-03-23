@@ -12,19 +12,22 @@ class AVIFBuilder final {
 public:
   class Frame final {
   private:
+    avif::img::ColorProfile colorProfile_;
     avif::av1::SequenceHeader sequenceHeader_;
     std::vector<uint8_t> configOBU_;
     std::vector<uint8_t> data_;
   public:
     Frame() = delete;
-    explicit Frame(avif::av1::SequenceHeader sequenceHeader, std::vector<uint8_t> configOBU, std::vector<uint8_t> data)
-    :sequenceHeader_(sequenceHeader)
+    explicit Frame(avif::img::ColorProfile colorProfile, avif::av1::SequenceHeader sequenceHeader, std::vector<uint8_t> configOBU, std::vector<uint8_t> data)
+    :colorProfile_(std::move(colorProfile))
+    ,sequenceHeader_(sequenceHeader)
     ,configOBU_(std::move(configOBU))
     ,data_(std::move(data))
     {
     }
     static Frame load(avif::util::Logger& log, std::string const& path);
   public:
+    [[ nodiscard ]] avif::img::ColorProfile const& colorProfile() const { return this->colorProfile_; }
     [[ nodiscard ]] avif::av1::SequenceHeader const& sequenceHeader() const { return this->sequenceHeader_; }
     [[ nodiscard ]] std::vector<uint8_t> const& configOBU() const { return this->configOBU_; }
     [[ nodiscard ]] std::vector<uint8_t> const& data() const { return this->data_; }
