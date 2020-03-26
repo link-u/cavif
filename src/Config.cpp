@@ -24,7 +24,7 @@ std::string trim(std::string str) {
   str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](int ch) {
     return !std::isspace(ch);
   }));
-  return std::move(str);
+  return str;
 }
 
 std::pair<int32_t, uint32_t> parseFraction(std::string const& str) {

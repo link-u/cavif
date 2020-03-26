@@ -226,7 +226,7 @@ std::vector<uint8_t> AVIFBuilder::build() {
     Frame& frame = alpha_.value();
     std::copy(std::begin(frame.data()), std::end(frame.data()), std::next(beg, fileBox.mediaDataBoxes.at(1).offset));
   }
-  return std::move(data);
+  return data;
 }
 
 void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const& frame, std::optional<std::string> const& auxType) {
