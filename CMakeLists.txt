@@ -107,8 +107,6 @@ ELSE()
         INSTALL_COMMAND make install
         )
 ENDIF()
-
-include_directories("${CMAKE_BINARY_DIR}/include")
 ###############################################################################
 
 add_executable(cavif
@@ -126,6 +124,7 @@ add_executable(cavif
 )
 
 add_dependencies(cavif lcms_repo)
+target_link_directories(cavif PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/lib")
 target_link_libraries(cavif PRIVATE lcms2)
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)
@@ -136,6 +135,7 @@ target_include_directories(cavif PRIVATE external/libaom)
 target_include_directories(cavif PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/external/libaom")
 target_include_directories(cavif PRIVATE external/libyuv/include)
 target_include_directories(cavif PRIVATE external/libavif-container/src)
+target_include_directories(cavif PRIVATE "${CMAKE_BINARY_DIR}/include")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # FIXME(ledyba-z): workaround for gcc-8
     target_link_libraries(cavif PRIVATE stdc++fs)
