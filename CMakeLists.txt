@@ -71,6 +71,7 @@ unset(CMAKE_LIBRARY_PATH_ORIG)
 add_dependencies(aom vmaf_repo)
 ###############################################################################
 include(ExternalProject)
+find_program(MAKE_EXE NAMES gmake nmake make)
 
 IF(CMAKE_BUILD_TYPE MATCHES Release)
     ExternalProject_Add(lcms_repo
@@ -85,9 +86,9 @@ IF(CMAKE_BUILD_TYPE MATCHES Release)
         --without-threads
         --without-jpeg
         --without-tiff
-        BUILD_COMMAND bash -c "make -j $(nproc)"
+        BUILD_COMMAND ${MAKE_EXE}
         INSTALL_DIR ${CMAKE_BINARY_DIR}
-        INSTALL_COMMAND make install
+        INSTALL_COMMAND ${MAKE_EXE} install
         )
 ELSE()
     ExternalProject_Add(lcms_repo
@@ -102,9 +103,9 @@ ELSE()
         --without-threads
         --without-jpeg
         --without-tiff
-        BUILD_COMMAND make
+        BUILD_COMMAND ${MAKE_EXE}
         INSTALL_DIR ${CMAKE_BINARY_DIR}
-        INSTALL_COMMAND make install
+        INSTALL_COMMAND ${MAKE_EXE} install
         )
 ENDIF()
 ###############################################################################
