@@ -20,3 +20,6 @@
 [submodule "external/vmaf"]
 	path = external/vmaf
 	url = git@github.com:Netflix/vmaf.git
+[submodule "external/Little-CMS"]
+	path = external/Little-CMS
+	url = git@github.com:mm2/Little-CMS.git
