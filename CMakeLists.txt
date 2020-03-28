@@ -61,7 +61,6 @@ set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
 # CMake Warning at external/libaom/build/cmake/util.cmake:57 (message):
 #  --- Disabled CONFIG_DIST_8X8, incompatible with CONFIG_MULTITHREAD.
 #
-set(CONFIG_DIST_8X8 1 CACHE INTERNAL "AV1 experiment flag." FORCE)
 set(CONFIG_AV1_DECODER 0 CACHE STRING "Enable AV1 decoder." FORCE)
 # FIXME(ledyba-z): It's need to link libvmaf.a to libaom with find_library
 set(CMAKE_LIBRARY_PATH_ORIG ${CMAKE_LIBRARY_PATH})
@@ -70,6 +69,46 @@ add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH_ORIG})
 unset(CMAKE_LIBRARY_PATH_ORIG)
 add_dependencies(aom vmaf_repo)
+###############################################################################
+include(ExternalProject)
+
+IF(CMAKE_BUILD_TYPE MATCHES Release)
+    ExternalProject_Add(lcms_repo
+        PREFIX "${CMAKE_BINARY_DIR}"
+        URL "${CMAKE_SOURCE_DIR}/external/Little-CMS"
+        CONFIGURE_COMMAND
+        ${CMAKE_SOURCE_DIR}/external/Little-CMS/configure
+        --prefix=${CMAKE_BINARY_DIR}
+        --enable-static
+        --disable-shared
+        --without-zlib
+        --without-threads
+        --without-jpeg
+        --without-tiff
+        BUILD_COMMAND bash -c "make -j $(nproc)"
+        INSTALL_DIR ${CMAKE_BINARY_DIR}
+        INSTALL_COMMAND make install
+        )
+ELSE()
+    ExternalProject_Add(lcms_repo
+        PREFIX "${CMAKE_BINARY_DIR}"
+        URL "${CMAKE_SOURCE_DIR}/external/Little-CMS"
+        CONFIGURE_COMMAND
+        env "CFLAGS=${CMAKE_CXX_FLAGS_DEBUG}" ${CMAKE_SOURCE_DIR}/external/Little-CMS/configure
+        --prefix=${CMAKE_BINARY_DIR}
+        --enable-static
+        --disable-shared
+        --without-zlib
+        --without-threads
+        --without-jpeg
+        --without-tiff
+        BUILD_COMMAND make
+        INSTALL_DIR ${CMAKE_BINARY_DIR}
+        INSTALL_COMMAND make install
+        )
+ENDIF()
+
+include_directories("${CMAKE_BINARY_DIR}/include")
 ###############################################################################
 
 add_executable(cavif
@@ -86,6 +125,8 @@ add_executable(cavif
         src/AVIFBuilder.hpp
 )
 
+add_dependencies(cavif lcms_repo)
+target_link_libraries(cavif PRIVATE lcms2)
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)
 target_link_libraries(cavif PRIVATE fmt::fmt)
