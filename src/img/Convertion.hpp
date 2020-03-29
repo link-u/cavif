@@ -150,7 +150,7 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
   dst.bit_depth = config.codec.g_bit_depth;
   if(std::holds_alternative<avif::img::ICCProfile>(src.colorProfile())) {
     auto icc = std::get<avif::img::ICCProfile>(src.colorProfile()).calcColorCoefficients();
-    convert<decltype(icc), rgbBits>(config, icc, src, dst);
+      convert<decltype(icc), rgbBits>(config, icc, src, dst);
     return;
   }
   namespace converters = avif::img::converters;
