@@ -1,19 +1,19 @@
-#include <iostream>
+#include <thread>
 
-#include "avif/img/Image.hpp"
-#include "img/PNGReader.hpp"
-#include "AVIFBuilder.hpp"
 #include <aom/aom_encoder.h>
 #include <aom/aom_codec.h>
 #include <aom/aomcx.h>
+
 #include <avif/av1/Parser.hpp>
 #include <avif/util/FileLogger.hpp>
 #include <avif/util/File.hpp>
 #include <avif/FileBox.hpp>
 #include <avif/Writer.hpp>
-#include <thread>
+#include <avif/img/Image.hpp>
 
 #include "Config.hpp"
+#include "AVIFBuilder.hpp"
+#include "img/PNGReader.hpp"
 #include "img/Convertion.hpp"
 
 namespace {
