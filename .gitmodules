@@ -7,9 +7,6 @@
 [submodule "external/libpng"]
 	path = external/libpng
 	url = git://git.code.sf.net/p/libpng/code
-[submodule "external/fmt"]
-	path = external/fmt
-	url = git@github.com:fmtlib/fmt.git
 [submodule "external/libavif-container"]
 	path = external/libavif-container
 	url = git@github.com:link-u/libavif-container.git

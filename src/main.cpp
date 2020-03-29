@@ -32,9 +32,9 @@ size_t encode(avif::util::Logger& log, aom_codec_ctx_t& codec, aom_image* img, s
   aom_codec_err_t const res = aom_codec_encode(&codec, img, 0, 1, img ? AOM_EFLAG_FORCE_KF : 0);
   if (res != AOM_CODEC_OK) {
     if(img) {
-      log.fatal("failed to encode a frame: %s", aom_codec_error_detail(&codec));
+      log.fatal("failed to encode a frame: {}", aom_codec_error_detail(&codec));
     } else {
-      log.fatal("failed to flush encoder: %s", aom_codec_error_detail(&codec));
+      log.fatal("failed to flush encoder: {}", aom_codec_error_detail(&codec));
     }
     return 0;
   }
@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
 int _main(int argc, char** argv) {
   avif::util::FileLogger log(stdout, stderr, avif::util::Logger::Level::DEBUG);
   log.info("cavif");
-  log.info("libaom ver: %s", aom_codec_version_str());
+  log.info("libaom ver: {}", aom_codec_version_str());
 
   aom_codec_iface_t* av1codec = aom_codec_av1_cx();
   if(!av1codec) {
@@ -133,24 +133,24 @@ int _main(int argc, char** argv) {
     flags = AOM_CODEC_USE_HIGHBITDEPTH;
   }
   if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &config.codec, flags)) {
-    log.fatal("Failed to initialize encoder: %s", aom_codec_error_detail(&codec));
+    log.fatal("Failed to initialize encoder: {}", aom_codec_error_detail(&codec));
   }
 
   config.modify(&codec);
 
   std::vector<std::vector<uint8_t>> packets;
   {
-    log.info("Encoding: %s -> %s", config.input, config.output);
+    log.info("Encoding: {} -> {}", config.input, config.output);
     auto start = std::chrono::steady_clock::now();
     encode(log, codec, &img, packets);
     while(encode(log, codec, nullptr, packets) > 0); //flushing
     auto finish = std::chrono::steady_clock::now();
-    log.info(" Encoded: %s -> %s in %.2f [sec]", config.input, config.output, std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() / 1000.0f);
+    log.info(" Encoded: {} -> {} in {:.2f} [sec]", config.input, config.output, std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() / 1000.0f);
   }
   aom_img_free(&img);
 
   if (aom_codec_destroy(&codec) != AOM_CODEC_OK) {
-    log.error("Failed to destroy codec: %s", aom_codec_error_detail(&codec));
+    log.error("Failed to destroy codec: {}", aom_codec_error_detail(&codec));
     return -1;
   }
 
@@ -191,11 +191,11 @@ int _main(int argc, char** argv) {
     }
     builder.setPrimaryFrame(AVIFBuilder::Frame(colorProfile, seq.value(), std::move(configOBUs), std::move(mdat)));
     if(config.alphaInput.has_value()) {
-      log.info("Attaching %s as Alpha plane.", config.alphaInput.value());
+      log.info("Attaching {} as Alpha plane.", config.alphaInput.value());
       builder.setAlphaFrame(AVIFBuilder::Frame::load(log, config.alphaInput.value()));
     }
     if(config.depthInput.has_value()) {
-      log.info("Attaching %s as Depth plane.", config.depthInput.value());
+      log.info("Attaching {} as Depth plane.", config.depthInput.value());
       builder.setDepthFrame(AVIFBuilder::Frame::load(log, config.depthInput.value()));
     }
     std::vector<uint8_t> data = builder.build();
@@ -214,38 +214,38 @@ int _main(int argc, char** argv) {
 void printSequenceHeader(avif::util::Logger& log, avif::av1::SequenceHeader& seq) {
   log.info("<Encoding Result>");
   log.info(" - OBU Sequence Header:");
-  log.info("   - AV1 Profile: %d", seq.seqProfile);
-  log.info("   - Still picture: %s", seq.stillPicture ? "Yes" : "No");
-  log.info("   - Reduced still picture header: %s", seq.reducedStillPictureHeader ? "Yes" : "No");
-  log.info("   - Sequence Level Index at OperatingPoint[0]: %d", seq.operatingPoints.at(0).seqLevelIdx);
-  log.info("   - Max frame width: %d", seq.maxFrameWidth);
-  log.info("   - Max frame height: %d", seq.maxFrameHeight);
-  log.info("   - Use 128x128 superblock: %s", seq.use128x128Superblock ? "Yes" : "No");
-  log.info("   - FilterIntra enabled: %s", seq.enableFilterIntra ? "Yes" : "No");
-  log.info("   - IntraEdgeFilter enabled: %s", seq.enableIntraEdgeFilter ? "Yes" : "No");
+  log.info("   - AV1 Profile: {}", seq.seqProfile);
+  log.info("   - Still picture: {}", seq.stillPicture ? "Yes" : "No");
+  log.info("   - Reduced still picture header: {}", seq.reducedStillPictureHeader ? "Yes" : "No");
+  log.info("   - Sequence Level Index at OperatingPoint[0]: {}", seq.operatingPoints.at(0).seqLevelIdx);
+  log.info("   - Max frame width: {}", seq.maxFrameWidth);
+  log.info("   - Max frame height: {}", seq.maxFrameHeight);
+  log.info("   - Use 128x128 superblock: {}", seq.use128x128Superblock ? "Yes" : "No");
+  log.info("   - FilterIntra enabled: {}", seq.enableFilterIntra ? "Yes" : "No");
+  log.info("   - IntraEdgeFilter enabled: {}", seq.enableIntraEdgeFilter ? "Yes" : "No");
 /*
-  log.info("   - InterIntraCompound enabled: %s", seq.enableInterintraCompound ? "Yes" : "No");
-  log.info("   - Masked Compound enabled: %s", seq.enableMaskedCompound ? "Yes" : "No");
-  log.info("   - WarpedMotion enabled: %s", seq.enableWarpedMotion ? "Yes" : "No");
-  log.info("   - DualFilter enabled: %s", seq.enableDualFilter ? "Yes" : "No");
-  log.info("   - OrderHint enabled: %s", seq.enableOrderHint ? "Yes" : "No");
-  log.info("   - JNTComp enabled: %s", seq.enableJNTComp ? "Yes" : "No");
-  log.info("   - RefFrameMVS enabled: %s", seq.enableRefFrameMVS ? "Yes" : "No");
+  log.info("   - InterIntraCompound enabled: {}", seq.enableInterintraCompound ? "Yes" : "No");
+  log.info("   - Masked Compound enabled: {}", seq.enableMaskedCompound ? "Yes" : "No");
+  log.info("   - WarpedMotion enabled: {}", seq.enableWarpedMotion ? "Yes" : "No");
+  log.info("   - DualFilter enabled: {}", seq.enableDualFilter ? "Yes" : "No");
+  log.info("   - OrderHint enabled: {}", seq.enableOrderHint ? "Yes" : "No");
+  log.info("   - JNTComp enabled: {}", seq.enableJNTComp ? "Yes" : "No");
+  log.info("   - RefFrameMVS enabled: {}", seq.enableRefFrameMVS ? "Yes" : "No");
 */
-  log.info("   - Superres enabled: %s", seq.enableSuperres ? "Yes" : "No");
-  log.info("   - CDEF enabled: %s", seq.enableCDEF ? "Yes" : "No");
-  log.info("   - Loop Restoration enabled: %s", seq.enableRestoration ? "Yes" : "No");
-  log.info("   - Film Grain Params Present: %s", seq.filmGrainParamsPresent ? "Yes" : "No");
+  log.info("   - Superres enabled: {}", seq.enableSuperres ? "Yes" : "No");
+  log.info("   - CDEF enabled: {}", seq.enableCDEF ? "Yes" : "No");
+  log.info("   - Loop Restoration enabled: {}", seq.enableRestoration ? "Yes" : "No");
+  log.info("   - Film Grain Params Present: {}", seq.filmGrainParamsPresent ? "Yes" : "No");
   log.info("   - Color Info:");
-  log.info("     - High bit-depth: %s", seq.colorConfig.highBitdepth ? "Yes" : "No");
-  log.info("     - Twelve bit: %s", seq.colorConfig.twelveBit ? "Yes" : "No");
-  log.info("     - Monochrome: %s", seq.colorConfig.monochrome ? "Yes" : "No");
-  log.info("     - Color primaries: %s", seq.colorConfig.colorPrimaries.has_value() ? std::to_string(static_cast<uint8_t>(seq.colorConfig.colorPrimaries.value())) : "<Unknownn>");
-  log.info("     - Transfer characteristics: %s", seq.colorConfig.transferCharacteristics.has_value() ? std::to_string(static_cast<uint8_t>(seq.colorConfig.transferCharacteristics.value())) : "<Unknownn>");
-  log.info("     - Matrix coefficients: %s", seq.colorConfig.matrixCoefficients.has_value() ? std::to_string(static_cast<uint8_t>(seq.colorConfig.matrixCoefficients.value())) : "<Unknownn>");
-  log.info("     - Color range: %s", seq.colorConfig.colorRange ? "Full Ranged" : "Limited");
-  log.info("     - Sub sampling X: %d", seq.colorConfig.subsamplingX);
-  log.info("     - Sub sampling Y: %d", seq.colorConfig.subsamplingX);
-  log.info("     - Chroma sample position: %s", seq.colorConfig.chromaSamplePosition.has_value() ? std::to_string(static_cast<uint8_t>(seq.colorConfig.chromaSamplePosition.value())) : "<Unknownn>");
-  log.info("     - Separate UV Delta Q: %s", seq.colorConfig.separateUVDeltaQ ? "Yes" : "No");
+  log.info("     - High bit-depth: {}", seq.colorConfig.highBitdepth ? "Yes" : "No");
+  log.info("     - Twelve bit: {}", seq.colorConfig.twelveBit ? "Yes" : "No");
+  log.info("     - Monochrome: {}", seq.colorConfig.monochrome ? "Yes" : "No");
+  log.info("     - Color primaries: {}", seq.colorConfig.colorPrimaries.has_value() ? std::to_string(static_cast<uint8_t>(seq.colorConfig.colorPrimaries.value())) : "<Unknownn>");
+  log.info("     - Transfer characteristics: {}", seq.colorConfig.transferCharacteristics.has_value() ? std::to_string(static_cast<uint8_t>(seq.colorConfig.transferCharacteristics.value())) : "<Unknownn>");
+  log.info("     - Matrix coefficients: {}", seq.colorConfig.matrixCoefficients.has_value() ? std::to_string(static_cast<uint8_t>(seq.colorConfig.matrixCoefficients.value())) : "<Unknownn>");
+  log.info("     - Color range: {}", seq.colorConfig.colorRange ? "Full Ranged" : "Limited");
+  log.info("     - Sub sampling X: {}", seq.colorConfig.subsamplingX);
+  log.info("     - Sub sampling Y: {}", seq.colorConfig.subsamplingX);
+  log.info("     - Chroma sample position: {}", seq.colorConfig.chromaSamplePosition.has_value() ? std::to_string(static_cast<uint8_t>(seq.colorConfig.chromaSamplePosition.value())) : "<Unknownn>");
+  log.info("     - Separate UV Delta Q: {}", seq.colorConfig.separateUVDeltaQ ? "Yes" : "No");
 }

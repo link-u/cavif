@@ -37,11 +37,6 @@ target_include_directories(png_static PRIVATE external/zlib)
 target_link_libraries(png_static zlibstatic)
 add_dependencies(png_static zlibstatic)
 ###############################################################################
-# fmt
-set(FMT_TEST OFF CACHE BOOL "" FORCE)
-set(FMT_FUZZ OFF CACHE BOOL "" FORCE)
-add_subdirectory(external/fmt EXCLUDE_FROM_ALL)
-###############################################################################
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo/CMakeLists.txt.in"
                "${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo/CMakeLists.txt" @ONLY)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -S "${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo" -B "${CMAKE_BINARY_DIR}/external/vmaf-repo" )
@@ -70,45 +65,6 @@ set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH_ORIG})
 unset(CMAKE_LIBRARY_PATH_ORIG)
 add_dependencies(aom vmaf_repo)
 ###############################################################################
-include(ExternalProject)
-find_program(MAKE_EXE NAMES gmake nmake make)
-
-IF(CMAKE_BUILD_TYPE MATCHES Release)
-    ExternalProject_Add(lcms_repo
-        PREFIX "${CMAKE_BINARY_DIR}"
-        URL "${CMAKE_SOURCE_DIR}/external/Little-CMS"
-        CONFIGURE_COMMAND
-        ${CMAKE_SOURCE_DIR}/external/Little-CMS/configure
-        --prefix=${CMAKE_BINARY_DIR}
-        --enable-static
-        --disable-shared
-        --without-zlib
-        --without-threads
-        --without-jpeg
-        --without-tiff
-        BUILD_COMMAND ${MAKE_EXE}
-        INSTALL_DIR ${CMAKE_BINARY_DIR}
-        INSTALL_COMMAND ${MAKE_EXE} install
-        )
-ELSE()
-    ExternalProject_Add(lcms_repo
-        PREFIX "${CMAKE_BINARY_DIR}"
-        URL "${CMAKE_SOURCE_DIR}/external/Little-CMS"
-        CONFIGURE_COMMAND
-        env "CFLAGS=${CMAKE_CXX_FLAGS_DEBUG}" ${CMAKE_SOURCE_DIR}/external/Little-CMS/configure
-        --prefix=${CMAKE_BINARY_DIR}
-        --enable-static
-        --disable-shared
-        --without-zlib
-        --without-threads
-        --without-jpeg
-        --without-tiff
-        BUILD_COMMAND ${MAKE_EXE}
-        INSTALL_DIR ${CMAKE_BINARY_DIR}
-        INSTALL_COMMAND ${MAKE_EXE} install
-        )
-ENDIF()
-###############################################################################
 
 add_executable(cavif
         src/main.cpp
@@ -124,9 +80,6 @@ add_executable(cavif
         src/AVIFBuilder.hpp
 )
 
-add_dependencies(cavif lcms_repo)
-target_link_directories(cavif PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/lib")
-target_link_libraries(cavif PRIVATE lcms2)
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)
 target_link_libraries(cavif PRIVATE fmt::fmt)
