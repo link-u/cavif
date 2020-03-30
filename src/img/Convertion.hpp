@@ -149,7 +149,8 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
   dst.monochrome = config.codec.monochrome ? 1 : 0;
   dst.bit_depth = config.codec.g_bit_depth;
   if(std::holds_alternative<avif::img::ICCProfile>(src.colorProfile())) {
-    auto icc = std::get<avif::img::ICCProfile>(src.colorProfile()).calcColorCoefficients();
+    avif::img::ICCProfile const& profile = std::get<avif::img::ICCProfile>(src.colorProfile());
+    auto icc = profile.calcColorCoefficients();
       convert<decltype(icc), rgbBits>(config, icc, src, dst);
     return;
   }
@@ -161,6 +162,7 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
       convert<decltype(converter), rgbBits>(config, converter, src, dst);
       break;
     }
+    case MatrixCoefficients::MC_UNSPECIFIED:
     case MatrixCoefficients::MC_BT_709: {
       constexpr auto converter = converters::BT_709;
       convert<decltype(converter), rgbBits>(config, converter, src, dst);
@@ -191,7 +193,6 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
       convert<decltype(converter), rgbBits>(config, converter, src, dst);
       break;
     }
-    case MatrixCoefficients::MC_UNSPECIFIED:
     case MatrixCoefficients::MC_BT_2020_NCL: {
       auto converter = converters::Unimplementd(matrix);
       convert<decltype(converter), rgbBits>(config, converter, src, dst);
