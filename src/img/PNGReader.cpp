@@ -63,7 +63,6 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
 
   int bytesPerPixel = {};
   avif::img::PixelOrder pixelOrder = {};
-  // These color_type don't have an alpha channel then fill it with 0xff.
   switch(color_type) {
     case PNG_COLOR_TYPE_GRAY:
       pixelOrder = avif::img::PixelOrder::Mono;
