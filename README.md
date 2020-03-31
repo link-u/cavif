@@ -456,7 +456,7 @@ OPTIONS
 
 ## TODO
 
- - ICC Profile
+ - AVIF Image Sequence
  - Exif Profile
  - Add more and more command-line flags.
 
