@@ -47,7 +47,7 @@ public:
   int renderWidth = 0;
   int renderHeight = 0;
   aom_img_fmt_t pixFmt = AOM_IMG_FMT_I420;
-  int crf = 32;
+  int crf = 10;
   int deltaQMode = 0;
   bool enableChromaDeltaQ = false;
   bool enableDeltaLoopfilter = false;
