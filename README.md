@@ -456,8 +456,8 @@ OPTIONS
 
 ## TODO
 
- - AVIF Image Sequence
- - Exif Profile
+ - Thumbnail
+ - Improve default configs
  - Add more and more command-line flags.
 
 # Related repositories
