@@ -148,7 +148,7 @@ int Config::parse(int argc, char **argv) {
       option("--vertical-scale-mode").doc("Set vertical scale mode") & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO)),
       option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)) | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)) | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM))),
       option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16]", codec.rc_resize_kf_denominator)),
-      option("--superres-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_NONE)) | parameter("fixed").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_FIXED)) | parameter("random").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_RANDOM)) | parameter("qthresh").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_QTHRESH)) | parameter("auto").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_AUTO))),
+      option("--superres-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_superres_mode, (unsigned int)(AOM_SUPERRES_NONE)) | parameter("fixed").set(codec.rc_superres_mode, (unsigned int)(AOM_SUPERRES_FIXED)) | parameter("random").set(codec.rc_superres_mode, (unsigned int)(AOM_SUPERRES_RANDOM)) | parameter("qthresh").set(codec.rc_superres_mode, (unsigned int)(AOM_SUPERRES_QTHRESH)) | parameter("auto").set(codec.rc_superres_mode, (unsigned int)(AOM_SUPERRES_AUTO))),
       option("--superres-denominator").doc("Set resize denominator.") & (integer("[8-16]", codec.rc_superres_kf_denominator)),
       option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63]", codec.rc_superres_kf_qthresh)),
       option("--render-width").doc("Set render width.") & (integer("<render-width>", renderWidth)),
@@ -374,12 +374,10 @@ void Config::modify(aom_codec_ctx_t* aom) {
     set(AV1E_SET_QM_U, qmMinU);
     set(AV1E_SET_QM_V, qmMinV);
   }
-  (void)AV1E_SET_ENABLE_DIST_8X8; // is for testing purposes
 
   set(AV1E_SET_NUM_TG, (1u << static_cast<unsigned int>(tileRows)) + (1u << static_cast<unsigned int>(tileColumns)));
 
   (void)AV1E_SET_MTU; // is not needed to set, because AV1E_SET_NUM_TG is already set.
-  (void)AV1E_SET_ANS_WINDOW_SIZE_LOG2; // is not used.
   set(AV1E_SET_ENABLE_RECT_PARTITIONS, enableRectPartition ? 1 : 0);
   set(AV1E_SET_ENABLE_AB_PARTITIONS, enableABPartition ? 1 : 0);
   set(AV1E_SET_ENABLE_1TO4_PARTITIONS, enable1to4Partition ? 1 : 0);
