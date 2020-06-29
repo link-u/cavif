@@ -1,5 +1,6 @@
-#! /bin/bash
-set -e
+#! /bin/bash -eux
+
+set -eux
 
 BASE_DIR=$(cd $(dirname $(readlink -f $0)) && cd .. && pwd)
 cd ${BASE_DIR}
