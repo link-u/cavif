@@ -25,6 +25,15 @@ apt-get install -y --no-install-recommends apt-transport-https ca-certificates g
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
 apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
 
+# Workaround: gcc >= 8.0 is required.
+case $(lsb_release -cs) in
+  bionic)
+     export CC=gcc-8
+     export CXX=g++-8
+    ;;
+  *) ;;
+esac
+
 # Install deps to build.
 mk-build-deps --install --remove \
   --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' \

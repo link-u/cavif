@@ -22,6 +22,15 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: |
+          # Workaround: gcc >= 8.0 is required.
+          case $(lsb_release -cs) in
+            bionic)
+              sudo apt install -y --no-install-recommends \
+                 gcc-8 g++-8 yasm python3-venv python3-pip python3-setuptools ;;
+            *)
+              sudo apt install -y --no-install-recommends \
+                 gcc g++ yasm python3-venv python3-pip python3-setuptools ;;
+          esac
           sudo apt install -y gcc-8 g++-8 yasm python3-venv python3-pip python3-setuptools
           python3 -m venv venv
           source venv/bin/activate
@@ -32,7 +41,15 @@ jobs:
         shell: bash
         run: |
           source venv/bin/activate
-          CXX=g++-8 CC=gcc-8 cmake -S . -B build
+          # Workaround: gcc >= 8.0 is required.
+          case $(lsb_release -cs) in
+            bionic)
+              export CC=gcc-8
+              export CXX=g++-8
+              ;;
+            *) ;;
+          esac
+          cmake -S . -B build
       - name: make
         shell: bash
         run: |
