@@ -1,6 +1,6 @@
 [submodule "external/clipp"]
 	path = external/clipp
-	url = git@github.com:muellan/clipp.git
+	url = https://github.com/muellan/clipp
 [submodule "external/libaom"]
 	path = external/libaom
 	url = https://aomedia.googlesource.com/aom
@@ -9,11 +9,11 @@
 	url = git://git.code.sf.net/p/libpng/code
 [submodule "external/libavif-container"]
 	path = external/libavif-container
-	url = git@github.com:link-u/libavif-container.git
+	url = https://github.com/link-u/libavif-container
 [submodule "external/zlib"]
 	path = external/zlib
-	url = git@github.com:madler/zlib.git
+	url = https://github.com/madler/zlib
 	ignore = dirty
 [submodule "external/vmaf"]
 	path = external/vmaf
-	url = git@github.com:Netflix/vmaf.git
+	url = https://github.com/Netflix/vmaf
