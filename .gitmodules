@@ -6,7 +6,7 @@
 	url = https://aomedia.googlesource.com/aom
 [submodule "external/libpng"]
 	path = external/libpng
-	url = git://git.code.sf.net/p/libpng/code
+	url = https://git.code.sf.net/p/libpng/code
 [submodule "external/libavif-container"]
 	path = external/libavif-container
 	url = https://github.com/link-u/libavif-container
