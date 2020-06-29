@@ -18,6 +18,13 @@ cavif (${VERSION}) unstable; urgency=medium
  -- Ryo Hirafuji <ryo.hirafuji@link-u.co.jp>  ${DATE}
 EOF
 
+# Add Kitware APT repository to install the latest cmake.
+# https://apt.kitware.com/
+apt-get update
+apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget
+wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+
 # Install deps to build.
 mk-build-deps --install --remove \
   --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' \
