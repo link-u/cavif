@@ -31,10 +31,9 @@ case $(lsb_release -cs) in
   bionic)
       export CC=gcc-8
       export CXX=g++-8
-      sed -i -r "s/gcc-9/gcc-8/g"                     "${BASE_DIR}/debian/control"
+      sed -i -r "s/gcc-9/gcc-8/g"                       "${BASE_DIR}/debian/control"
       sed -i -r "s/g\+\+-9/g++-8/g"                     "${BASE_DIR}/debian/control"
       sed -i -r "s/libstdc\+\+-9-dev/libstdc++-8-dev/g" "${BASE_DIR}/debian/control"
-      
     ;;
   *) ;;
 esac
