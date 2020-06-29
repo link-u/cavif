@@ -4,19 +4,13 @@ build_script:
   - cmd: >-
       set MSYSTEM=MINGW64
 
-      sed -r -i "s/git@github.com:([^ ]+)\.git$/https:\/\/github.com\/\1/" .gitmodules
-
-      sed -i "s/git:\/\//https:\/\//" .gitmodules
-
       xcopy %CD% C:\msys64\home\appveyor\cavif /e/i/h
 
       C:\msys64\usr\bin\bash -lc "pacman -S mingw-w64-x86_64-nasm mingw-w64-x86_64-cmake --noconfirm"
 
-      C:\msys64\usr\bin\bash -lc "cd cavif && git submodule update --init"
+      C:\msys64\usr\bin\bash -lc "cd cavif && git submodule update --init --recursive"
 
-      C:\msys64\usr\bin\bash -lc "cd cavif/external/libavif-container && sed -r -i 's/git@github.com:([^ ]+)\.git$/https:\/\/github.com\/\1/' .gitmodules && git submodule update --init"
-
-      C:\msys64\usr\bin\bash -lc "cd cavif && mkdir build && cd build && cmake .. -G 'MSYS Makefiles' -DCMAKE_CXX_FLAGS=-static && make -j4 && strip cavif.exe"
+      C:\msys64\usr\bin\bash -lc "cd cavif && mkdir build && cd build && cmake .. -G 'MSYS Makefiles' -DCMAKE_CXX_FLAGS=-static && make -j && strip cavif.exe"
 
       7z a cavif-win64.7z "C:\msys64\home\appveyor\cavif\build\*.exe"
 
