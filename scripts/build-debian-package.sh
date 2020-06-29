@@ -38,6 +38,12 @@ case $(lsb_release -cs) in
   *) ;;
 esac
 
+# Workaround: meson has been upgraded so fast, we use the latest versions.
+python3 -m venv venv
+source venv/bin/activate
+pip3 install wheel
+pip3 install meson ninja
+
 # Install deps to build.
 mk-build-deps --install --remove \
   --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' \
