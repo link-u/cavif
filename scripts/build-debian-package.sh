@@ -9,7 +9,7 @@ git_describe="$(git describe --tags)"
 VERSION=${git_describe:1}.$(TZ=JST-9 date +%Y%m%d)+$(lsb_release -cs)
 DATE=$(LC_ALL=C TZ=JST-9 date '+%a, %d %b %Y %H:%M:%S %z')
 
-cat <<EOF > "${BASE_DIR}/cavif/debian/changelog"
+cat <<EOF > "${BASE_DIR}/debian/changelog"
 cavif (${VERSION}) unstable; urgency=medium
 
   * This is atomated build.
@@ -21,7 +21,7 @@ EOF
 # Install deps to build.
 mk-build-deps --install --remove \
   --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' \
-  "${BASE_DIR}/cavif/debian/control"
+  "${BASE_DIR}/debian/control"
 
 fakeroot debian/rules clean
 fakeroot debian/rules configure
