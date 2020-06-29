@@ -39,6 +39,7 @@ case $(lsb_release -cs) in
 esac
 
 # Workaround: meson has been upgraded so fast, we use the latest versions.
+apt-get install -y --no-install-recommends python3-venv python3-pip python3-setuptools
 python3 -m venv venv
 source venv/bin/activate
 pip3 install wheel
