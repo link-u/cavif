@@ -24,7 +24,6 @@ mk-build-deps --install --remove \
   "${BASE_DIR}/debian/control"
 
 fakeroot debian/rules clean
-fakeroot debian/rules configure
 fakeroot debian/rules build
 fakeroot debian/rules binary
 # workaround. external/libpng will be dirty after making debian packages.
