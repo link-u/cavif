@@ -1,40 +1,39 @@
 name: Build on Linux
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - dependabot/**
+  pull_request:
+    branches:
+      - master
+
 jobs:
   build:
-
-    runs-on: ubuntu-18.04
-
+    strategy:
+      matrix:
+        os: [ubuntu-18.04, ubuntu-20.04]
     steps:
-    - uses: actions/checkout@v2
-    - name: Checkout submodules
-      shell: bash
-      run: |
-        sed -i -e 's/git\@github\.com\:/https\:\/\/github.com\//g' .gitmodules
-        git submodule init
-        git submodule sync --recursive
-        git submodule update
-        git submodule foreach bash -c "sed -i -e 's/git\@github\.com\:/https\:\/\/github.com\//g' .gitmodules || true"
-        git submodule foreach git submodule sync --recursive
-        git submodule foreach git submodule init
-        git submodule foreach git submodule update --init --force --recursive
-    - name: Install dependencies
-      shell: bash
-      run: |
-        sudo apt install -y gcc-8 g++-8 yasm python3-venv python3-pip python3-setuptools
-        python3 -m venv venv
-        source venv/bin/activate
-        pip3 install wheel
-        pip3 install meson
-        pip3 install ninja
-    - name: configure
-      shell: bash
-      run: |
-        source venv/bin/activate
-        CXX=g++-8 CC=gcc-8 cmake -S . -B build
-    - name: make
-      shell: bash
-      run: |
-        source venv/bin/activate
-        env --chdir build make
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+      - name: Install dependencies
+        shell: bash
+        run: |
+          sudo apt install -y gcc-8 g++-8 yasm python3-venv python3-pip python3-setuptools
+          python3 -m venv venv
+          source venv/bin/activate
+          pip3 install wheel
+          pip3 install meson
+          pip3 install ninja
+      - name: configure
+        shell: bash
+        run: |
+          source venv/bin/activate
+          CXX=g++-8 CC=gcc-8 cmake -S . -B build
+      - name: make
+        shell: bash
+        run: |
+          source venv/bin/activate
+          env --chdir build make

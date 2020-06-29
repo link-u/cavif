@@ -2,7 +2,8 @@
 
 set -eux
 
-cd $(cd $(dirname $(readlink -f $0)) && .. && pwd)
+BASE_DIR=$(cd $(dirname $(readlink -f $0)) && cd .. && pwd)
+cd ${BASE_DIR}
 
 apt install -y ./artifact/*.deb
 apt show cavif
