@@ -29,10 +29,10 @@ apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
 # Workaround: gcc >= 8.0 is required.
 case $(lsb_release -cs) in
   bionic)
-     export CC=gcc-8
-     export CXX=g++-8
-     sed -i -r "s/gcc (>= 4:8)/gcc-8/g" "${BASE_DIR}/debian/control"
-     sed -i -r "s/g++ (>= 4:8)/g++-8/g" "${BASE_DIR}/debian/control"
+      export CC=gcc-8
+      export CXX=g++-8
+      sed -i -r "s/gcc (>= 4:8)/gcc-8/g" "${BASE_DIR}/debian/control"
+      sed -i -r "s/g++ (>= 4:8)/g++-8/g" "${BASE_DIR}/debian/control"
     ;;
   *) ;;
 esac
