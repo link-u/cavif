@@ -52,12 +52,14 @@ size_t encode(avif::util::Logger& log, aom_codec_ctx_t& codec, aom_image* img, s
 
 }
 
-static int _main(int argc, char** argv);
+namespace internal{
+int main(int argc, char** argv);
+}
 void printSequenceHeader(avif::util::Logger& log, avif::av1::SequenceHeader& seq);
 
 int main(int argc, char** argv) {
   try {
-    return _main(argc, argv);
+    return internal::main(argc, argv);
   } catch (std::exception& err) {
     fprintf(stderr, "%s\n", err.what());
     fflush(stderr);
@@ -65,7 +67,7 @@ int main(int argc, char** argv) {
   }
 }
 
-int _main(int argc, char** argv) {
+int internal::main(int argc, char** argv) {
   avif::util::FileLogger log(stdout, stderr, avif::util::Logger::Level::DEBUG);
   log.info("cavif");
   log.info("libaom ver: {}", aom_codec_version_str());
