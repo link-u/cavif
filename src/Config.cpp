@@ -55,9 +55,56 @@ std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>> parseFra
 
 }
 
-int Config::parse(int argc, char **argv) {
+Config::Config(int argc, char** argv)
+:commandName(basename(std::string(argv[0])))
+,argc(argc)
+,argv(argv)
+,commandLineFlags(createCommandLineFlags())
+{
+
+}
+
+void Config::usage() {
+  std::cerr << make_man_page(commandLineFlags, commandName) << std::flush;
+}
+
+int Config::parse() {
+
+  if(clipp::parse(argc, argv, commandLineFlags).any_error()) {
+    this->usage();
+    return -1;
+  }
+  if(showHelp) {
+    return 0;
+  }
+  { // validate
+    if(input == output) {
+      std::cerr << "Input and output can't be the same file!" << std::endl;
+      return -1;
+    }
+    if(!cropSize.has_value() && cropOffset.has_value()) {
+      std::cerr << "crop-size must also be set, when crop-offset is set." << std::endl << std::flush;
+      return -1;
+    }
+    if(cropSize.has_value() && !cropOffset.has_value()) {
+      cropOffset = std::make_pair(std::make_pair(0,1), std::make_pair(0,1));
+    }
+  }
+  // MEMO(ledyba-z): These qp offset parameters are only used in video.
+  //codec.use_fixed_qp_offsets = 1;
+  //codec.fixed_qp_offsets[0] = 0;
+  return 0;
+}
+
+clipp::group Config::createCommandLineFlags() {
   using namespace clipp;
   auto& aom = this->codec;
+
+  // Support flags.
+  auto support = (
+      option("-h", "--help").doc("Show help and exit.").set(showHelp, true)
+  );
+
   // input/output
   group io = (
       required("-i", "--input").doc("Filename to input") & value("input.png", input),
@@ -153,7 +200,7 @@ int Config::parse(int argc, char **argv) {
       option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63]", codec.rc_superres_kf_qthresh)),
       option("--render-width").doc("Set render width.") & (integer("<render-width>", renderWidth)),
       option("--render-height").doc("Set render height.") & (integer("<render-height>", renderHeight))
-   );
+  );
 
   // profile and pixel formats
   group pixelAndColor = (
@@ -253,31 +300,8 @@ int Config::parse(int argc, char **argv) {
       option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false)
   );
 
-  group cli = (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters);
-
-  if(!clipp::parse(argc, argv, cli)) {
-    std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
-    return -1;
-  }
-  { // validate
-    if(input == output) {
-      std::cerr << make_man_page(cli, basename(std::string(argv[0]))) << std::flush;
-      return -1;
-    }
-    if(!cropSize.has_value() && cropOffset.has_value()) {
-      std::cerr << "crop-size must also be set, when crop-offset is set." << std::endl << std::flush;
-      return -1;
-    }
-    if(cropSize.has_value() && !cropOffset.has_value()) {
-      cropOffset = std::make_pair(std::make_pair(0,1), std::make_pair(0,1));
-    }
-  }
-  // MEMO(ledyba-z): These qp offset parameters are only used in video.
-  //codec.use_fixed_qp_offsets = 1;
-  //codec.fixed_qp_offsets[0] = 0;
-  return 0;
+  return support | (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters);
 }
-
 
 void Config::modify(aom_codec_ctx_t* aom) {
   #define set(param, expr) \

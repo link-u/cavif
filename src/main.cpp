@@ -77,13 +77,17 @@ int internal::main(int argc, char** argv) {
     log.fatal("failed to get AV1 encoder.");
   }
 
-  Config config;
+  Config config(argc, argv);
   aom_codec_enc_config_default(av1codec, &config.codec, 0);
   config.codec.g_threads = std::thread::hardware_concurrency();
   {
-    int const parsrResult = config.parse(argc, argv);
+    int const parsrResult = config.parse();
     if(parsrResult != 0) {
       return parsrResult;
+    }
+    if(config.showHelp) {
+      config.usage();
+      return 0;
     }
   }
 

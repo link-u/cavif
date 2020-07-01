@@ -17,6 +17,10 @@
 class Configurator;
 class Config final {
   friend class Configurator;
+
+public:
+  std::string commandName;
+  bool showHelp;
 public:
   std::string input{};
   std::optional<std::string> alphaInput{};
@@ -92,14 +96,21 @@ public:
   aom_tune_metric tune = AOM_TUNE_SSIM;
   std::string vmafModelPath = "/usr/share/cavif/model/vmaf_v0.6.1.pkl";
 public:
-  Config() = default;
+  Config() = delete;
   Config(Config&&) noexcept = default;
   Config(Config const&) = default;
   Config& operator=(Config&&) noexcept = default;
   Config& operator=(Config const&) = default;
+  Config(int argc, char** argv);
 
+private:
+  int argc{};
+  char** argv{};
+  clipp::group commandLineFlags{};
+  clipp::group createCommandLineFlags();
 public:
-  int parse(int argc, char** argv);
+  void usage();
+  int parse();
   void modify(aom_codec_ctx_t* aom);
 };
 

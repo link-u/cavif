@@ -9,7 +9,6 @@ apt install -y ./artifact/*.deb
 apt show cavif
 which cavif
 
-# TODO: add "--help" flag to check
-cavif || true
+cavif --help
 
 ldd $(which cavif)
