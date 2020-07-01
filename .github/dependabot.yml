@@ -1,8 +1,18 @@
 version: 2
 updates:
-- package-ecosystem: gitsubmodule
+- package-ecosystem: "gitsubmodule"
   directory: "/"
   schedule:
-    interval: weekly
+    interval: "weekly"
+    time: "02:00"
+    timezone: "Asia/Tokyo"
+  reviewers:
+    - "ledyba-z"
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "weekly"
+    time: "02:00"
     timezone: Asia/Tokyo
-  open-pull-requests-limit: 10
+  reviewers:
+    - "ledyba-z"
