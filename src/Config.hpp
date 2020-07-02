@@ -19,8 +19,8 @@ class Config final {
   friend class Configurator;
 
 public:
-  std::string commandName;
-  bool showHelp;
+  std::string commandName{};
+  bool showHelp = false;
 public:
   std::string input{};
   std::optional<std::string> alphaInput{};

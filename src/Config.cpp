@@ -300,7 +300,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false)
   );
 
-  return support | (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters);
+  return (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters) | support;
 }
 
 void Config::modify(aom_codec_ctx_t* aom) {
