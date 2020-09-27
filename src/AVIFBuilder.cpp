@@ -156,7 +156,7 @@ avif::FileBox AVIFBuilder::buildFileBox() {
     { // fill HandlerBox
       HandlerBox& handlerBox = metaBox.handlerBox;
       handlerBox.setFullBoxHeader(0u, 0u);
-      handlerBox.name = "cavif - https://github.com/link-u/cavif";
+      handlerBox.name = "cavif";
       handlerBox.handler = "pict";
     }
   }
