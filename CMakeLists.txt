@@ -44,7 +44,7 @@ execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY "${CMAKE_BI
 execute_process(COMMAND ${CMAKE_COMMAND} --install . WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external/vmaf-repo")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo" EXCLUDE_FROM_ALL)
 include_directories("${CMAKE_BINARY_DIR}/include")
-set(ENV{PKG_CONFIG_PATH} "${CMAKE_BINARY_DIR}/lib/pkgconfig")
+set(ENV{PKG_CONFIG_PATH} "${CMAKE_BINARY_DIR}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
 ###############################################################################
 set(ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
