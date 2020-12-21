@@ -15,6 +15,7 @@ IF(CMAKE_BUILD_TYPE MATCHES Release)
             --default-library static
             --buildtype=release
             -Denable_asm=true
+            -Denable_float=true
             #-optimization=3
             "@CMAKE_SOURCE_DIR@/external/vmaf/libvmaf"
             "."
@@ -33,6 +34,7 @@ ELSE()
             --default-library static
             --buildtype=debug
             -Denable_asm=false
+            -Denable_float=true
             #--optimization=g
             "@CMAKE_SOURCE_DIR@/external/vmaf/libvmaf"
             "."
