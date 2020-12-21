@@ -30,7 +30,7 @@ jobs:
       run: |
         export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
         source venv/bin/activate
-        cmake -S . -B build
+        env 'CXX=g++' 'CC=gcc' cmake -S . -B build
     - name: make
       shell: bash
       run: |
