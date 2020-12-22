@@ -191,8 +191,8 @@ clipp::group Config::createCommandLineFlags() {
   );
 
   auto scales = (
-      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL) | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO)),
-      option("--vertical-scale-mode").doc("Set vertical scale mode") & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO)),
+      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL) | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT)),
+      option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL) | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT)),
       option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)) | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)) | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM))),
       option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16]", codec.rc_resize_kf_denominator)),
       option("--superres-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE) | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED) | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM) | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH) | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO)),
@@ -309,7 +309,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
       throw std::invalid_argument(std::string("Failed to set [" #param "] : ") + aom_codec_error_detail(aom)); \
     }
 
-  //aom_codec_control(codec, AV1E_SET_DENOISE_NOISE_LEVEL, 1);
+  //(void)AOME_USE_REFERENCE; // It's for movies?
 
   //FIXME: not implemented yet at libaom.
   // It can be useful for manga images.
