@@ -264,8 +264,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64)),
       option("--tile-rows").doc("Number of tile rows") & integer("0-6", tileRows),
       option("--tile-columns").doc("Number of tile columns") & integer("0-6", tileColumns),
-      option("--disable-keyframe-temporal-filtering").doc("Disable temporal filtering on key frame").set(enableKeyframeTemporalFiltering, false),
-      option("--enable-keyframe-temporal-filtering").doc("Enable temporal filtering on key frame").set(enableKeyframeTemporalFiltering, true),
+      option("--keyframe-temporal-filter").doc("Enable temporal filtering on key frame") & (parameter("disable").set(keyframeTemporalFilter, 0) | parameter("without-overlay").set(keyframeTemporalFilter, 1) | parameter("with-overlay").set(keyframeTemporalFilter, 2)),
       option("--enable-rect-partitions").doc("enable rectangular partitions").set(enableRectPartition, true),
       option("--disable-rect-partitions").doc("disable rectangular partitions").set(enableRectPartition, false),
       option("--enable-ab-partitions").doc("enable ab partitions").set(enableABPartition, true),
@@ -343,7 +342,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_SET_FRAME_PARALLEL_DECODING; // is for video. we have just one frame.
   (void)AV1E_SET_ERROR_RESILIENT_MODE; // is for video.
   (void)AV1E_SET_S_FRAME_MODE; // is for video.
-  set(AV1E_SET_AQ_MODE, adaptiveQuantization ? 1 : 0);
+  set(AV1E_SET_AQ_MODE, adaptiveQuantizationMode);
   (void)AV1E_SET_FRAME_PERIODIC_BOOST; // is for video.
 
   //FIXME(ledyba-z): it can be set, but not used.
