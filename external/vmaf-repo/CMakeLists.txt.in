@@ -23,7 +23,7 @@ IF(CMAKE_BUILD_TYPE MATCHES Release)
             BUILD_COMMAND ninja -C "."
             INSTALL_DIR @CMAKE_BINARY_DIR@
             # FIXME(ledyba-z): Remove shared version to ensure to link static version
-            INSTALL_COMMAND ninja install -C "." && bash -c "rm -f @CMAKE_BINARY_DIR@/lib/libvmaf.so* @CMAKE_BINARY_DIR@/lib/libvmaf.*.dylib"
+            INSTALL_COMMAND ninja install -C "." && bash -c "rm -f @CMAKE_BINARY_DIR@/lib/libvmaf.so* @CMAKE_BINARY_DIR@/lib/libvmaf.*.dylib @CMAKE_BINARY_DIR@/lib/*vmaf.dll"
     )
 ELSE()
     ExternalProject_Add(vmaf_repo
@@ -44,6 +44,6 @@ ELSE()
             BUILD_COMMAND ninja -C "."
             INSTALL_DIR @CMAKE_BINARY_DIR@
             # FIXME(ledyba-z): Remove shared version to ensure to link static version
-            INSTALL_COMMAND ninja install -C "." && bash -c "rm -f @CMAKE_BINARY_DIR@/lib/libvmaf.so* @CMAKE_BINARY_DIR@/lib/libvmaf.*.dylib"
+            INSTALL_COMMAND ninja install -C "." && bash -c "rm -f @CMAKE_BINARY_DIR@/lib/libvmaf.so* @CMAKE_BINARY_DIR@/lib/libvmaf.*.dylib @CMAKE_BINARY_DIR@/lib/*vmaf.dll"
      )
 ENDIF()
