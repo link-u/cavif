@@ -43,10 +43,10 @@ execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -S "${CMAKE_CUR
 execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external/vmaf-repo")
 execute_process(COMMAND ${CMAKE_COMMAND} --install . WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external/vmaf-repo")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo" EXCLUDE_FROM_ALL)
-include_directories("${CMAKE_BINARY_DIR}/include")
-include_directories("${CMAKE_BINARY_DIR}/include/libvmaf")
+
 set(ENV{PKG_CONFIG_PATH} "${CMAKE_BINARY_DIR}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}") # pkg-config
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}") # w/o pkg-config
+include_directories("${CMAKE_BINARY_DIR}/include/libvmaf") #FIXME(ledyba-z) This line is also needed to compile w/o pkg-config
 ###############################################################################
 set(ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -60,12 +60,7 @@ set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
 #  --- Disabled CONFIG_DIST_8X8, incompatible with CONFIG_MULTITHREAD.
 #
 set(CONFIG_AV1_DECODER 0 CACHE STRING "Enable AV1 decoder." FORCE)
-# FIXME(ledyba-z): It's need to link libvmaf.a to libaom with find_library
-set(CMAKE_LIBRARY_PATH_ORIG ${CMAKE_LIBRARY_PATH})
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_BINARY_DIR}/lib")
 add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH_ORIG})
-unset(CMAKE_LIBRARY_PATH_ORIG)
 add_dependencies(aom vmaf_repo)
 ###############################################################################
 
