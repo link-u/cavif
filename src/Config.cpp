@@ -226,7 +226,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63", crf),
       option("--qmin").doc("Minimum (Best Quality) Quantizer") & integer("0-63", codec.rc_min_quantizer),
       option("--qmax").doc("Maximum (Worst Quality) Quantizer") & integer("0-63", codec.rc_max_quantizer),
-      option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none").set(adaptiveQuantization, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantization, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantization, int(CYCLIC_REFRESH_AQ))),
+      option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none").set(adaptiveQuantizationMode, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantizationMode, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantizationMode, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantizationMode, int(CYCLIC_REFRESH_AQ))),
       option("--enable-adaptive-quantization-b").doc("use adaptive quantize_b").set(enableAdaptiveQuantizationB, true),
       option("--disable-adaptive-quantization-b").doc("use traditional adaptive quantization").set(enableAdaptiveQuantizationB, false),
       option("--delta-q").doc("a mode of delta q mode feature, that allows modulating q per superblock") & (parameter("none").doc("disable deltaQ").set(deltaQMode, int(NO_DELTA_Q)) | parameter("objective").doc("Use modulation to maximize objective quality").set(deltaQMode, int(DELTA_Q_OBJECTIVE)) | parameter("perceptual").doc("Use modulation to maximize perceptual quality").set(deltaQMode, int(DELTA_Q_PERCEPTUAL))),
@@ -339,7 +339,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   set(AV1E_SET_TILE_ROWS, tileRows);
   set(AV1E_SET_TILE_COLUMNS, tileColumns);
   (void)AV1E_SET_ENABLE_TPL_MODEL; // is for video.
-  set(AV1E_SET_ENABLE_KEYFRAME_FILTERING, enableKeyframeTemporalFiltering ? 1 : 0);
+  set(AV1E_SET_ENABLE_KEYFRAME_FILTERING, keyframeTemporalFilter);
   (void)AV1E_SET_FRAME_PARALLEL_DECODING; // is for video. we have just one frame.
   (void)AV1E_SET_ERROR_RESILIENT_MODE; // is for video.
   (void)AV1E_SET_S_FRAME_MODE; // is for video.

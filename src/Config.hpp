@@ -71,14 +71,14 @@ public:
   int sharpness = 0;
   int tileRows = 0;
   int tileColumns = 0;
-  bool enableKeyframeTemporalFiltering = false;
+  int keyframeTemporalFilter = 0;
   bool enableIntraEdgeFilter = true;
   bool enableTX64 = true;
   bool enableFlipIDTX = true;
   bool useDCTOnly = false;
   bool useDefaultTXOnly = false;
   bool useReducedTXSet = false;
-  int adaptiveQuantization = NO_AQ;
+  int adaptiveQuantizationMode = NO_AQ;
   bool enableAdaptiveQuantizationB = false;
   bool enableFilterIntra = true;
   bool enableSmoothIntra = true;
