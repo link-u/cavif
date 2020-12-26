@@ -38,4 +38,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: cavif-win64
-        path: build\cavif.exe
+        path: build/cavif.exe
