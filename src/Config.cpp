@@ -109,9 +109,9 @@ clipp::group Config::createCommandLineFlags() {
   group io = (
       required("-i", "--input").doc("Filename to input") & value("input.png", input),
       required("-o", "--output").doc("Filename to output") & value("output.avif", output),
-      option("--attach-alpha").doc("Attach alpha plane.") & value("input-alpha.avif").call([&](std::string const &str){ alphaInput = str; }),
-      option("--attach-depth").doc("Attach depth plane.") & value("input-depth.avif").call([&](std::string const &str){ depthInput = str; }),
-      option("--encode-target").doc("Encode alpha image.") & (parameter("image").set(encodeTarget, EncodeTarget::Image).doc("Encode image planes") | parameter("alpha").set(encodeTarget, EncodeTarget::Alpha).doc("Encode alpha planes")),
+      option("--attach-alpha").doc("Attach alpha plane") & value("input-alpha.avif").call([&](std::string const &str){ alphaInput = str; }),
+      option("--attach-depth").doc("Attach depth plane") & value("input-depth.avif").call([&](std::string const &str){ depthInput = str; }),
+      option("--encode-target").doc("Encode alpha image") & (parameter("image").set(encodeTarget, EncodeTarget::Image).doc("Encode image planes (default)") | parameter("alpha").set(encodeTarget, EncodeTarget::Alpha).doc("Encode alpha planes")),
       option("--show-result").doc("Show encoding result").set(showResult, true)
   );
 
@@ -132,7 +132,7 @@ clipp::group Config::createCommandLineFlags() {
   group color = (
       option("--color-primaries").doc("Set color primaries information value.") & (
           integer("Value defined in H.273").set(colorPrimaries).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
-          parameter("bt709").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("Rec. ITU-R BT.709-6") |
+          parameter("bt709").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("Rec. ITU-R BT.709-6").doc("(default)") |
           parameter("sRGB").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("sYCC").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("unspecified").set<uint8_t&, uint8_t>(colorPrimaries, 2u).doc("Image characteristics are unknown or are determined by the application.") |
@@ -164,7 +164,7 @@ clipp::group Config::createCommandLineFlags() {
           parameter("log100sqrt10").set<uint8_t&, uint8_t>(transferCharacteristics, 10u).doc("Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)") |
           parameter("iec61966").set<uint8_t&, uint8_t>(transferCharacteristics, 11u).doc("IEC 61966-2-4") |
           parameter("bt1361").set<uint8_t&, uint8_t>(transferCharacteristics, 12u).doc("Rec. ITU-R BT.1361-0 extended colour gamut system (historical)") |
-          parameter("sRGB").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("sRGB").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC").doc("(default)") |
           parameter("sYCC").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("bt2020").set<uint8_t&, uint8_t>(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
           parameter("bt2020-10bit").set<uint8_t&, uint8_t>(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
@@ -178,7 +178,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--matrix-coefficients").doc("Set matrix coefficients information value.") & (
           integer("Value defined in H.273").set(matrixCoefficients).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
           parameter("bt709").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("Rec. ITU-R BT.709-6") |
-          parameter("sRGB").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("sRGB").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC").doc("(default)") |
           parameter("sYCC").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("unspecified").set<uint8_t&, uint8_t>(matrixCoefficients, 2u).doc("Image characteristics are unknown or are determined by the application") |
           parameter("us-fcc").set<uint8_t&, uint8_t>(matrixCoefficients, 4u).doc("United States Federal Communications Commission (2003)") |
@@ -193,30 +193,31 @@ clipp::group Config::createCommandLineFlags() {
   auto scales = (
       option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL).doc("(default)") | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT)),
       option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL).doc("(default)") | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT)),
-      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)) | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)) | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM))),
-      option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16]", codec.rc_resize_kf_denominator)),
-      option("--superres-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE) | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED) | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM) | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH) | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO)),
-      option("--superres-denominator").doc("Set resize denominator.") & (integer("[8-16]", codec.rc_superres_kf_denominator)),
-      option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63]", codec.rc_superres_kf_qthresh)),
-      option("--render-width").doc("Set render width.") & (integer("<render-width>", renderWidth)),
-      option("--render-height").doc("Set render height.") & (integer("<render-height>", renderHeight))
+      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)).doc("(default)") | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)) | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM))),
+      option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16], default=8", codec.rc_resize_kf_denominator)),
+      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE).doc("(default)") | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED) | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM) | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH) | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO)),
+      option("--superres-denominator").doc("Set superres resize denominator.") & (integer("[8-16], default=8", codec.rc_superres_kf_denominator)),
+      option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63], default=63", codec.rc_superres_kf_qthresh)),
+      option("--render-width").doc("Set render width explicitly") & (integer("<render-width>", renderWidth)),
+      option("--render-height").doc("Set render height explicitly") & (integer("<render-height>", renderHeight))
   );
 
   // profile and pixel formats
   group pixelAndColor = (
-      option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base, 1=high, 2=professional", aom.g_profile),
-      option("--pix-fmt").doc("Pixel format of output image.") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420) | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444)),
-      option("--bit-depth").doc("Bit depth of output image.") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8) | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_12)),
-      option("--disable-full-color-range").doc("Use limited YUV color range.").set(fullColorRange, false),
-      option("--enable-full-color-range").doc("Use full YUV color range.").set(fullColorRange, true)
+      option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base(default), 1=high, 2=professional", aom.g_profile),
+      option("--pix-fmt").doc("Pixel format of output image") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420).doc("(default)") | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444)),
+      option("--bit-depth").doc("Bit depth of output image") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8).doc("(default)") | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_12)),
+      option("--disable-full-color-range").doc("Use limited YUV color range (default)").set(fullColorRange, false),
+      option("--enable-full-color-range").doc("Use full YUV color range").set(fullColorRange, true)
   );
 
   // trade offs between speed and quality.
   group multiThreading = (
-      option("--encoder-usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
-      option("--threads") & integer("Num of threads to use", aom.g_threads),
-      option("--row-mt").doc("Enable row based multi-threading of encoder").set(rowMT, true),
-      option("--cpu-used").doc("Quality/Speed ratio modifier") & integer("0-8", cpuUsed)
+      option("--encoder-usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)).doc("(default)") | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
+      option("--threads") & integer("Num of threads to use (default=0)", aom.g_threads),
+      option("--enable-row-mt").doc("Enable row based multi-threading of encoder").set(rowMT, true),
+      option("--disable-row-mt").doc("Disable row based multi-threading of encoder (default)").set(rowMT, false),
+      option("--cpu-used").doc("Quality/Speed ratio modifier") & integer("0-8, default=1", cpuUsed)
   );
 
   // rate-control
@@ -224,11 +225,11 @@ clipp::group Config::createCommandLineFlags() {
       option("--rate-control").doc("Rate control method") & (parameter("q").doc("Constant Quality").set(aom.rc_end_usage, AOM_Q) | parameter("cq").doc("Constrained Quality").set(aom.rc_end_usage, AOM_CQ)),
       option("--bit-rate").doc("Bit rate of output image.") & integer("kilo-bits per second", aom.rc_target_bitrate),
       option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63", crf),
-      option("--qmin").doc("Minimum (Best Quality) Quantizer") & integer("0-63", codec.rc_min_quantizer),
-      option("--qmax").doc("Maximum (Worst Quality) Quantizer") & integer("0-63", codec.rc_max_quantizer),
-      option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none").set(adaptiveQuantizationMode, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantizationMode, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantizationMode, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantizationMode, int(CYCLIC_REFRESH_AQ))),
+      option("--qmin").doc("Minimum (Best Quality) Quantizer") & integer("0-63(default=0)", codec.rc_min_quantizer),
+      option("--qmax").doc("Maximum (Worst Quality) Quantizer") & integer("0-63(default=63)", codec.rc_max_quantizer),
+      option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none(default)").set(adaptiveQuantizationMode, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantizationMode, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantizationMode, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantizationMode, int(CYCLIC_REFRESH_AQ))),
       option("--enable-adaptive-quantization-b").doc("use adaptive quantize_b").set(enableAdaptiveQuantizationB, true),
-      option("--disable-adaptive-quantization-b").doc("use traditional adaptive quantization").set(enableAdaptiveQuantizationB, false),
+      option("--disable-adaptive-quantization-b").doc("use traditional adaptive quantization (default)").set(enableAdaptiveQuantizationB, false),
       option("--delta-q").doc("a mode of delta q mode feature, that allows modulating q per superblock") & (parameter("none").doc("disable deltaQ").set(deltaQMode, int(NO_DELTA_Q)) | parameter("objective").doc("Use modulation to maximize objective quality").set(deltaQMode, int(DELTA_Q_OBJECTIVE)) | parameter("perceptual").doc("Use modulation to maximize perceptual quality").set(deltaQMode, int(DELTA_Q_PERCEPTUAL))),
       option("--enable-chroma-delta-q").doc("enable delta quantization in chroma").set(enableChromaDeltaQ, true),
       option("--disable-chroma-delta-q").doc("disable delta quantization in chroma").set(enableChromaDeltaQ, false),
