@@ -3,7 +3,7 @@
 |         | Status |
 |--|---|
 | Linux | [![Build on Linux](https://github.com/link-u/cavif/workflows/Build%20on%20Linux/badge.svg) ](https://github.com/link-u/cavif/actions?query=workflow%3A%22Build+on+Linux%22) |
-| Linux(.deb) | [![Build debian package](https://github.com/link-u/cavif/workflows/Build%20debian%20package/badge.svg)](https://github.com/link-u/cavif/actions?query=workflow%3A%22Build+debian+package%22) |
+| Linux(.deb) | [![Build debian packages](https://github.com/link-u/cavif/workflows/Build%20debian%20packages/badge.svg)](https://github.com/link-u/cavif/actions?query=workflow%3A%22Build+debian+packages%22) |
 | macOS | [![Build on macOS](https://github.com/link-u/cavif/workflows/Build%20on%20macOS/badge.svg)](https://github.com/link-u/cavif/actions?query=workflow%3A%22Build+on+macOS%22) |
 | Windows | [![Build on Windows](https://github.com/link-u/cavif/workflows/Build%20on%20Windows/badge.svg)](https://github.com/link-u/cavif/actions?query=workflow%3A%22Build+on+Windows%22) |
 
