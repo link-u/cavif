@@ -17,19 +17,20 @@ jobs:
         submodules: 'recursive'
         fetch-depth: 0
     - name: Install dependencies
-      shell: pwsh
+      shell: cmd
       run: |
-        pip3 install wheel
-        pip3 install meson
-        pip3 install ninja
-        choco install yasm
-        vcpkg.exe install pthread:x64-windows-static # it's requrired for one of dependencies of libvmaf
+        set MSYSTEM=MINGW64
+        C:\msys64\usr\bin\bash -lc "pacman -S mingw-w64-x86_64-nasm mingw-w64-x86_64-cmake --noconfirm"
     - name: configure
-      shell: pwsh
+      shell: cmd
       run: |
-        cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+        set MSYSTEM=MINGW64
+        C:\msys64\usr\bin\bash -lc "mkdir build && cd build && cmake .. -G 'MSYS Makefiles' -DCMAKE_CXX_FLAGS=-static"
     - name: make
       shell: pwsh
       run: |
-        cd build
-        nmake
+        C:\msys64\usr\bin\bash -lc "make -j && strip cavif.exe"
+    - name: archive
+      shell: pwsh
+      run: |
+        7z a cavif-win64.7z "build\*.exe"
