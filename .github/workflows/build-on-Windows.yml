@@ -25,11 +25,11 @@ jobs:
       shell: cmd
       run: |
         set MSYSTEM=MINGW64
-        C:\msys64\usr\bin\bash -lc "mkdir build && cd build && cmake .. -G 'MSYS Makefiles' -DCMAKE_CXX_FLAGS=-static"
+        C:\msys64\usr\bin\bash -c "mkdir build && cd build && cmake .. -G 'MSYS Makefiles' '-DCMAKE_CXX_FLAGS=-static'"
     - name: make
       shell: pwsh
       run: |
-        C:\msys64\usr\bin\bash -lc "make -j && strip cavif.exe"
+        C:\msys64\usr\bin\bash -c "make -j && strip cavif.exe"
     - name: archive
       shell: pwsh
       run: |
