@@ -16,8 +16,6 @@ IF(CMAKE_BUILD_TYPE MATCHES Release)
             --buildtype=release
             -Denable_asm=true
             -Denable_tests=false
-            -Denable_tests=false
-            -optimization=3
             "@CMAKE_SOURCE_DIR@/external/vmaf/libvmaf"
             "."
             BUILD_COMMAND ninja -C "."
@@ -37,8 +35,6 @@ ELSE()
             --buildtype=debug
             -Denable_asm=false
             -Denable_tests=false
-            -Denable_tests=false
-            --optimization=g
             "@CMAKE_SOURCE_DIR@/external/vmaf/libvmaf"
             "."
             BUILD_COMMAND ninja -C "."
