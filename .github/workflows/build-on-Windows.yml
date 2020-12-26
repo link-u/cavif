@@ -23,11 +23,11 @@ jobs:
         pip3 install meson
         pip3 install ninja
         choco install yasm
-        vcpkg.exe install pthread # it's requrired for one of dependencies of libvmaf
+        vcpkg.exe install pthread:x64-windows-static # it's requrired for one of dependencies of libvmaf
     - name: configure
       shell: pwsh
       run: |
-        cmake -S . -B build
+        cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
     - name: make
       shell: pwsh
       run: |
