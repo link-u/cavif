@@ -191,8 +191,8 @@ clipp::group Config::createCommandLineFlags() {
   );
 
   auto scales = (
-      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL) | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT)),
-      option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL) | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT)),
+      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL).doc("(default)") | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT)),
+      option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL).doc("(default)") | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT)),
       option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)) | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)) | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM))),
       option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16]", codec.rc_resize_kf_denominator)),
       option("--superres-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE) | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED) | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM) | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH) | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO)),
@@ -253,9 +253,9 @@ clipp::group Config::createCommandLineFlags() {
 
   // post-process
   group postProsess = (
-      option("--disable-cdef").doc("Disable Constrained Directional Enhancement Filter").set(enableCDEF, false),
+      option("--disable-cdef").doc("Disable Constrained Directional Enhancement Filter (default)").set(enableCDEF, false),
       option("--enable-cdef").doc("Enable Constrained Directional Enhancement Filter").set(enableCDEF, true),
-      option("--disable-loop-restoration").doc("Disable Loop Restoration Filter").set(enableRestoration, false),
+      option("--disable-loop-restoration").doc("Disable Loop Restoration Filter (default)").set(enableRestoration, false),
       option("--enable-loop-restoration").doc("Enable Loop Restoration Filter").set(enableRestoration, true)
   );
 
@@ -264,38 +264,41 @@ clipp::group Config::createCommandLineFlags() {
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64)),
       option("--tile-rows").doc("Number of tile rows") & integer("0-6", tileRows),
       option("--tile-columns").doc("Number of tile columns") & integer("0-6", tileColumns),
-      option("--keyframe-temporal-filter").doc("Enable temporal filtering on key frame") & (parameter("disable").set(keyframeTemporalFilter, 0) | parameter("without-overlay").set(keyframeTemporalFilter, 1) | parameter("with-overlay").set(keyframeTemporalFilter, 2)),
-      option("--enable-rect-partitions").doc("enable rectangular partitions").set(enableRectPartition, true),
+      option("--keyframe-temporal-filter").doc("Enable temporal filtering on key frame") & (parameter("disable").set(keyframeTemporalFilter, 0).doc("(default)") | parameter("without-overlay").set(keyframeTemporalFilter, 1) | parameter("with-overlay").set(keyframeTemporalFilter, 2)),
+      option("--enable-rect-partitions").doc("enable rectangular partitions (default)").set(enableRectPartition, true),
       option("--disable-rect-partitions").doc("disable rectangular partitions").set(enableRectPartition, false),
-      option("--enable-ab-partitions").doc("enable ab partitions").set(enableABPartition, true),
+      option("--enable-ab-partitions").doc("enable ab partitions (default)").set(enableABPartition, true),
       option("--disable-ab-partitions").doc("disable ab partitions").set(enableABPartition, false),
-      option("--disable-1to4-partitions").doc("enable 1to4 partitions").set(enable1to4Partition, true),
+      option("--disable-1to4-partitions").doc("enable 1to4 partitions (default)").set(enable1to4Partition, true),
       option("--enable-1to4-partitions").doc("disable 1to4 partitions").set(enable1to4Partition, false),
-      option("--enable-intra-edge-filter").doc("enable intra edge filter").set(enableIntraEdgeFilter, true),
+      option("--enable-intra-edge-filter").doc("enable intra edge filter (default)").set(enableIntraEdgeFilter, true),
       option("--disable-intra-edge-filter").doc("disable intra edge filter").set(enableIntraEdgeFilter, false),
-      option("--min-partition-size").doc("min partition size") & (parameter("4").set(minPartitionSize, 4) | parameter("8").set(minPartitionSize, 8) | parameter("16").set(minPartitionSize, 16) | parameter("32").set(minPartitionSize, 32) | parameter("64").set(minPartitionSize, 64) | parameter("128").set(minPartitionSize, 128)),
-      option("--max-partition-size").doc("max partition size") & (parameter("4").set(maxPartitionSize, 4) | parameter("8").set(maxPartitionSize, 8) | parameter("16").set(maxPartitionSize, 16) | parameter("32").set(maxPartitionSize, 32) | parameter("64").set(maxPartitionSize, 64) | parameter("128").set(maxPartitionSize, 128)),
-      option("--enable-tx64").doc("enable 64-length transforms").set(enableTX64, true),
+      option("--min-partition-size").doc("min partition size") & (parameter("4").set(minPartitionSize, 4).doc("(default)") | parameter("8").set(minPartitionSize, 8) | parameter("16").set(minPartitionSize, 16) | parameter("32").set(minPartitionSize, 32) | parameter("64").set(minPartitionSize, 64) | parameter("128").set(minPartitionSize, 128)),
+      option("--max-partition-size").doc("max partition size") & (parameter("4").set(maxPartitionSize, 4) | parameter("8").set(maxPartitionSize, 8) | parameter("16").set(maxPartitionSize, 16) | parameter("32").set(maxPartitionSize, 32) | parameter("64").set(maxPartitionSize, 64) | parameter("128").set(maxPartitionSize, 128).doc("(default)")),
+      option("--enable-tx64").doc("enable 64-length transforms (default)").set(enableTX64, true),
       option("--disable-tx64").doc("disable 64-length transforms").set(enableTX64, false),
-      option("--enable-flip-idtx").doc("enable flip and identity transforms.").set(enableFlipIDTX, true),
+      option("--enable-flip-idtx").doc("enable flip and identity transforms (default)").set(enableFlipIDTX, true),
+      option("--disable-flip-idtx").doc("disable flip and identity transforms").set(enableFlipIDTX, false),
+      option("--enable-rect-tx").doc("enable rectangular transforms (default)").set(enableRectTX, true),
+      option("--disable-rect-tx").doc("disable rectangular transforms").set(enableRectTX, false),
       option("--use-dct-only").doc("use dct only.").set(useDCTOnly, true),
       option("--use-default-tx-only").doc("use default tx type only").set(useDefaultTXOnly, true),
       option("--use-reduced-tx-set").doc("use reduced tx set, transforms w/o flip (4) + Identity (1).").set(useReducedTXSet, true),
-      option("--enable-filter-intra").doc("enable ").set(enableFilterIntra, true),
+      option("--enable-filter-intra").doc("enable (default)").set(enableFilterIntra, true),
       option("--disable-filter-intra").doc("disable ").set(enableFilterIntra, false),
-      option("--enable-smooth-intra").doc("enable ").set(enableSmoothIntra, true),
+      option("--enable-smooth-intra").doc("enable (default)").set(enableSmoothIntra, true),
       option("--disable-smooth-intra").doc("disable ").set(enableSmoothIntra, false),
-      option("--enable-paeth-intra").doc("enable ").set(enablePaethIntra, true),
+      option("--enable-paeth-intra").doc("enable (default)").set(enablePaethIntra, true),
       option("--disable-paeth-intra").doc("disable ").set(enablePaethIntra, false),
-      option("--enable-chroma-from-luma").doc("enable ").set(enableChromaFromLuma, true),
+      option("--enable-chroma-from-luma").doc("enable (default)").set(enableChromaFromLuma, true),
       option("--disable-chroma-from-luma").doc("disable ").set(enableChromaFromLuma, false),
-      option("--enable-superres").doc("enable frame superresolution").set(enableSuperres, true),
+      option("--enable-superres").doc("enable frame superresolution (default)").set(enableSuperres, true),
       option("--disable-superres").doc("disable frame superresolution").set(enableSuperres, false),
       option("--enable-palette").doc("enable palette mode").set(enablePalette, true),
-      option("--disable-palette").doc("disable palette mode").set(enablePalette, false),
-      option("--enable-intrabc").doc("enable intra block copy mode").set(enableIntraBC, true),
+      option("--disable-palette").doc("disable palette mode (default)").set(enablePalette, false),
+      option("--enable-intrabc").doc("enable intra block copy mode (default)").set(enableIntraBC, true),
       option("--disable-intrabc").doc("disable intra block copy mode").set(enableIntraBC, false),
-      option("--enable-angle-delta").doc("enable intra angle delta").set(enableAngleDelta, true),
+      option("--enable-angle-delta").doc("enable intra angle delta (default)").set(enableAngleDelta, true),
       option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false)
   );
 
@@ -410,6 +413,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_SET_ENABLE_ORDER_HINT; // is for video
   set(AV1E_SET_ENABLE_TX64, enableTX64 ? 1 : 0);
   set(AV1E_SET_ENABLE_FLIP_IDTX, enableFlipIDTX ? 1 : 0);
+  set(AV1E_SET_ENABLE_RECT_TX, enableRectTX ? 1 : 0);
   (void)AV1E_SET_ENABLE_DIST_WTD_COMP; // is for video
   (void)AV1E_SET_ENABLE_REF_FRAME_MVS; // is for video
   (void)AV1E_SET_ALLOW_REF_FRAME_MVS; // is for video
@@ -463,6 +467,8 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_ENABLE_EXT_TILE_DEBUG;// is for debugging.
   (void)AV1E_ENABLE_SB_MULTIPASS_UNIT_TEST;// is for unit test.
   (void)AV1E_SET_GF_MIN_PYRAMID_HEIGHT; // is for video.
+  (void)AV1E_SET_VBR_CORPUS_COMPLEXITY_LAP; // is for video.
+  (void)AV1E_GET_BASELINE_GF_INTERVAL; // is for video.
 
   #undef set
 }
