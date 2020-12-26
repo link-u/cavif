@@ -132,7 +132,7 @@ clipp::group Config::createCommandLineFlags() {
   group color = (
       option("--color-primaries").doc("Set color primaries information value.") & (
           integer("Value defined in H.273").set(colorPrimaries).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
-          parameter("bt709").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("Rec. ITU-R BT.709-6").doc("(default)") |
+          parameter("bt709").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("Rec. ITU-R BT.709-6") |
           parameter("sRGB").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("sYCC").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("unspecified").set<uint8_t&, uint8_t>(colorPrimaries, 2u).doc("Image characteristics are unknown or are determined by the application.") |
@@ -164,7 +164,7 @@ clipp::group Config::createCommandLineFlags() {
           parameter("log100sqrt10").set<uint8_t&, uint8_t>(transferCharacteristics, 10u).doc("Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)") |
           parameter("iec61966").set<uint8_t&, uint8_t>(transferCharacteristics, 11u).doc("IEC 61966-2-4") |
           parameter("bt1361").set<uint8_t&, uint8_t>(transferCharacteristics, 12u).doc("Rec. ITU-R BT.1361-0 extended colour gamut system (historical)") |
-          parameter("sRGB").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC").doc("(default)") |
+          parameter("sRGB").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("sYCC").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("bt2020").set<uint8_t&, uint8_t>(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
           parameter("bt2020-10bit").set<uint8_t&, uint8_t>(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
@@ -178,7 +178,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--matrix-coefficients").doc("Set matrix coefficients information value.") & (
           integer("Value defined in H.273").set(matrixCoefficients).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
           parameter("bt709").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("Rec. ITU-R BT.709-6") |
-          parameter("sRGB").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC").doc("(default)") |
+          parameter("sRGB").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("sYCC").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("unspecified").set<uint8_t&, uint8_t>(matrixCoefficients, 2u).doc("Image characteristics are unknown or are determined by the application") |
           parameter("us-fcc").set<uint8_t&, uint8_t>(matrixCoefficients, 4u).doc("United States Federal Communications Commission (2003)") |
@@ -191,11 +191,11 @@ clipp::group Config::createCommandLineFlags() {
   );
 
   auto scales = (
-      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL).doc("(default)") | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT)),
-      option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL).doc("(default)") | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT)),
-      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)).doc("(default)") | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)) | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM))),
+      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL) | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT)),
+      option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL) | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT)),
+      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)) | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)) | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM))),
       option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16], default=8", codec.rc_resize_kf_denominator)),
-      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE).doc("(default)") | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED) | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM) | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH) | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO)),
+      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE) | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED) | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM) | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH) | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO)),
       option("--superres-denominator").doc("Set superres resize denominator.") & (integer("[8-16], default=8", codec.rc_superres_kf_denominator)),
       option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63], default=63", codec.rc_superres_kf_qthresh)),
       option("--render-width").doc("Set render width explicitly") & (integer("<render-width>", renderWidth)),
@@ -205,15 +205,15 @@ clipp::group Config::createCommandLineFlags() {
   // profile and pixel formats
   group pixelAndColor = (
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base(default), 1=high, 2=professional", aom.g_profile),
-      option("--pix-fmt").doc("Pixel format of output image") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420).doc("(default)") | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444)),
-      option("--bit-depth").doc("Bit depth of output image") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8).doc("(default)") | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_12)),
+      option("--pix-fmt").doc("Pixel format of output image") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420) | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444)),
+      option("--bit-depth").doc("Bit depth of output image") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8) | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_12)),
       option("--disable-full-color-range").doc("Use limited YUV color range (default)").set(fullColorRange, false),
       option("--enable-full-color-range").doc("Use full YUV color range").set(fullColorRange, true)
   );
 
   // trade offs between speed and quality.
   group multiThreading = (
-      option("--encoder-usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)).doc("(default)") | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
+      option("--encoder-usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
       option("--threads") & integer("Num of threads to use (default=0)", aom.g_threads),
       option("--enable-row-mt").doc("Enable row based multi-threading of encoder").set(rowMT, true),
       option("--disable-row-mt").doc("Disable row based multi-threading of encoder (default)").set(rowMT, false),
@@ -265,7 +265,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--superblock-size").doc("Superblock size.") & (parameter("dynamic").doc("encoder determines the size automatically.").set(superblockSize, AOM_SUPERBLOCK_SIZE_DYNAMIC) | parameter("128").doc("use 128x128 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_128X128) | parameter("64").doc("use 64x64 superblock.").set(superblockSize, AOM_SUPERBLOCK_SIZE_64X64)),
       option("--tile-rows").doc("Number of tile rows") & integer("0-6", tileRows),
       option("--tile-columns").doc("Number of tile columns") & integer("0-6", tileColumns),
-      option("--keyframe-temporal-filter").doc("Enable temporal filtering on key frame") & (parameter("disable").set(keyframeTemporalFilter, 0).doc("(default)") | parameter("without-overlay").set(keyframeTemporalFilter, 1) | parameter("with-overlay").set(keyframeTemporalFilter, 2)),
+      option("--keyframe-temporal-filter").doc("Enable temporal filtering on key frame") & (parameter("disable").set(keyframeTemporalFilter, 0) | parameter("without-overlay").set(keyframeTemporalFilter, 1) | parameter("with-overlay").set(keyframeTemporalFilter, 2)),
       option("--enable-rect-partitions").doc("enable rectangular partitions (default)").set(enableRectPartition, true),
       option("--disable-rect-partitions").doc("disable rectangular partitions").set(enableRectPartition, false),
       option("--enable-ab-partitions").doc("enable ab partitions (default)").set(enableABPartition, true),
@@ -274,8 +274,8 @@ clipp::group Config::createCommandLineFlags() {
       option("--enable-1to4-partitions").doc("disable 1to4 partitions").set(enable1to4Partition, false),
       option("--enable-intra-edge-filter").doc("enable intra edge filter (default)").set(enableIntraEdgeFilter, true),
       option("--disable-intra-edge-filter").doc("disable intra edge filter").set(enableIntraEdgeFilter, false),
-      option("--min-partition-size").doc("min partition size") & (parameter("4").set(minPartitionSize, 4).doc("(default)") | parameter("8").set(minPartitionSize, 8) | parameter("16").set(minPartitionSize, 16) | parameter("32").set(minPartitionSize, 32) | parameter("64").set(minPartitionSize, 64) | parameter("128").set(minPartitionSize, 128)),
-      option("--max-partition-size").doc("max partition size") & (parameter("4").set(maxPartitionSize, 4) | parameter("8").set(maxPartitionSize, 8) | parameter("16").set(maxPartitionSize, 16) | parameter("32").set(maxPartitionSize, 32) | parameter("64").set(maxPartitionSize, 64) | parameter("128").set(maxPartitionSize, 128).doc("(default)")),
+      option("--min-partition-size").doc("min partition size") & (parameter("4").set(minPartitionSize, 4) | parameter("8").set(minPartitionSize, 8) | parameter("16").set(minPartitionSize, 16) | parameter("32").set(minPartitionSize, 32) | parameter("64").set(minPartitionSize, 64) | parameter("128").set(minPartitionSize, 128)),
+      option("--max-partition-size").doc("max partition size") & (parameter("4").set(maxPartitionSize, 4) | parameter("8").set(maxPartitionSize, 8) | parameter("16").set(maxPartitionSize, 16) | parameter("32").set(maxPartitionSize, 32) | parameter("64").set(maxPartitionSize, 64) | parameter("128").set(maxPartitionSize, 128)),
       option("--enable-tx64").doc("enable 64-length transforms (default)").set(enableTX64, true),
       option("--disable-tx64").doc("disable 64-length transforms").set(enableTX64, false),
       option("--enable-flip-idtx").doc("enable flip and identity transforms (default)").set(enableFlipIDTX, true),
