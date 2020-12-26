@@ -20,18 +20,26 @@ jobs:
       shell: cmd
       run: |
         set MSYSTEM=MINGW64
+        set HOME=${{ github.workspace }}
         C:\msys64\usr\bin\bash -lc "pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-nasm mingw-w64-x86_64-yasm mingw-w64-x86_64-meson mingw-w64-x86_64-ninja --noconfirm"
     - name: configure
       shell: cmd
       run: |
         set MSYSTEM=MINGW64
+        set HOME=${{ github.workspace }}
         C:\msys64\usr\bin\bash -lc "cmake -S . -B build -G 'MSYS Makefiles' '-DCMAKE_CXX_FLAGS=-static'"
     - name: make
       shell: cmd
       run: |
         set MSYSTEM=MINGW64
+        set HOME=${{ github.workspace }}
         C:\msys64\usr\bin\bash -lc "cd build && make -j && strip cavif.exe"
     - name: archive
       shell: pwsh
       run: |
         7z a cavif-win64.7z "build\*.exe"
+    - name: Upload result
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.codename }}
+        path: cavif-win64.7z
