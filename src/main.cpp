@@ -78,7 +78,10 @@ int internal::main(int argc, char** argv) {
   }
 
   Config config(argc, argv);
-  aom_codec_enc_config_default(av1codec, &config.codec, 0);
+  aom_codec_enc_config_default(av1codec, &config.codec, AOM_USAGE_GOOD_QUALITY);
+  // Set our default.
+  config.codec.rc_end_usage = AOM_Q;
+  config.codec.rc_target_bitrate = 0;
   config.codec.g_threads = std::thread::hardware_concurrency();
   {
     int const parsrResult = config.parse();
@@ -129,8 +132,6 @@ int internal::main(int argc, char** argv) {
   // One frame takes 1 second.
   config.codec.g_timebase.den = 1;
   config.codec.g_timebase.num = 1;
-  //
-  config.codec.rc_target_bitrate = 0;
 
   aom_codec_ctx_t codec{};
 

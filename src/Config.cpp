@@ -61,7 +61,7 @@ Config::Config(int argc, char** argv)
 ,argv(argv)
 ,commandLineFlags(createCommandLineFlags())
 {
-
+  auto& aom = this->codec;
 }
 
 void Config::usage() {
@@ -111,7 +111,7 @@ clipp::group Config::createCommandLineFlags() {
       required("-o", "--output").doc("Filename to output") & value("output.avif", output),
       option("--attach-alpha").doc("Attach alpha plane") & value("input-alpha.avif").call([&](std::string const &str){ alphaInput = str; }),
       option("--attach-depth").doc("Attach depth plane") & value("input-depth.avif").call([&](std::string const &str){ depthInput = str; }),
-      option("--encode-target").doc("Encode alpha image") & (parameter("image").set(encodeTarget, EncodeTarget::Image).doc("Encode image planes (default)") | parameter("alpha").set(encodeTarget, EncodeTarget::Alpha).doc("Encode alpha planes")),
+      option("--encode-target").doc("Encode target") & (parameter("image").set(encodeTarget, EncodeTarget::Image).doc("Encode image planes (default)") | parameter("alpha").set(encodeTarget, EncodeTarget::Alpha).doc("Encode an alpha plane")),
       option("--show-result").doc("Show encoding result").set(showResult, true)
   );
 
@@ -191,13 +191,13 @@ clipp::group Config::createCommandLineFlags() {
   );
 
   auto scales = (
-      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL) | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT)),
-      option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL) | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO) | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE) | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE) | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR) | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR) | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT)),
-      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)) | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)) | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM))),
+      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL).doc("Do not scale (default)") | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO).doc("Scale to 1/2") | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE).doc("Scale to 3/5") | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE).doc("Scale to 4/5") | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR).doc("Scale to 1/4") | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR).doc("Scale to 3/4") | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT).doc("Scale to 1/8")),
+      option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL).doc("Do not scale (default)") | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO).doc("Scale to 1/2") | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE).doc("Scale to 3/5") | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE).doc("Scale to 4/5") | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR).doc("Scale to 1/4") | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR).doc("Scale to 3/4") | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT).doc("Scale to 1/8")),
+      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)).doc("Do not resize") | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)).doc("Resize image using a denominator given by `--resize-denominator` arg") | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM)).doc("Resize image randomly!")),
       option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16], default=8", codec.rc_resize_kf_denominator)),
-      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE) | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED) | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM) | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH) | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO)),
+      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE).doc("Do not use superres mode") | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED).doc("Apply superres filter to image using a denominator given by `--superres-denominator` arg") | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM).doc("Apply superres filter to image with a random denominator!") | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH).doc("Apply or do not apply superres filter to image based on the q index") | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO).doc("Apply or do not apply superres filter to image automatically")),
       option("--superres-denominator").doc("Set superres resize denominator.") & (integer("[8-16], default=8", codec.rc_superres_kf_denominator)),
-      option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63], default=63", codec.rc_superres_kf_qthresh)),
+      option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63], default=63 (Do not apply superres filter)", codec.rc_superres_kf_qthresh)),
       option("--render-width").doc("Set render width explicitly") & (integer("<render-width>", renderWidth)),
       option("--render-height").doc("Set render height explicitly") & (integer("<render-height>", renderHeight))
   );
@@ -205,26 +205,26 @@ clipp::group Config::createCommandLineFlags() {
   // profile and pixel formats
   group pixelAndColor = (
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base(default), 1=high, 2=professional", aom.g_profile),
-      option("--pix-fmt").doc("Pixel format of output image") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420) | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422) | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444)),
-      option("--bit-depth").doc("Bit depth of output image") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8) | parameter("10").set(aom.g_bit_depth, AOM_BITS_10) | parameter("12").set(aom.g_bit_depth, AOM_BITS_12)),
+      option("--pix-fmt").doc("Pixel format of output image") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420).doc("YUV420 format (default)") | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422).doc("YUV422 format") | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444).doc("YUV444 format (recommended for lossless images)")),
+      option("--bit-depth").doc("Bit depth of output image") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8).doc("8bits per color, 24bits per pixel (default)") | parameter("10").set(aom.g_bit_depth, AOM_BITS_10).doc("10bits per color, 30bits per pixel") | parameter("12").set(aom.g_bit_depth, AOM_BITS_12).doc("12bits per color, 36bits per pixel")),
       option("--disable-full-color-range").doc("Use limited YUV color range (default)").set(fullColorRange, false),
       option("--enable-full-color-range").doc("Use full YUV color range").set(fullColorRange, true)
   );
 
   // trade offs between speed and quality.
   group multiThreading = (
-      option("--encoder-usage").doc("Encoder usage") & (parameter("good").doc("Good Quality mode").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)) | parameter("realtime").doc("Real time encoding mode.").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME))),
-      option("--threads") & integer("Num of threads to use (default=0)", aom.g_threads),
+      option("--encoder-usage").doc("Encoder usage") & (parameter("good").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)).doc("Good Quality mode (default)") | parameter("realtime").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME)).doc("Real time encoding mode")),
+      option("--threads") & integer("Num of threads to use (default=num of logical cores)", aom.g_threads),
       option("--enable-row-mt").doc("Enable row based multi-threading of encoder").set(rowMT, true),
       option("--disable-row-mt").doc("Disable row based multi-threading of encoder (default)").set(rowMT, false),
-      option("--cpu-used").doc("Quality/Speed ratio modifier") & integer("0-8, default=1", cpuUsed)
+      option("--cpu-used").doc("Quality/Speed ratio modifier") & integer("0-8, default=1. Higher means slower encoding and better quality", cpuUsed)
   );
 
   // rate-control
   group rateControl= (
-      option("--rate-control").doc("Rate control method") & (parameter("q").doc("Constant Quality").set(aom.rc_end_usage, AOM_Q) | parameter("cq").doc("Constrained Quality").set(aom.rc_end_usage, AOM_CQ)),
-      option("--bit-rate").doc("Bit rate of output image.") & integer("kilo-bits per second", aom.rc_target_bitrate),
-      option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63", crf),
+      option("--rate-control").doc("Rate control method") & (parameter("cbr").set(aom.rc_end_usage, AOM_CBR).doc("Constant Bit Rate mode. Please also set `--bit-rate` arg.") | parameter("q").set(aom.rc_end_usage, AOM_Q).doc("Constant Quality (default)") | parameter("cq").set(aom.rc_end_usage, AOM_CQ).doc("Constrained Quality")),
+      option("--bit-rate").doc("Bit rate of output image.") & integer("kilo-bits per frame(default=0)", aom.rc_target_bitrate),
+      option("--crf").doc("CQ Level in CQ rate control mode") & integer("0-63(default=10)", crf),
       option("--qmin").doc("Minimum (Best Quality) Quantizer") & integer("0-63(default=0)", codec.rc_min_quantizer),
       option("--qmax").doc("Maximum (Worst Quality) Quantizer") & integer("0-63(default=63)", codec.rc_max_quantizer),
       option("--adaptive-quantization").doc("Set adaptive-quantization mode") & (parameter("none").doc("none(default)").set(adaptiveQuantizationMode, int(NO_AQ)) | parameter("variance").doc("variance based").set(adaptiveQuantizationMode, int(VARIANCE_AQ)) | parameter("complexity").doc("complexity based").set(adaptiveQuantizationMode, int(VARIANCE_AQ)) | parameter("cyclic").doc("Cyclic refresh").set(adaptiveQuantizationMode, int(CYCLIC_REFRESH_AQ))),
@@ -241,14 +241,14 @@ clipp::group Config::createCommandLineFlags() {
       option("--qm-min-y").doc("Min quant matrix flatness for Y") & integer("0-15 (default: 10)", qmMinY),
       option("--qm-min-u").doc("Min quant matrix flatness for U") & integer("0-15 (default: 11)", qmMinU),
       option("--qm-min-v").doc("Min quant matrix flatness for V") & integer("0-15 (default: 12)", qmMinV),
-      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("structural similarity").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("peak signal-to-noise ratio").set(tune, AOM_TUNE_PSNR)  | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-without-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN)),
-      option("--vmaf-model-path").doc("VMAF model file path to tuning image quality.") & value("<path-to-vmaf-model-file>", vmafModelPath),
+      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("SSIM(structural similarity)").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("PSNR(peak signal-to-noise ratio)").set(tune, AOM_TUNE_PSNR)  | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-without-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN) | parameter("vmaf-neg-max-gain").doc("vmaf-neg-max-gain").set(tune, AOM_TUNE_VMAF_NEG_MAX_GAIN)),
+      option("--vmaf-model-path").doc("VMAF model file path to tuning image quality") & value("<path-to-vmaf-model-file>", vmafModelPath),
       option("--lossless").doc("Enable lossless encoding").set(lossless, true)
   );
 
   // pre-process
   group preProcess = (
-      option("--monochrome").doc("Encode to monochrome image.").set(codec.monochrome, 1u),
+      option("--monochrome").doc("Encode to monochrome image").set(codec.monochrome, 1u),
       option("--sharpness").doc("Sharpening output") & integer("0-7", sharpness)
   );
 
@@ -282,7 +282,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--disable-flip-idtx").doc("disable flip and identity transforms").set(enableFlipIDTX, false),
       option("--enable-rect-tx").doc("enable rectangular transforms (default)").set(enableRectTX, true),
       option("--disable-rect-tx").doc("disable rectangular transforms").set(enableRectTX, false),
-      option("--use-dct-only").doc("use dct only.").set(useDCTOnly, true),
+      option("--use-dct-only").doc("Use DCT tx onlyq").set(useDCTOnly, true),
       option("--use-default-tx-only").doc("use default tx type only").set(useDefaultTXOnly, true),
       option("--use-reduced-tx-set").doc("use reduced tx set, transforms w/o flip (4) + Identity (1).").set(useReducedTXSet, true),
       option("--enable-filter-intra").doc("enable (default)").set(enableFilterIntra, true),
