@@ -241,7 +241,8 @@ clipp::group Config::createCommandLineFlags() {
       option("--qm-min-y").doc("Min quant matrix flatness for Y") & integer("0-15 (default: 10)", qmMinY),
       option("--qm-min-u").doc("Min quant matrix flatness for U") & integer("0-15 (default: 11)", qmMinU),
       option("--qm-min-v").doc("Min quant matrix flatness for V") & integer("0-15 (default: 12)", qmMinV),
-      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("SSIM(structural similarity)").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("PSNR(peak signal-to-noise ratio)").set(tune, AOM_TUNE_PSNR)  | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-without-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN) | parameter("vmaf-neg-max-gain").doc("vmaf-neg-max-gain").set(tune, AOM_TUNE_VMAF_NEG_MAX_GAIN)),
+      //FIXME
+      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("SSIM(structural similarity)").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("PSNR(peak signal-to-noise ratio)").set(tune, AOM_TUNE_PSNR)  | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-without-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN)/* | parameter("vmaf-neg-max-gain").doc("vmaf-neg-max-gain").set(tune, AOM_TUNE_VMAF_NEG_MAX_GAIN)*/),
       option("--vmaf-model-path").doc("VMAF model file path to tuning image quality") & value("<path-to-vmaf-model-file>", vmafModelPath),
       option("--lossless").doc("Enable lossless encoding").set(lossless, true)
   );
@@ -280,8 +281,9 @@ clipp::group Config::createCommandLineFlags() {
       option("--disable-tx64").doc("disable 64-length transforms").set(enableTX64, false),
       option("--enable-flip-idtx").doc("enable flip and identity transforms (default)").set(enableFlipIDTX, true),
       option("--disable-flip-idtx").doc("disable flip and identity transforms").set(enableFlipIDTX, false),
-      option("--enable-rect-tx").doc("enable rectangular transforms (default)").set(enableRectTX, true),
-      option("--disable-rect-tx").doc("disable rectangular transforms").set(enableRectTX, false),
+      //FIXME
+      //option("--enable-rect-tx").doc("enable rectangular transforms (default)").set(enableRectTX, true),
+      //option("--disable-rect-tx").doc("disable rectangular transforms").set(enableRectTX, false),
       option("--use-dct-only").doc("Use DCT tx onlyq").set(useDCTOnly, true),
       option("--use-default-tx-only").doc("use default tx type only").set(useDefaultTXOnly, true),
       option("--use-reduced-tx-set").doc("use reduced tx set, transforms w/o flip (4) + Identity (1).").set(useReducedTXSet, true),
@@ -414,7 +416,8 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_SET_ENABLE_ORDER_HINT; // is for video
   set(AV1E_SET_ENABLE_TX64, enableTX64 ? 1 : 0);
   set(AV1E_SET_ENABLE_FLIP_IDTX, enableFlipIDTX ? 1 : 0);
-  set(AV1E_SET_ENABLE_RECT_TX, enableRectTX ? 1 : 0);
+  //FIXME
+  //set(AV1E_SET_ENABLE_RECT_TX, enableRectTX ? 1 : 0);
   (void)AV1E_SET_ENABLE_DIST_WTD_COMP; // is for video
   (void)AV1E_SET_ENABLE_REF_FRAME_MVS; // is for video
   (void)AV1E_SET_ALLOW_REF_FRAME_MVS; // is for video

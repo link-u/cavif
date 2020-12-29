@@ -49,6 +49,7 @@ list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}") # w/o pkg-config
 #FIXME(ledyba-z) This line is also needed to compile w/o pkg-config
 # Please see: https://bugs.chromium.org/p/aomedia/issues/detail?id=2748&q=vmaf&can=2
 include_directories("${CMAKE_BINARY_DIR}/include/libvmaf")
+include_directories("${CMAKE_BINARY_DIR}/include")
 ###############################################################################
 set(ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
