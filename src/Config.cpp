@@ -191,11 +191,14 @@ clipp::group Config::createCommandLineFlags() {
   );
 
   auto scales = (
-      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL).doc("Do not scale (default)") | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO).doc("Scale to 1/2") | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE).doc("Scale to 3/5") | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE).doc("Scale to 4/5") | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR).doc("Scale to 1/4") | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR).doc("Scale to 3/4") | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT).doc("Scale to 1/8")),
-      option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL).doc("Do not scale (default)") | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO).doc("Scale to 1/2") | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE).doc("Scale to 3/5") | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE).doc("Scale to 4/5") | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR).doc("Scale to 1/4") | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR).doc("Scale to 3/4") | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT).doc("Scale to 1/8")),
+      // FIXME(ledyba-z): Please upgrade libaom
+      option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL).doc("Do not scale (default)") | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO).doc("Scale to 1/2") | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE).doc("Scale to 3/5") | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE).doc("Scale to 4/5") /*| parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR).doc("Scale to 1/4") | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR).doc("Scale to 3/4") | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT).doc("Scale to 1/8")*/),
+      option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL).doc("Do not scale (default)") | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO).doc("Scale to 1/2") | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE).doc("Scale to 3/5") | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE).doc("Scale to 4/5") /*| parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR).doc("Scale to 1/4") | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR).doc("Scale to 3/4") | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT).doc("Scale to 1/8")*/),
       option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)).doc("Do not resize") | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)).doc("Resize image using a denominator given by `--resize-denominator` arg") | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM)).doc("Resize image randomly!")),
       option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16], default=8", codec.rc_resize_kf_denominator)),
-      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE).doc("Do not use superres mode") | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED).doc("Apply superres filter to image using a denominator given by `--superres-denominator` arg") | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM).doc("Apply superres filter to image with a random denominator!") | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH).doc("Apply or do not apply superres filter to image based on the q index") | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO).doc("Apply or do not apply superres filter to image automatically")),
+      // FIXME(ledyba-z): Please upgrade libaom
+      //option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE).doc("Do not use superres mode") | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED).doc("Apply superres filter to image using a denominator given by `--superres-denominator` arg") | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM).doc("Apply superres filter to image with a random denominator!") | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH).doc("Apply or do not apply superres filter to image based on the q index") | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO).doc("Apply or do not apply superres filter to image automatically")),
+      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_NONE)).doc("Do not use superres mode") | parameter("fixed").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_FIXED)).doc("Apply superres filter to image using a denominator given by `--superres-denominator` arg") | parameter("random").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_RANDOM)).doc("Apply superres filter to image with a random denominator!") | parameter("qthresh").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_QTHRESH)).doc("Apply or do not apply superres filter to image based on the q index") | parameter("auto").set(codec.rc_superres_mode, (unsigned int)(SUPERRES_AUTO)).doc("Apply or do not apply superres filter to image automatically")),
       option("--superres-denominator").doc("Set superres resize denominator.") & (integer("[8-16], default=8", codec.rc_superres_kf_denominator)),
       option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63], default=63 (Do not apply superres filter)", codec.rc_superres_kf_qthresh)),
       option("--render-width").doc("Set render width explicitly") & (integer("<render-width>", renderWidth)),
@@ -241,7 +244,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--qm-min-y").doc("Min quant matrix flatness for Y") & integer("0-15 (default: 10)", qmMinY),
       option("--qm-min-u").doc("Min quant matrix flatness for U") & integer("0-15 (default: 11)", qmMinU),
       option("--qm-min-v").doc("Min quant matrix flatness for V") & integer("0-15 (default: 12)", qmMinV),
-      //FIXME
+      // FIXME(ledyba-z): Please upgrade libaom
       option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("SSIM(structural similarity)").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("PSNR(peak signal-to-noise ratio)").set(tune, AOM_TUNE_PSNR)  | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-without-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN)/* | parameter("vmaf-neg-max-gain").doc("vmaf-neg-max-gain").set(tune, AOM_TUNE_VMAF_NEG_MAX_GAIN)*/),
       option("--vmaf-model-path").doc("VMAF model file path to tuning image quality") & value("<path-to-vmaf-model-file>", vmafModelPath),
       option("--lossless").doc("Enable lossless encoding").set(lossless, true)
@@ -281,7 +284,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--disable-tx64").doc("disable 64-length transforms").set(enableTX64, false),
       option("--enable-flip-idtx").doc("enable flip and identity transforms (default)").set(enableFlipIDTX, true),
       option("--disable-flip-idtx").doc("disable flip and identity transforms").set(enableFlipIDTX, false),
-      //FIXME
+      // FIXME(ledyba-z): Please upgrade libaom
       //option("--enable-rect-tx").doc("enable rectangular transforms (default)").set(enableRectTX, true),
       //option("--disable-rect-tx").doc("disable rectangular transforms").set(enableRectTX, false),
       option("--use-dct-only").doc("Use DCT tx onlyq").set(useDCTOnly, true),
@@ -416,7 +419,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_SET_ENABLE_ORDER_HINT; // is for video
   set(AV1E_SET_ENABLE_TX64, enableTX64 ? 1 : 0);
   set(AV1E_SET_ENABLE_FLIP_IDTX, enableFlipIDTX ? 1 : 0);
-  //FIXME
+  // FIXME(ledyba-z): Please upgrade libaom
   //set(AV1E_SET_ENABLE_RECT_TX, enableRectTX ? 1 : 0);
   (void)AV1E_SET_ENABLE_DIST_WTD_COMP; // is for video
   (void)AV1E_SET_ENABLE_REF_FRAME_MVS; // is for video
@@ -471,8 +474,10 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_ENABLE_EXT_TILE_DEBUG;// is for debugging.
   (void)AV1E_ENABLE_SB_MULTIPASS_UNIT_TEST;// is for unit test.
   (void)AV1E_SET_GF_MIN_PYRAMID_HEIGHT; // is for video.
-  (void)AV1E_SET_VBR_CORPUS_COMPLEXITY_LAP; // is for video.
-  (void)AV1E_GET_BASELINE_GF_INTERVAL; // is for video.
+
+  // FIXME(ledyba-z): Please upgrade libaom
+  //(void)AV1E_SET_VBR_CORPUS_COMPLEXITY_LAP; // is for video.
+  //(void)AV1E_GET_BASELINE_GF_INTERVAL; // is for video.
 
   #undef set
 }

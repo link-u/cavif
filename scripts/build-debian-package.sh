@@ -35,13 +35,6 @@ case $(lsb_release -cs) in
       sed -i -r "s/g\+\+-9/g++-8/g"                     "${BASE_DIR}/debian/control"
       sed -i -r "s/libstdc\+\+-9-dev/libstdc++-8-dev/g" "${BASE_DIR}/debian/control"
     ;;
-  focal)
-      export CC=gcc-10
-      export CXX=g++-10
-      sed -i -r "s/gcc-9/gcc-10/g"                       "${BASE_DIR}/debian/control"
-      sed -i -r "s/g\+\+-9/g++-10/g"                     "${BASE_DIR}/debian/control"
-      sed -i -r "s/libstdc\+\+-9-dev/libstdc++-10-dev/g" "${BASE_DIR}/debian/control"
-    ;;
   *) ;;
 esac
 
