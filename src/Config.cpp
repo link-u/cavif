@@ -257,7 +257,7 @@ clipp::group Config::createCommandLineFlags() {
   );
 
   // post-process
-  group postProsess = (
+  group postProcess = (
       option("--disable-cdef").doc("Disable Constrained Directional Enhancement Filter (default)").set(enableCDEF, false),
       option("--enable-cdef").doc("Enable Constrained Directional Enhancement Filter").set(enableCDEF, true),
       option("--disable-loop-restoration").doc("Disable Loop Restoration Filter (default)").set(enableRestoration, false),
@@ -308,7 +308,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false)
   );
 
-  return (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProsess, codingParameters) | support;
+  return (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProcess, codingParameters) | support;
 }
 
 void Config::modify(aom_codec_ctx_t* aom) {
