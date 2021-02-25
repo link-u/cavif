@@ -33,7 +33,7 @@ cavifは、ラッパーを介さず[libaom](https://aomedia.googlesource.com/aom
 # https://apt.kitware.com/
 
 # cloning this repository with dependencies.
-git clone --recurse-submodules --recursive git@github.com:link-u/cavif.git
+git clone --recurse-submodules --recursive https://github.com/link-u/cavif
 
 cd cavif
 
