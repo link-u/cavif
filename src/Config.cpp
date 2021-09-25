@@ -109,8 +109,8 @@ clipp::group Config::createCommandLineFlags() {
   group io = (
       required("-i", "--input").doc("Filename to input") & value("input.png", input),
       required("-o", "--output").doc("Filename to output") & value("output.avif", output),
-      option("--attach-alpha").doc("Attach alpha plane") & value("input-alpha.avif").call([&](std::string const &str){ alphaInput = str; }),
-      option("--attach-depth").doc("Attach depth plane") & value("input-depth.avif").call([&](std::string const &str){ depthInput = str; }),
+      option("--attach-alpha").doc("Attach alpha plane") & value("input-alpha.avif").call([&](std::string const& str){ alphaInput = str; }),
+      option("--attach-depth").doc("Attach depth plane") & value("input-depth.avif").call([&](std::string const& str){ depthInput = str; }),
       option("--encode-target").doc("Encode target") & (parameter("image").set(encodeTarget, EncodeTarget::Image).doc("Encode image planes (default)") | parameter("alpha").set(encodeTarget, EncodeTarget::Alpha).doc("Encode an alpha plane")),
       option("--show-result").doc("Show encoding result").set(showResult, true)
   );
