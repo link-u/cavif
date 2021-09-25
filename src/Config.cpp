@@ -211,7 +211,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--enable-full-color-range").doc("Use full YUV color range").set(fullColorRange, true)
   );
 
-  // trade offs between speed and quality.
+  // trade-offs between speed and quality.
   group multiThreading = (
       option("--encoder-usage").doc("Encoder usage") & (parameter("good").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_GOOD_QUALITY)).doc("Good Quality mode (default)") | parameter("realtime").set(aom.g_usage, static_cast<unsigned int>(AOM_USAGE_REALTIME)).doc("Real time encoding mode")),
       option("--threads") & integer("Num of threads to use (default=num of logical cores)", aom.g_threads),
@@ -241,8 +241,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--qm-min-y").doc("Min quant matrix flatness for Y") & integer("0-15 (default: 10)", qmMinY),
       option("--qm-min-u").doc("Min quant matrix flatness for U") & integer("0-15 (default: 11)", qmMinU),
       option("--qm-min-v").doc("Min quant matrix flatness for V") & integer("0-15 (default: 12)", qmMinV),
-      // FIXME(ledyba-z): Please upgrade libaom
-      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("SSIM(structural similarity)").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("PSNR(peak signal-to-noise ratio)").set(tune, AOM_TUNE_PSNR)  | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-without-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN)/* | parameter("vmaf-neg-max-gain").doc("vmaf-neg-max-gain").set(tune, AOM_TUNE_VMAF_NEG_MAX_GAIN)*/),
+      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("SSIM(structural similarity)").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("PSNR(peak signal-to-noise ratio)").set(tune, AOM_TUNE_PSNR)  | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-without-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN) | parameter("vmaf-neg-max-gain").doc("vmaf-neg-max-gain").set(tune, AOM_TUNE_VMAF_NEG_MAX_GAIN) | parameter("butteraugli").doc("google's butteraugli algorithm (github.com/google/butteraugli)").set(tune, AOM_TUNE_BUTTERAUGLI)),
       option("--vmaf-model-path").doc("VMAF model file path to tuning image quality") & value("<path-to-vmaf-model-file>", vmafModelPath),
       option("--lossless").doc("Enable lossless encoding").set(lossless, true)
   );
@@ -281,9 +280,8 @@ clipp::group Config::createCommandLineFlags() {
       option("--disable-tx64").doc("disable 64-length transforms").set(enableTX64, false),
       option("--enable-flip-idtx").doc("enable flip and identity transforms (default)").set(enableFlipIDTX, true),
       option("--disable-flip-idtx").doc("disable flip and identity transforms").set(enableFlipIDTX, false),
-      // FIXME(ledyba-z): Please upgrade libaom
-      //option("--enable-rect-tx").doc("enable rectangular transforms (default)").set(enableRectTX, true),
-      //option("--disable-rect-tx").doc("disable rectangular transforms").set(enableRectTX, false),
+      option("--enable-rect-tx").doc("enable rectangular transforms (default)").set(enableRectTX, true),
+      option("--disable-rect-tx").doc("disable rectangular transforms").set(enableRectTX, false),
       option("--use-dct-only").doc("Use DCT tx onlyq").set(useDCTOnly, true),
       option("--use-default-tx-only").doc("use default tx type only").set(useDefaultTXOnly, true),
       option("--use-reduced-tx-set").doc("use reduced tx set, transforms w/o flip (4) + Identity (1).").set(useReducedTXSet, true),

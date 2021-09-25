@@ -75,7 +75,7 @@ public:
   bool enableIntraEdgeFilter = true;
   bool enableTX64 = true;
   bool enableFlipIDTX = true;
-  //bool enableRectTX = true;
+  bool enableRectTX = true;
   bool useDCTOnly = false;
   bool useDefaultTXOnly = false;
   bool useReducedTXSet = false;
