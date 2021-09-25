@@ -16,7 +16,7 @@ git_describe="$(git describe --tags)"
 VERSION=${git_describe:1}.$(TZ=JST-9 date +%Y%m%d)+$(lsb_release -cs)
 DATE=$(LC_ALL=C TZ=JST-9 date '+%a, %d %b %Y %H:%M:%S %z')
 
-cat <<EOF > "${BASE_DIR}/debian/changelog"
+cat <<EOF > "${ROOT_DIR}/debian/changelog"
 cavif (${VERSION}) unstable; urgency=medium
 
   * This is atomated build.
@@ -37,9 +37,9 @@ case $(lsb_release -cs) in
   bionic)
       export CC=gcc-8
       export CXX=g++-8
-      sed -i -r "s/gcc-9/gcc-8/g"                       "${BASE_DIR}/debian/control"
-      sed -i -r "s/g\+\+-9/g++-8/g"                     "${BASE_DIR}/debian/control"
-      sed -i -r "s/libstdc\+\+-9-dev/libstdc++-8-dev/g" "${BASE_DIR}/debian/control"
+      sed -i -r "s/gcc-9/gcc-8/g"                       "${ROOT_DIR}/debian/control"
+      sed -i -r "s/g\+\+-9/g++-8/g"                     "${ROOT_DIR}/debian/control"
+      sed -i -r "s/libstdc\+\+-9-dev/libstdc++-8-dev/g" "${ROOT_DIR}/debian/control"
     ;;
   *) ;;
 esac
@@ -54,7 +54,7 @@ pip3 install meson ninja
 # Install deps to build.
 mk-build-deps --install --remove \
   --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' \
-  "${BASE_DIR}/debian/control"
+  "${ROOT_DIR}/debian/control"
 
 fakeroot debian/rules clean
 fakeroot debian/rules build
