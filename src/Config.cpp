@@ -470,9 +470,8 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_ENABLE_SB_MULTIPASS_UNIT_TEST;// is for unit test.
   (void)AV1E_SET_GF_MIN_PYRAMID_HEIGHT; // is for video.
 
-  // FIXME(ledyba-z): Please upgrade libaom
-  //(void)AV1E_SET_VBR_CORPUS_COMPLEXITY_LAP; // is for video.
-  //(void)AV1E_GET_BASELINE_GF_INTERVAL; // is for video.
+  (void)AV1E_SET_VBR_CORPUS_COMPLEXITY_LAP; // is for video.
+  (void)AV1E_GET_BASELINE_GF_INTERVAL; // is for video.
 
   #undef set
 }
