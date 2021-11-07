@@ -312,7 +312,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
       throw std::invalid_argument(std::string("Failed to set [" #param "] : ") + aom_codec_error_detail(aom)); \
     }
 
-  //(void)AOME_USE_REFERENCE; // It's for movies?
+  (void)AOME_USE_REFERENCE; // It's for movies.(Anyway, it's not used in current libaom)
 
   //FIXME: not implemented yet at libaom.
   // It can be useful for manga images.
