@@ -327,7 +327,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   set(AOME_SET_SHARPNESS, sharpness);
   (void)AOME_SET_ENABLEAUTOALTREF; // is used only in 2nd pass(thus, is's for video).
   (void)AOME_SET_ENABLEAUTOBWDREF; // is for video (bwd-pred frames).
-  (void)AOME_SET_STATIC_THRESHOLD; // is for video.
+  (void)AOME_SET_STATIC_THRESHOLD; // TODO: Not used. I don't know it's for key-frame or not.
   (void)AOME_SET_ARNR_MAXFRAMES; // is for video.
   (void)AOME_SET_ARNR_STRENGTH; // is for video.
   set(AOME_SET_TUNING, tune);
@@ -414,8 +414,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_SET_ENABLE_ORDER_HINT; // is for video
   set(AV1E_SET_ENABLE_TX64, enableTX64 ? 1 : 0);
   set(AV1E_SET_ENABLE_FLIP_IDTX, enableFlipIDTX ? 1 : 0);
-  // FIXME(ledyba-z): Please upgrade libaom
-  //set(AV1E_SET_ENABLE_RECT_TX, enableRectTX ? 1 : 0);
+  set(AV1E_SET_ENABLE_RECT_TX, enableRectTX ? 1 : 0);
   (void)AV1E_SET_ENABLE_DIST_WTD_COMP; // is for video
   (void)AV1E_SET_ENABLE_REF_FRAME_MVS; // is for video
   (void)AV1E_SET_ALLOW_REF_FRAME_MVS; // is for video
