@@ -336,7 +336,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   set(AOME_SET_MAX_INTRA_BITRATE_PCT, 0);
   (void)AOME_SET_NUMBER_SPATIAL_LAYERS; // for video
   (void)AV1E_SET_MAX_INTER_BITRATE_PCT; // for video
-  (void)AV1E_SET_GF_CBR_BOOST_PCT; // for video.(I don't know what Golden Frame is)
+  (void)AV1E_SET_GF_CBR_BOOST_PCT; // for video.(I don't know what Golden Frame actually means)
   set(AV1E_SET_LOSSLESS, lossless ? 1 : 0);
   set(AV1E_SET_ROW_MT, rowMT ? 1 : 0);
   set(AV1E_SET_TILE_ROWS, tileRows);
@@ -471,6 +471,9 @@ void Config::modify(aom_codec_ctx_t* aom) {
 
   (void)AV1E_SET_VBR_CORPUS_COMPLEXITY_LAP; // is for video.
   (void)AV1E_GET_BASELINE_GF_INTERVAL; // is for video.
+
+  // TODO: バージョンアップが最優先だそうな
+  // set(AV1E_SET_ENABLE_DNL_DENOISING, );
 
   #undef set
 }
