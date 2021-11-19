@@ -28,6 +28,7 @@ jobs:
         set MSYSTEM=MINGW64
         set HOME=${{ github.workspace }}
         C:\msys64\usr\bin\bash -lc "bash scripts/build-deps.sh"
+        C:\msys64\usr\bin\bash -lc "find ."
         C:\msys64\usr\bin\bash -lc "cmake -S . -B build -G 'MSYS Makefiles' '-DCMAKE_CXX_FLAGS=-static'"
     - name: make
       shell: cmd
