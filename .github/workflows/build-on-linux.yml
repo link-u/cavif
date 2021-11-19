@@ -49,6 +49,7 @@ jobs:
               ;;
             *) ;;
           esac
+          bash scripts/build-deps.sh
           cmake -S . -B build
       - name: make
         shell: bash

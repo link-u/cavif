@@ -32,7 +32,10 @@ jobs:
         source venv/bin/activate
         # FIXME(ledyba-z): clang reports errors when compiling libvmaf. So we will use gcc instead temporally.
         # I think libvmaf should follow the c standard :-(
-        env 'CXX=g++-10' 'CC=gcc-10' cmake -S . -B build
+        export CXX=g++-10
+        export CC=gcc-10
+        bash scripts/build-deps.sh
+        cmake -S . -B build
     - name: make
       shell: bash
       run: |

@@ -17,7 +17,7 @@ rm -Rf "${DEPS_DIR}"
 mkdir -p "${DEPS_DIR}"
 
 # libvmaf
-cd external/vmaf/libvmaf && bash <<EOF
+cd external/vmaf/libvmaf && bash -eux <<EOF
 meson setup \
   "--reconfigure" \
   "--prefix=${DEPS_DIR}" \
@@ -30,6 +30,6 @@ meson setup \
   "-Denable_asm=true" \
   "-Denable_tests=false" \
   "." \
-  "build" \
- && (cd build && ninja && meson install)
+  "build"
+(cd build && ninja && meson install)
 EOF
