@@ -19,7 +19,7 @@ DATE=$(LC_ALL=C TZ=JST-9 date '+%a, %d %b %Y %H:%M:%S %z')
 cat <<EOF > "${ROOT_DIR}/debian/changelog"
 cavif (${VERSION}) unstable; urgency=medium
 
-  * This is atomated build.
+  * This is automated build.
   * Please see https://github.com/link-u/cavif/releases for more information!
 
  -- Ryo Hirafuji <ryo.hirafuji@link-u.co.jp>  ${DATE}
