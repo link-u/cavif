@@ -26,10 +26,10 @@ jobs:
           case $(lsb_release -cs) in
             bionic)
               sudo apt install -y --no-install-recommends \
-                 gcc-8 g++-8 yasm python3-venv python3-pip python3-setuptools ;;
+                 gcc-8 g++-8 yasm nasm python3-venv python3-pip python3-setuptools ;;
             *)
               sudo apt install -y --no-install-recommends \
-                 gcc g++ yasm python3-venv python3-pip python3-setuptools ;;
+                 gcc g++ yasm nasm python3-venv python3-pip python3-setuptools ;;
           esac
           sudo apt install -y gcc-8 g++-8 yasm python3-venv python3-pip python3-setuptools
           python3 -m venv venv
