@@ -24,7 +24,7 @@ jobs:
         pip3 install wheel
         pip3 install meson
         pip3 install ninja
-        brew install yasm
+        brew install yasm nasm
     - name: configure
       shell: bash
       run: |
