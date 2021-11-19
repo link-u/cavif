@@ -29,7 +29,7 @@ meson setup \
   "--optimization" "3" \
   "-Denable_asm=true" \
   "-Denable_tests=false" \
-  "." \
-  "build"
+  "build" \
+  "."
 (cd build && ninja && meson install)
 EOF
