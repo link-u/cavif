@@ -16,6 +16,11 @@ else(WIN32)
   set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
 endif(WIN32)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  # https://discussions.apple.com/thread/1945589
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
+endif()
+
 # pkg-config path for dependencies
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/_deps/include")
 link_directories("${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib")
