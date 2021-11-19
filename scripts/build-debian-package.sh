@@ -32,7 +32,9 @@ apt-get install -y --no-install-recommends apt-transport-https ca-certificates g
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
 apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
 apt-get update
-apt-get install -y --no-install-recommends cmake
+# FIXME: Repository broken?
+#  cmake : Depends: cmake-data (= 3.21.3-0kitware1ubuntu20.04.1) but 3.22.0-0kitware1ubuntu20.04.1 is to be installed
+apt-get install -y --no-install-recommends 'cmake=3.21'
 
 # Workaround: gcc >= 8.0 is required.
 case $(lsb_release -cs) in
