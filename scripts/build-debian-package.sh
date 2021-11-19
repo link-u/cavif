@@ -34,7 +34,7 @@ apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
 apt-get update
 # FIXME: Repository broken?
 #  cmake : Depends: cmake-data (= 3.21.3-0kitware1ubuntu20.04.1) but 3.22.0-0kitware1ubuntu20.04.1 is to be installed
-apt-get install -y --no-install-recommends 'cmake=3.21'
+apt-get install -y --no-install-recommends 'cmake=3.21.3-0kitware1ubuntu20.04.1'
 
 # Workaround: gcc >= 8.0 is required.
 case $(lsb_release -cs) in
