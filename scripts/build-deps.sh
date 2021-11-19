@@ -18,8 +18,8 @@ mkdir -p "${DEPS_DIR}"
 
 # libvmaf
 cd external/vmaf/libvmaf && bash -eux <<EOF
+rm -Rf build
 meson setup \
-  "--reconfigure" \
   "--prefix=${DEPS_DIR}" \
   "--libdir" "lib" \
   "--auto-features" "disabled" \
