@@ -51,6 +51,8 @@ source venv/bin/activate
 pip3 install wheel
 pip3 install meson ninja
 
+bash scripts/build-deps.sh
+
 # Install deps to build.
 mk-build-deps --install --remove \
   --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' \

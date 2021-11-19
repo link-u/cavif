@@ -6,11 +6,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
 
 if (WIN32)
-    # https://stackoverflow.com/questions/47690822/possible-to-force-cmake-msvc-to-use-utf-8-encoding-for-source-files-without-a-bo
-    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+  # https://stackoverflow.com/questions/47690822/possible-to-force-cmake-msvc-to-use-utf-8-encoding-for-source-files-without-a-bo
+  add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+  add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 endif(WIN32)
 
+# pkg-config path for dependencies
+set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/_deps/include")
+link_directories("${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib")
 ###############################################################################
 add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 ###############################################################################
@@ -37,20 +41,6 @@ target_include_directories(png_static PRIVATE external/zlib "${CMAKE_CURRENT_BIN
 target_link_libraries(png_static zlibstatic)
 add_dependencies(png_static zlibstatic)
 ###############################################################################
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo/CMakeLists.txt.in"
-               "${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo/CMakeLists.txt" @ONLY)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -S "${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo" -B "${CMAKE_BINARY_DIR}/external/vmaf-repo" )
-execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external/vmaf-repo")
-execute_process(COMMAND ${CMAKE_COMMAND} --install . WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external/vmaf-repo")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/external/vmaf-repo" EXCLUDE_FROM_ALL)
-
-set(ENV{PKG_CONFIG_PATH} "${CMAKE_BINARY_DIR}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}") # pkg-config
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}") # w/o pkg-config
-#FIXME(ledyba-z) This line is also needed to compile w/o pkg-config
-# Please see: https://bugs.chromium.org/p/aomedia/issues/detail?id=2748&q=vmaf&can=2
-include_directories("${CMAKE_BINARY_DIR}/include/libvmaf")
-include_directories("${CMAKE_BINARY_DIR}/include")
-###############################################################################
 set(ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(ENABLE_TOOLS OFF CACHE BOOL "" FORCE)
@@ -64,22 +54,21 @@ set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
 #
 set(CONFIG_AV1_DECODER 0 CACHE STRING "Enable AV1 decoder." FORCE)
 add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
-add_dependencies(aom vmaf_repo)
 ###############################################################################
 
 add_executable(cavif
-        src/main.cpp
+    src/main.cpp
 
-        src/img/PNGReader.cpp
-        src/img/PNGReader.hpp
-        src/img/Convertion.hpp
+    src/img/PNGReader.cpp
+    src/img/PNGReader.hpp
+    src/img/Convertion.hpp
 
-        src/Config.cpp
-        src/Config.hpp
+    src/Config.cpp
+    src/Config.hpp
 
-        src/AVIFBuilder.cpp
-        src/AVIFBuilder.hpp
-)
+    src/AVIFBuilder.cpp
+    src/AVIFBuilder.hpp
+    )
 
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)
@@ -92,16 +81,16 @@ target_include_directories(cavif PRIVATE external/libyuv/include)
 target_include_directories(cavif PRIVATE external/libavif-container/src)
 target_include_directories(cavif PRIVATE "${CMAKE_BINARY_DIR}/include")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # FIXME(ledyba-z): workaround for gcc-8
-    target_link_libraries(cavif PRIVATE stdc++fs)
+  # FIXME(ledyba-z): workaround for gcc-8
+  target_link_libraries(cavif PRIVATE stdc++fs)
 endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 ###############################################################################
 
 install(TARGETS cavif
-        RUNTIME DESTINATION bin
-)
+    RUNTIME DESTINATION bin
+    )
 
 install(DIRECTORY external/vmaf/model
-        DESTINATION share/cavif
-)
+    DESTINATION share/cavif
+    )

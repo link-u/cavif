@@ -37,6 +37,9 @@ git clone --recurse-submodules --recursive git@github.com:link-u/cavif.git
 
 cd cavif
 
+# build dependencies not managed by CMake.
+bash scripts/build-deps.sh
+
 # make build directory
 mkdir build && cd build
 
