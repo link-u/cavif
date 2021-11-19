@@ -9,10 +9,13 @@ if (WIN32)
   # https://stackoverflow.com/questions/47690822/possible-to-force-cmake-msvc-to-use-utf-8-encoding-for-source-files-without-a-bo
   add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
   add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
+  set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib/pkgconfig;$ENV{PKG_CONFIG_PATH}")
+else(WIN32)
+  set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
 endif(WIN32)
 
 # pkg-config path for dependencies
-set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/_deps/include")
 link_directories("${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib")
 ###############################################################################
