@@ -53,6 +53,7 @@ pip3 install wheel
 pip3 install meson ninja
 
 # Install deps to build.
+dpkg-checkbuilddeps "${ROOT_DIR}/debian/control"
 mk-build-deps --install --remove \
   --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' \
   "${ROOT_DIR}/debian/control"
