@@ -18,7 +18,7 @@ endif(WIN32)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   # https://discussions.apple.com/thread/1945589
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
 endif()
 
 # pkg-config path for dependencies
