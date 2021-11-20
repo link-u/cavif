@@ -16,11 +16,6 @@ else(WIN32)
   set(ENV{PKG_CONFIG_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
 endif(WIN32)
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  # https://discussions.apple.com/thread/1945589
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
-endif()
-
 # pkg-config path for dependencies
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/_deps/include")
 link_directories("${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib")
@@ -93,6 +88,10 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # FIXME(ledyba-z): workaround for gcc-8
   target_link_libraries(cavif PRIVATE stdc++fs)
 endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  # https://discussions.apple.com/thread/1945589
+  target_link_options(cavif PRIVATE "-static")
+endif()
 
 ###############################################################################
 
