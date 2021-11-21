@@ -53,7 +53,7 @@ jobs:
       - name: Check debian package
         uses: link-u/execute-on-separated-ubuntu@master
         with:
-          script: scripts/test.sh
+          script: scripts/test-debian-package.sh
           on: ${{ matrix.codename }}
 
   release:
