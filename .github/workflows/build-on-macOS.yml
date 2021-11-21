@@ -31,10 +31,13 @@ jobs:
         export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
         source venv/bin/activate
         bash scripts/build-deps.sh
-        cmake -S . -B build
+        cmake -S . -B build -G 'Ninja'
+        # FIXME
+        sed -e 's/ -static$/ /' -e 's/ -static / /' build/build.ninja > build/build_fixed.ninja
+        mv build/build_fixed.ninja build/build.ninja 
     - name: make
       shell: bash
       run: |
         export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
         source venv/bin/activate
-        (cd build && make)
+        (cd build && ninja -f build_fixed.ninja)
