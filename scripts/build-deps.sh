@@ -17,7 +17,8 @@ rm -Rf "${DEPS_DIR}"
 mkdir -p "${DEPS_DIR}"
 
 # libvmaf
-cd external/vmaf/libvmaf && bash -eux <<EOF
+bash -eux <<EOF
+cd external/vmaf/libvmaf
 rm -Rf build
 meson setup \
   "--prefix=${DEPS_DIR}" \
