@@ -2,7 +2,7 @@ Source: cavif
 Section: unknown
 Priority: optional
 Maintainer: Ryo Hirafuji <ryo.hirafuji@link-u.co.jp>
-Build-Depends: debhelper (>= 10), cmake (>= 3.21), gcc-9, g++-9, libc6-dev, libstdc++-9-dev, yasm, nasm
+Build-Depends: debhelper (>= 10), cmake (>= 3.21), pkg-config, gcc-9, g++-9, libc6-dev, libstdc++-9-dev, yasm, nasm
 Standards-Version: 4.1.2
 Homepage: https://github.com/link-u/cavif
 Vcs-Git: https://github.com/link-u/cavif.git
