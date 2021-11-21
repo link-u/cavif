@@ -28,7 +28,7 @@ EOF
 # Add Kitware APT repository to install the latest cmake.
 # https://apt.kitware.com/
 apt-get update
-apt-get install -y --no-install-recommends wget
+apt-get install -y --no-install-recommends wget ca-certificates
 wget -O - 'https://apt.kitware.com/kitware-archive.sh' | sh
 apt-get update
 # FIXME: Repository broken?
