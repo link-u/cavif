@@ -40,4 +40,4 @@ jobs:
       run: |
         export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"
         source venv/bin/activate
-        (cd build && ninja -f build_fixed.ninja)
+        (cd build && ninja)
