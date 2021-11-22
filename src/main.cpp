@@ -14,7 +14,7 @@
 #include "Config.hpp"
 #include "AVIFBuilder.hpp"
 #include "img/PNGReader.hpp"
-#include "img/Convertion.hpp"
+#include "img/Conversion.hpp"
 
 namespace {
 

@@ -65,7 +65,7 @@ add_executable(cavif
 
     src/img/PNGReader.cpp
     src/img/PNGReader.hpp
-    src/img/Convertion.hpp
+    src/img/Conversion.hpp
 
     src/Config.cpp
     src/Config.hpp
