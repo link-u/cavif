@@ -19,17 +19,15 @@ The most significant mission of this project is "**Make it enable to tune libaom
 
 [AVIF(AV1 Image File Format)]((https://aomediacodec.github.io/av1-avif/))は、動画フォーマットである[AV1](https://aomediacodec.github.io/av1-spec/av1-spec.pdf)のキーフレームを流用して圧縮する静止画フォーマットです。
 
-cavifは、ラッパーを介さず[libaom](https://aomedia.googlesource.com/aom/)を直接叩くavifのエンコーディング・コマンドです。このプロジェクトの唯一にして最大の使命は、 **libaomの静止画に関する全エンコードオプションを仔細に操作できるようにして、現生人類が現時点で達成可能な最高の圧縮効率を実現する手段を提供すること** です。
+cavifは、ラッパーを介さず [libaom](https://aomedia.googlesource.com/aom/) を直接叩くavifのエンコーディング・コマンドです。このプロジェクトの唯一にして最大の使命は、 **libaomの静止画に関する全エンコードオプションを仔細に操作できるようにして、現生人類が現時点で達成可能な最高の圧縮効率を実現する手段を提供すること** です。
 
 [日本語の詳しいドキュメントはこちら](./doc/ja_JP/README.md)。
 
-# Usage
+# How to build
 
-## How to build
+## Pre-requirements
 
-### Pre-requirements
-
-#### cmake >= 3.13
+### cmake >= 3.13
 
 If your system cmake is lower than 3.13, please install the latest version:
 
@@ -43,7 +41,7 @@ To install:
 - mac OS
   - `brew install cmake`
 
-#### latest version of meson and ninja
+### latest version of meson and ninja
 
 meson and ninja are required to build libvmaf.
 
@@ -51,7 +49,7 @@ Please see: https://mesonbuild.com/Quick-guide.html
 
 [We use python's venv module to install meson and ninja in CI](https://github.com/link-u/cavif/blob/master/.github/workflows/build-on-linux.yml).
 
-### Build steps
+## Build steps
 
 ```bash
 # cloning this repository with dependencies.
@@ -59,13 +57,13 @@ git clone --recurse-submodules --recursive git@github.com:link-u/cavif.git
 
 cd cavif
 
-# build dependencies not managed by CMake.
+# Build dependencies not managed by CMake.
 bash scripts/build-deps.sh
 
-# make build directory
+# Make build directory
 mkdir build && cd build
 
-# System gcc is 8.0 or higher:
+# If your system gcc is 8.0 or higher:
 cmake -G 'Ninja' ..
 
 # If not, please install gcc-8 (or higher) and tell them to CMake.
@@ -78,6 +76,8 @@ mv build_fixed.ninja build.ninja
 # build and get cavif binary!
 ninja
 ```
+
+# Usage
 
 ## basic usage
 
