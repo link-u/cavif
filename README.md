@@ -25,13 +25,28 @@ cavifは、ラッパーを介さず[libaom](https://aomedia.googlesource.com/aom
 
 # Usage
 
-## how to build
+## How to build
+
+### Pre-requirements
+
+#### cmake >= 3.13
+
+If your system cmake is lower than 3.13, please install latest version:
+
+See: https://apt.kitware.com/
+
+#### latest version of meson and ninja
+
+meson and ninja is required to build libvmaf.
+
+Please see:
+https://mesonbuild.com/Quick-guide.html
+
+[We use venv to install meson and ninja in CI](https://github.com/link-u/cavif/blob/master/.github/workflows/build-on-linux.yml).
+
+### Build steps
 
 ```bash
-# pre-requirements
-# If your system cmake is lower than 3.13, please install latest version:
-# https://apt.kitware.com/
-
 # cloning this repository with dependencies.
 git clone --recurse-submodules --recursive git@github.com:link-u/cavif.git
 
@@ -44,7 +59,7 @@ bash scripts/build-deps.sh
 mkdir build && cd build
 
 # System gcc is 8.0 or higher:
-cmake ..
+cmake -G 'Ninja' ..
 
 # If not, please install gcc-8 (or higher) and tell them to CMake.
 CXX=g++-8 CC=gcc-8 cmake -G 'Ninja' ..
@@ -53,7 +68,7 @@ CXX=g++-8 CC=gcc-8 cmake -G 'Ninja' ..
 sed -e 's/ -static$/ /' -e 's/ -static / /' build.ninja > build_fixed.ninja
 mv build_fixed.ninja build.ninja
 
-# build cavif binary.
+# build and get cavif binary!
 ninja
 ```
 
