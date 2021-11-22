@@ -31,18 +31,25 @@ cavifは、ラッパーを介さず[libaom](https://aomedia.googlesource.com/aom
 
 #### cmake >= 3.13
 
-If your system cmake is lower than 3.13, please install latest version:
+If your system cmake is lower than 3.13, please install the latest version:
 
-See: https://apt.kitware.com/
+To install:
+
+- Ubuntu/Debian
+  - See https://apt.kitware.com/
+- Windows
+  - [Download | CMake](https://cmake.org/download/)
+  - [mingw-w64-cmake - MSYS2 Packages](https://packages.msys2.org/base/mingw-w64-cmake)
+- mac OS
+  - `brew install cmake`
 
 #### latest version of meson and ninja
 
-meson and ninja is required to build libvmaf.
+meson and ninja are required to build libvmaf.
 
-Please see:
-https://mesonbuild.com/Quick-guide.html
+Please see: https://mesonbuild.com/Quick-guide.html
 
-[We use venv to install meson and ninja in CI](https://github.com/link-u/cavif/blob/master/.github/workflows/build-on-linux.yml).
+[We use python's venv module to install meson and ninja in CI](https://github.com/link-u/cavif/blob/master/.github/workflows/build-on-linux.yml).
 
 ### Build steps
 
@@ -64,7 +71,7 @@ cmake -G 'Ninja' ..
 # If not, please install gcc-8 (or higher) and tell them to CMake.
 CXX=g++-8 CC=gcc-8 cmake -G 'Ninja' ..
 
-# Workaround: if you are on mac OS, please run this scipt:
+# Workaround: if you are on mac OS, please run this script:
 sed -e 's/ -static$/ /' -e 's/ -static / /' build.ninja > build_fixed.ninja
 mv build_fixed.ninja build.ninja
 
