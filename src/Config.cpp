@@ -317,8 +317,9 @@ void Config::modify(aom_codec_ctx_t* aom) {
   //FIXME: not implemented yet at libaom.
   // It can be useful for manga images.
   //aom_codec_control(codec, AOME_SET_ROI_MAP, ...);
+  (void)AOME_SET_ROI_MAP;
 
-  (void)AOME_SET_ACTIVEMAP; // for internal use only
+  (void)AOME_SET_ACTIVEMAP; // FIXME(ledyba-z): Not used currently.
   if(!(scaleMode.h_scaling_mode == AOME_NORMAL && scaleMode.v_scaling_mode == AOME_NORMAL)) {
     set(AOME_SET_SCALEMODE, &scaleMode);
   }
