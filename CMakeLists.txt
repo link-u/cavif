@@ -88,10 +88,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # FIXME(ledyba-z): workaround for gcc-8
   target_link_libraries(cavif PRIVATE stdc++fs)
 endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  # https://discussions.apple.com/thread/1945589
-  target_link_options(cavif PRIVATE "-static")
-endif()
 
 ###############################################################################
 
