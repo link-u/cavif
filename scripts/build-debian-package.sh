@@ -31,8 +31,7 @@ apt-get update
 apt-get install -y --no-install-recommends wget ca-certificates
 wget -O - 'https://apt.kitware.com/kitware-archive.sh' | sh
 apt-get update
-# FIXME: Repository broken?
-#  cmake : Depends: cmake-data (= 3.21.3-0kitware1ubuntu20.04.1) but 3.22.0-0kitware1ubuntu20.04.1 is to be installed
+# It fails if kitware's apt repository is broken.
 apt-get install -y --no-install-recommends cmake
 
 # Workaround: gcc >= 8.0 is required.
