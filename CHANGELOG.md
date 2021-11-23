@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `--(enable|disable)-diagonal-intra` is introduced. Enable by default.
 
 ### Changed
 - libaom is upgraded to v3.1.2

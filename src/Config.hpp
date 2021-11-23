@@ -89,6 +89,7 @@ public:
   bool enablePalette = false;
   bool enableIntraBC = true;
   bool enableAngleDelta = true;
+  bool enableDiagonalIntra = true;
   bool lossless = false;
   bool enableCDEF = false;
   bool enableRestoration = false;

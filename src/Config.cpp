@@ -300,7 +300,9 @@ clipp::group Config::createCommandLineFlags() {
       option("--enable-intrabc").doc("enable intra block copy mode (default)").set(enableIntraBC, true),
       option("--disable-intrabc").doc("disable intra block copy mode").set(enableIntraBC, false),
       option("--enable-angle-delta").doc("enable intra angle delta (default)").set(enableAngleDelta, true),
-      option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false)
+      option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false),
+      option("--enable-diagonal-intra").doc("enable usage of D45 to D203 intra modes. (default)").set(enableDiagonalIntra, true),
+      option("--disable-diagonal-intra").doc("disable usage of D45 to D203 intra modes.").set(enableDiagonalIntra, false)
   );
 
   return (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProcess, codingParameters) | support;
@@ -344,7 +346,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   set(AV1E_SET_TILE_COLUMNS, tileColumns);
   (void)AV1E_SET_ENABLE_TPL_MODEL; // is for video.
   set(AV1E_SET_ENABLE_KEYFRAME_FILTERING, keyframeTemporalFilter);
-  (void)AV1E_SET_FRAME_PARALLEL_DECODING; // is for video. we have just one frame.
+  (void)AV1E_SET_FRAME_PARALLEL_DECODING; // is for video. we have just one frame. Finally, we just encode.
   (void)AV1E_SET_ERROR_RESILIENT_MODE; // is for video.
   (void)AV1E_SET_S_FRAME_MODE; // is for video.
   set(AV1E_SET_AQ_MODE, adaptiveQuantizationMode);
@@ -352,7 +354,8 @@ void Config::modify(aom_codec_ctx_t* aom) {
 
   //FIXME(ledyba-z): it can be set, but not used.
   // To check, `grep -R 'oxcf->noise_sensitivity' external/libaom/av1`
-  // control(AV1E_SET_NOISE_SENSITIVITY, 0);
+  // (updated at 2021/11: it is used, but guarded by OUTPUT_YUV_DENOISED, which is not documented yet.
+  // set(AV1E_SET_NOISE_SENSITIVITY, 0);
 
   //FIXME(ledyba-z): it can be set, but not used.
   // To check, `grep -R 'oxcf->content' external/libaom/av1`
@@ -368,7 +371,8 @@ void Config::modify(aom_codec_ctx_t* aom) {
   set(AV1E_SET_TRANSFER_CHARACTERISTICS, transferCharacteristics);
   set(AV1E_SET_MATRIX_COEFFICIENTS, matrixCoefficients);
 
-  set(AV1E_SET_CHROMA_SAMPLE_POSITION, 0); // see libavif-container
+ // FIXME(ledyba-z): It's not used. see libavif-container to see our choice.
+  (void)AV1E_SET_CHROMA_SAMPLE_POSITION;
 
   (void)AV1E_SET_MIN_GF_INTERVAL; // for video
   set(AV1E_SET_COLOR_RANGE, fullColorRange ? 1 : 0);
@@ -378,17 +382,18 @@ void Config::modify(aom_codec_ctx_t* aom) {
     set(AV1E_SET_RENDER_SIZE, renderSize);
   }
   (void)AV1E_SET_TARGET_SEQ_LEVEL_IDX; // for video.
+  (void)AV1E_GET_SEQ_LEVEL_IDX; // for video.
   set(AV1E_SET_SUPERBLOCK_SIZE, superblockSize);
   (void)AOME_SET_ENABLEAUTOBWDREF; // is for video.
 
   set(AV1E_SET_ENABLE_CDEF, enableCDEF ? 1 : 0);
   set(AV1E_SET_ENABLE_RESTORATION, enableRestoration ? 1 : 0);
 
-  // we are working for images.
+  // we are working on images.
   set(AV1E_SET_FORCE_VIDEO_MODE, 0);
 
   (void)AV1E_SET_ENABLE_OBMC; // is for video, motion prediction.
-  // OBMC is "Overlapped Block Motion Compensation"
+  // OBMC means "Overlapped Block Motion Compensation"
   // https://jmvalin.ca/papers/AV1_tools.pdf
 
   (void)AV1E_SET_DISABLE_TRELLIS_QUANT; // is for video(motion estimation).
@@ -428,9 +433,9 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_SET_ENABLE_DIFF_WTD_COMP; // is for video
   (void)AV1E_SET_ENABLE_INTERINTER_WEDGE; // is for video
   (void)AV1E_SET_ENABLE_GLOBAL_MOTION; // is for video
-  set(AV1E_SET_ENABLE_GLOBAL_MOTION, 0);
-  set(AV1E_SET_ENABLE_WARPED_MOTION, 0);
-  (void)AV1E_SET_ALLOW_WARPED_MOTION; // is for video
+  set(AV1E_SET_ENABLE_GLOBAL_MOTION, 0); // we are working on images.
+  set(AV1E_SET_ENABLE_WARPED_MOTION, 0); // we are working on images.
+  set(AV1E_SET_ALLOW_WARPED_MOTION, 0); // we are working on images.
   set(AV1E_SET_ENABLE_FILTER_INTRA, enableFilterIntra ? 1 : 0);
   set(AV1E_SET_ENABLE_SMOOTH_INTRA, enableSmoothIntra ? 1 : 0);
   set(AV1E_SET_ENABLE_PAETH_INTRA, enablePaethIntra ? 1 : 0);
@@ -441,7 +446,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   set(AV1E_SET_ENABLE_INTRABC, enableIntraBC ? 1 : 0);
   set(AV1E_SET_DELTAQ_MODE, deltaQMode);
   set(AV1E_SET_DELTALF_MODE, enableDeltaLoopfilter ? 1 : 0);
-  (void)AV1E_SET_SINGLE_TILE_DECODING; // is for video.
+  (void)AV1E_SET_SINGLE_TILE_DECODING; // We are working on encoding.
   (void)AV1E_ENABLE_MOTION_VECTOR_UNIT_TEST; // is for video.
   (void)AV1E_SET_TIMING_INFO_TYPE; // is for video.
   (void)AV1E_SET_FILM_GRAIN_TEST_VECTOR; // is for testing
@@ -473,8 +478,9 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_SET_VBR_CORPUS_COMPLEXITY_LAP; // is for video.
   (void)AV1E_GET_BASELINE_GF_INTERVAL; // is for video.
 
-  // TODO: バージョンアップが最優先だそうな
-  // set(AV1E_SET_ENABLE_DNL_DENOISING, );
+  (void)AV1E_SET_ENABLE_DNL_DENOISING; // can be supported, but it is mainly for video (used in two pass mode).
+
+  set(AV1E_SET_ENABLE_DIAGONAL_INTRA, enableDiagonalIntra ? 1 : 0);
 
   #undef set
 }

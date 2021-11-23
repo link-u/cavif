@@ -51,6 +51,7 @@ set(ENABLE_TOOLS OFF CACHE BOOL "" FORCE)
 # See: external/libaom/build/cmake/aom_config_defaults.cmake
 set(CONFIG_TUNE_VMAF 1 CACHE INTERNAL "Enable encoding tuning for VMAF." FORCE)
 set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
+set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
 # FIXME(ledyba-z): CONFIG_DIST_8X8 conflicts with CONFIG_MULTITHREAD.
 # --- aom_configure: Detected CPU: x86_64
 # CMake Warning at external/libaom/build/cmake/util.cmake:57 (message):
