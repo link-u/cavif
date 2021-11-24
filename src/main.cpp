@@ -15,6 +15,7 @@
 #include "AVIFBuilder.hpp"
 #include "img/PNGReader.hpp"
 #include "img/Conversion.hpp"
+#include "Encoder.hpp"
 
 namespace {
 
@@ -24,30 +25,6 @@ bool endsWidh(std::string const& target, std::string const& suffix) {
     return false;
   }
   return target.substr(target.size()-suffix.size()) == suffix;
-}
-
-size_t encode(avif::util::Logger& log, aom_codec_ctx_t& codec, aom_image* img, std::vector<std::vector<uint8_t>>& packets) {
-  aom_codec_cx_pkt_t const* pkt;
-  aom_codec_iter_t iter = nullptr;
-  aom_codec_err_t const res = aom_codec_encode(&codec, img, 0, 1, img ? AOM_EFLAG_FORCE_KF : 0);
-  if (res != AOM_CODEC_OK) {
-    if(img) {
-      log.fatal("failed to encode a frame: {}", aom_codec_error_detail(&codec));
-    } else {
-      log.fatal("failed to flush encoder: {}", aom_codec_error_detail(&codec));
-    }
-    return 0;
-  }
-  size_t numPackets = 0;
-  while ((pkt = aom_codec_get_cx_data(&codec, &iter)) != nullptr) {
-    if (pkt->kind == AOM_CODEC_CX_FRAME_PKT) {
-      auto& frame = pkt->data.frame;
-      auto const beg = reinterpret_cast<uint8_t*>(frame.buf);
-      packets.emplace_back(std::vector<uint8_t>(beg, beg + frame.sz));
-      ++numPackets;
-    }
-  }
-  return numPackets;
 }
 
 }
@@ -72,21 +49,21 @@ int internal::main(int argc, char** argv) {
   log.info("cavif");
   log.info("libaom ver: {}", aom_codec_version_str());
 
-  aom_codec_iface_t* av1codec = aom_codec_av1_cx();
-  if(!av1codec) {
+  aom_codec_iface_t* interface = aom_codec_av1_cx();
+  if(!interface) {
     log.fatal("failed to get AV1 encoder.");
   }
 
   Config config(argc, argv);
-  aom_codec_enc_config_default(av1codec, &config.codec, AOM_USAGE_GOOD_QUALITY);
+  aom_codec_enc_config_default(interface, &config.codec, AOM_USAGE_GOOD_QUALITY);
   // Set our default.
   config.codec.rc_end_usage = AOM_Q;
   config.codec.rc_target_bitrate = 0;
   config.codec.g_threads = std::thread::hardware_concurrency();
   {
-    int const parsrResult = config.parse();
-    if(parsrResult != 0) {
-      return parsrResult;
+    int const parseResult = config.parse();
+    if(parseResult != 0) {
+      return parseResult;
     }
     if(config.showHelp) {
       config.usage();
@@ -133,33 +110,25 @@ int internal::main(int argc, char** argv) {
   config.codec.g_timebase.den = 1;
   config.codec.g_timebase.num = 1;
 
-  aom_codec_ctx_t codec{};
-
   aom_codec_flags_t flags = 0;
   if(config.codec.g_bit_depth > 8) {
     flags = AOM_CODEC_USE_HIGHBITDEPTH;
   }
-  if(AOM_CODEC_OK != aom_codec_enc_init(&codec, av1codec, &config.codec, flags)) {
-    log.fatal("Failed to initialize encoder: {}", aom_codec_error_detail(&codec));
-  }
-
-  config.modify(&codec);
 
   std::vector<std::vector<uint8_t>> packets;
   {
     log.info("Encoding: {} -> {}", config.input, config.output);
     auto start = std::chrono::steady_clock::now();
-    encode(log, codec, &img, packets);
-    while(encode(log, codec, nullptr, packets) > 0); //flushing
+    Encoder encoder(log, config, interface, flags, img);
+    if (!config.multiPassEncoding) {
+      packets = encoder.encodeInSinglePass();
+    } else {
+    }
     auto finish = std::chrono::steady_clock::now();
-    log.info(" Encoded: {} -> {} in {:.2f} [sec]", config.input, config.output, std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() / 1000.0f);
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() / 1000.0f;
+    log.info(" Encoded: {} -> {} in {:.2f} [sec]", config.input, config.output, elapsed);
   }
   aom_img_free(&img);
-
-  if (aom_codec_destroy(&codec) != AOM_CODEC_OK) {
-    log.error("Failed to destroy codec: {}", aom_codec_error_detail(&codec));
-    return -1;
-  }
 
   if(packets.empty()) {
     log.error("no packats to out.");

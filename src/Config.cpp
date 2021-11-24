@@ -128,6 +128,11 @@ clipp::group Config::createCommandLineFlags() {
       option("--full-still-picture-header").doc("Force to output full picture header").set(aom.full_still_picture_hdr, 1u)
   );
 
+  auto pass = (
+      option("--enable-multi-pass-encoding").doc("Enable multipass encoding (default)").set(multiPassEncoding, true),
+      option("--disble-multi-pass-encoding").doc("Disable multipass encoding").set(multiPassEncoding, false)
+   );
+
   // colors
   group color = (
       option("--color-primaries").doc("Set color primaries information value.") & (
@@ -305,7 +310,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--disable-diagonal-intra").doc("disable usage of D45 to D203 intra modes.").set(enableDiagonalIntra, false)
   );
 
-  return (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProcess, codingParameters) | support;
+  return (io, meta, av1, pass, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProcess, codingParameters) | support;
 }
 
 void Config::modify(aom_codec_ctx_t* aom) {

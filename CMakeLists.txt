@@ -63,6 +63,8 @@ add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
 
 add_executable(cavif
     src/main.cpp
+    src/Encoder.cpp
+    src/Encoder.hpp
 
     src/img/PNGReader.cpp
     src/img/PNGReader.hpp
