@@ -129,8 +129,8 @@ clipp::group Config::createCommandLineFlags() {
   );
 
   auto pass = (
-      option("--enable-multi-pass-encoding").doc("Enable multipass encoding (default)").set(multiPassEncoding, true),
-      option("--disble-multi-pass-encoding").doc("Disable multipass encoding").set(multiPassEncoding, false)
+      option("--enable-multi-pass-encoding").doc("Enable multipass encoding").set(multiPassEncoding, true),
+      option("--disble-multi-pass-encoding").doc("Disable multipass encoding (default)").set(multiPassEncoding, false)
    );
 
   // colors

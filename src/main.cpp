@@ -123,9 +123,10 @@ int internal::main(int argc, char** argv) {
     if (!config.multiPassEncoding) {
       packets = encoder.encodeInSinglePass();
     } else {
+      packets = encoder.encodeInTwoPass();
     }
     auto finish = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count() / 1000.0f;
+    auto elapsed = static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(finish-start).count()) / 1000.0f;
     log.info(" Encoded: {} -> {} in {:.2f} [sec]", config.input, config.output, elapsed);
   }
   aom_img_free(&img);
