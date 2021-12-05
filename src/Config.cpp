@@ -242,6 +242,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--qm-min-u").doc("Min quant matrix flatness for U") & integer("0-15 (default: 11)", qmMinU),
       option("--qm-min-v").doc("Min quant matrix flatness for V") & integer("0-15 (default: 12)", qmMinV),
       option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("SSIM(structural similarity)").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("PSNR(peak signal-to-noise ratio)").set(tune, AOM_TUNE_PSNR)  | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-without-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN) | parameter("vmaf-neg-max-gain").doc("vmaf-neg-max-gain").set(tune, AOM_TUNE_VMAF_NEG_MAX_GAIN) | parameter("butteraugli").doc("google's butteraugli algorithm (github.com/google/butteraugli)").set(tune, AOM_TUNE_BUTTERAUGLI)),
+      option("--content-type").doc("Content type") & (parameter("default").doc("Regular video content (default)").set(contentType, AOM_CONTENT_DEFAULT) | parameter("screen").doc("Screen capture content").set(contentType, AOM_CONTENT_SCREEN) | parameter("film").doc("Film content").set(contentType, AOM_CONTENT_FILM)),
       option("--vmaf-model-path").doc("VMAF model file path to tuning image quality") & value("<path-to-vmaf-model-file>", vmafModelPath),
       option("--lossless").doc("Enable lossless encoding").set(lossless, true)
   );
@@ -357,9 +358,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   // (updated at 2021/11: it is used, but guarded by OUTPUT_YUV_DENOISED, which is not documented yet.
   // set(AV1E_SET_NOISE_SENSITIVITY, 0);
 
-  //FIXME(ledyba-z): it can be set, but not used.
-  // To check, `grep -R 'oxcf->content' external/libaom/av1`
-  // control(AV1E_SET_TUNE_CONTENT, AOM_CONTENT_DEFAULT);
+  set(AV1E_SET_TUNE_CONTENT, contentType);
 
   (void)AV1E_SET_CDF_UPDATE_MODE; // is for video.
 

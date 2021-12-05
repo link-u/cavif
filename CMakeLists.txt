@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
-project(cavif)
+project(cavif CXX ASM)
 
-enable_language(C CXX ASM)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
 
@@ -73,7 +72,10 @@ add_executable(cavif
 
     src/AVIFBuilder.cpp
     src/AVIFBuilder.hpp
-    )
+
+    src/ext/ExternalPartitionModelFactoryContainer.cpp
+    src/ext/ExternalPartitionModelFactoryContainer.hpp
+    src/ext/ExternalPartitionModel.hpp)
 
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE png_static)

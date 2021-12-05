@@ -59,6 +59,7 @@ mk-build-deps --install --remove \
   --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' \
   "${ROOT_DIR}/debian/control"
 
+bash scripts/apply-patches.sh
 bash scripts/build-deps.sh
 
 fakeroot debian/rules clean

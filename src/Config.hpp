@@ -80,6 +80,7 @@ public:
   bool useDefaultTXOnly = false;
   bool useReducedTXSet = false;
   int adaptiveQuantizationMode = NO_AQ;
+  aom_tune_content contentType = AOM_CONTENT_DEFAULT;
   bool enableAdaptiveQuantizationB = false;
   bool enableFilterIntra = true;
   bool enableSmoothIntra = true;

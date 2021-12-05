@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - `--(enable|disable)-diagonal-intra` is introduced. Enable by default.
+- `--content-type (default|screen|film)` is introduced.
+  - default: regular video content(default)
+  - screen: Screen capture content
+  - film: Film content
 
 ### Changed
-- libaom is upgraded to v3.1.2
+- libaom is upgraded to v3.2.0
 - libvmaf is upgrade to [9451ff498402e8f0a912161e5f8dea4de6b54ae2](https://github.com/Netflix/vmaf/tree/9451ff498402e8f0a912161e5f8dea4de6b54ae2).
 - [Remove URL from header to make image sizes smaller](https://github.com/link-u/cavif/pull/56).
 

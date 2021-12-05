@@ -49,10 +49,11 @@ jobs:
               ;;
             *) ;;
           esac
+          bash scripts/apply-patches.sh
           bash scripts/build-deps.sh
-          cmake -S . -B build
-      - name: make
+          cmake -S . -B build -G Ninja
+      - name: Build
         shell: bash
         run: |
           source venv/bin/activate
-          env --chdir build make
+          env --chdir build ninja
