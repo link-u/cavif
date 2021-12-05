@@ -57,6 +57,9 @@ git clone --recurse-submodules --recursive https://github.com/link-u/cavif
 
 cd cavif
 
+# Apply workarounds
+bash scripts/apply-patches.sh
+
 # Build dependencies not managed by CMake.
 bash scripts/build-deps.sh
 
