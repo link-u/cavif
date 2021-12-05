@@ -217,7 +217,7 @@ clipp::group Config::createCommandLineFlags() {
       option("--threads") & integer("Num of threads to use (default=num of logical cores)", aom.g_threads),
       option("--enable-row-mt").doc("Enable row based multi-threading of encoder").set(rowMT, true),
       option("--disable-row-mt").doc("Disable row based multi-threading of encoder (default)").set(rowMT, false),
-      option("--cpu-used").doc("Quality/Speed ratio modifier") & integer("0-8, default=1. Higher means slower encoding and better quality", cpuUsed)
+      option("--cpu-used").doc("Quality/Speed ratio modifier") & integer("0-9, default=1. Higher means slower encoding and better quality", cpuUsed)
   );
 
   // rate-control

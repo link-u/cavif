@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `--cpu-used 9` is introduced.
 - `--(enable|disable)-diagonal-intra` is introduced. Enable by default.
 - `--content-type (default|screen|film)` is introduced.
   - default: regular video content(default)
