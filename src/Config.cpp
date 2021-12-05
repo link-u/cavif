@@ -329,7 +329,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AOME_SET_SPATIAL_LAYER_ID; // for adaptive video decoding (such as for Netflix or Youtube).
   set(AOME_SET_CPUUSED, cpuUsed);
   set(AOME_SET_SHARPNESS, sharpness);
-  (void)AOME_SET_ENABLEAUTOALTREF; // is used only in 2nd pass(thus, is's for video).
+  (void)AOME_SET_ENABLEAUTOALTREF; // is used only in 2nd pass(thus, it's for video).
   (void)AOME_SET_ENABLEAUTOBWDREF; // is for video (bwd-pred frames).
   (void)AOME_SET_STATIC_THRESHOLD; // TODO: Not used. I don't know it's for key-frame or not.
   (void)AOME_SET_ARNR_MAXFRAMES; // is for video.
