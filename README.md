@@ -72,10 +72,6 @@ cmake -G 'Ninja' ..
 # If not, please install gcc-8 (or higher) and tell them to CMake.
 CXX=g++-8 CC=gcc-8 cmake -G 'Ninja' ..
 
-# Workaround: if you are on mac OS, please run this script:
-sed -e 's/ -static$/ /' -e 's/ -static / /' build.ninja > build_fixed.ninja
-mv build_fixed.ninja build.ninja
-
 # build and get cavif binary!
 ninja
 ```

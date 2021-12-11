@@ -33,9 +33,6 @@ jobs:
         bash scripts/apply-patches.sh
         bash scripts/build-deps.sh
         cmake -S . -B build -G 'Ninja'
-        # FIXME
-        sed -e 's/ -static$/ /' -e 's/ -static / /' build/build.ninja > build/build_fixed.ninja
-        mv build/build_fixed.ninja build/build.ninja 
     - name: make
       shell: bash
       run: |
