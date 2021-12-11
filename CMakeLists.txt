@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 project(cavif LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
 
 if (WIN32)
@@ -58,12 +57,15 @@ add_executable(cavif
     src/ext/ExternalPartitionModelFactoryContainer.hpp
     src/ext/ExternalPartitionModel.hpp)
 
+# https://cmake.org/cmake/help/latest/manual/cmake-compile-features.7.html#requiring-language-standards
+# https://stackoverflow.com/questions/45688522/how-to-enable-c17-in-cmake
+target_compile_features(cavif PRIVATE cxx_std_17)
+
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE fmt::fmt)
 target_link_libraries(cavif PRIVATE libavif-container)
 target_include_directories(cavif PRIVATE external/libaom)
 target_include_directories(cavif PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/external/libaom")
-target_include_directories(cavif PRIVATE external/libyuv/include)
 target_include_directories(cavif PRIVATE external/libavif-container/src)
 target_include_directories(cavif PRIVATE "${CMAKE_BINARY_DIR}/include")
 
