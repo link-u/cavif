@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(cavif CXX ASM)
+project(cavif LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
@@ -21,28 +21,9 @@ link_directories("${CMAKE_CURRENT_SOURCE_DIR}/_deps/lib")
 ###############################################################################
 add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 ###############################################################################
-# zlib
-set(ASM686L OFF CACHE BOOL "Enable building i686 assembly implementation" FORCE)
-set(ASM686 OFF CACHE BOOL "Enable building amd64 assembly implementation" FORCE)
-add_subdirectory(external/zlib EXCLUDE_FROM_ALL)
-set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/zlib" "${CMAKE_CURRENT_BINARY_DIR}/external/zlib")
-set(ZLIB_ROOT "${CMAKE_BINARY_DIR}/zlib")
-set(ZLIB_DIR "${CMAKE_BINARY_DIR}/zlib")
-###############################################################################
-set(SKIP_INSTALL_ALL ON)
-
-set(PNG_BUILD_ZLIB ON CACHE BOOL "Custom zlib Location, else find_package is used" FORCE)
-set(PNG_SHARED OFF CACHE BOOL "Build shared lib" FORCE)
-set(PNG_STATIC ON CACHE BOOL "Build static lib" FORCE)
-set(PNG_TESTS OFF CACHE BOOL "Build libpng tests" FORCE)
-add_subdirectory(external/libpng EXCLUDE_FROM_ALL)
-#FIXME(ledyba-z): Workaround to include "pnglibconf.h"
-target_include_directories(png_static PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/external/libpng")
-# zlib
-target_link_directories(png_static PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/external/zlib")
-target_include_directories(png_static PRIVATE external/zlib "${CMAKE_CURRENT_BINARY_DIR}/external/zlib")
-target_link_libraries(png_static zlibstatic)
-add_dependencies(png_static zlibstatic)
+find_package(PkgConfig)
+pkg_check_modules(ZLIB REQUIRED zlib)
+pkg_check_modules(LIBPNG REQUIRED libpng)
 ###############################################################################
 set(ENABLE_TESTS OFF CACHE BOOL "" FORCE)
 set(ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -78,15 +59,18 @@ add_executable(cavif
     src/ext/ExternalPartitionModel.hpp)
 
 target_link_libraries(cavif PRIVATE aom)
-target_link_libraries(cavif PRIVATE png_static)
 target_link_libraries(cavif PRIVATE fmt::fmt)
 target_link_libraries(cavif PRIVATE libavif-container)
-target_include_directories(cavif PRIVATE external/libpng)
 target_include_directories(cavif PRIVATE external/libaom)
 target_include_directories(cavif PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/external/libaom")
 target_include_directories(cavif PRIVATE external/libyuv/include)
 target_include_directories(cavif PRIVATE external/libavif-container/src)
 target_include_directories(cavif PRIVATE "${CMAKE_BINARY_DIR}/include")
+
+target_include_directories(cavif PRIVATE ${LIBPNG_INCLUDE_DIRS})
+target_include_directories(cavif PRIVATE ${ZLIB_INCLUDE_DIRS})
+target_link_libraries(cavif PRIVATE ${LIBPNG_LDFLAGS} ${LIBPNG_LIBRARIES})
+target_link_libraries(cavif PRIVATE ${ZLIB_LDFLAGS} ${ZLIB_LIBRARIES})
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # FIXME(ledyba-z): workaround for gcc-8
   target_link_libraries(cavif PRIVATE stdc++fs)

@@ -16,6 +16,23 @@ DEPS_DIR="$(readlink_f "${ROOT_DIR}/_deps")"
 rm -Rf "${DEPS_DIR}"
 mkdir -p "${DEPS_DIR}"
 
+# zlib
+bash -eux <<EOF
+cd external/zlib
+./configure "--prefix=${DEPS_DIR}" --static
+make
+make install
+EOF
+
+# libpng
+bash -eux <<EOF
+cd external/libpng
+CPPFLAGS="-I${DEPS_DIR}/include" LDFLAGS="-L${DEPS_DIR}/lib" \
+./configure "--prefix=${DEPS_DIR}" --enable-static --disable-shared
+make
+make install
+EOF
+
 # libvmaf
 bash -eux <<EOF
 cd external/vmaf/libvmaf
