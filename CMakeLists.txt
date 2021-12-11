@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.13)
 project(cavif LANGUAGES CXX)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (WIN32)
   # https://stackoverflow.com/questions/47690822/possible-to-force-cmake-msvc-to-use-utf-8-encoding-for-source-files-without-a-bo
@@ -60,6 +61,10 @@ add_executable(cavif
 # https://cmake.org/cmake/help/latest/manual/cmake-compile-features.7.html#requiring-language-standards
 # https://stackoverflow.com/questions/45688522/how-to-enable-c17-in-cmake
 target_compile_features(cavif PRIVATE cxx_std_17)
+# https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD.html
+set_property(TARGET cavif PROPERTY CXX_STANDARD 17)
+set_property(TARGET cavif PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET cavif PROPERTY CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
 
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE fmt::fmt)
