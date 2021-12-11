@@ -22,6 +22,7 @@ cd external/zlib
 ./configure "--prefix=${DEPS_DIR}" --static
 make
 make install
+make clean
 EOF
 
 # libpng
