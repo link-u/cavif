@@ -17,7 +17,6 @@ which cavif
 
 cavif --help
 
-if ldd "$(which cavif)"; then
-  echo "Dynamic executable produced!"
-  exit -1
-fi
+set e
+
+ldd "$(which cavif)"
