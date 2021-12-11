@@ -33,13 +33,13 @@ jobs:
       run: |
         set MSYSTEM=MINGW64
         set HOME=${{ github.workspace }}
-        C:\msys64\usr\bin\bash -lc "cmake -S . -B build -G 'MSYS Makefiles' '-DCMAKE_CXX_FLAGS=-static'"
+        C:\msys64\usr\bin\bash -lc "cmake -S . -B build -G Ninja '-DCMAKE_CXX_FLAGS=-static'"
     - name: make
       shell: cmd
       run: |
         set MSYSTEM=MINGW64
         set HOME=${{ github.workspace }}
-        C:\msys64\usr\bin\bash -lc "cd build && make -j && strip cavif.exe"
+        C:\msys64\usr\bin\bash -lc "cd build && ninja -v && strip cavif.exe"
     - name: Upload result
       uses: actions/upload-artifact@v2
       with:
