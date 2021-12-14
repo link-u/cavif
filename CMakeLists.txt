@@ -31,7 +31,8 @@ set(ENABLE_TOOLS OFF CACHE BOOL "" FORCE)
 # See: external/libaom/build/cmake/aom_config_defaults.cmake
 set(CONFIG_TUNE_VMAF 1 CACHE INTERNAL "Enable encoding tuning for VMAF." FORCE)
 set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
-set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
+set(CONFIG_COLLECT_PARTITION_STATS 1 CACHE INTERNAL "AV1 experiment: Collect partition timing stats. Can be 1 or 2." FORCE)
+set(CONFIG_PARTITION_SEARCH_ORDER 1 CACHE INTERNAL "AV1 experiment: Use alternative partition search order." FORCE)
 # FIXME(ledyba-z): CONFIG_DIST_8X8 conflicts with CONFIG_MULTITHREAD.
 # --- aom_configure: Detected CPU: x86_64
 # CMake Warning at external/libaom/build/cmake/util.cmake:57 (message):
@@ -56,7 +57,11 @@ add_executable(cavif
 
     src/ext/ExternalPartitionModelFactoryContainer.cpp
     src/ext/ExternalPartitionModelFactoryContainer.hpp
-    src/ext/ExternalPartitionModel.hpp)
+    src/ext/ExternalPartitionModel.hpp
+
+    src/ext/models/NonSplitPartitionModel.cpp
+    src/ext/models/NonSplitPartitionModel.hpp
+)
 
 # https://cmake.org/cmake/help/latest/manual/cmake-compile-features.7.html#requiring-language-standards
 # https://stackoverflow.com/questions/45688522/how-to-enable-c17-in-cmake

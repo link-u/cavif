@@ -9,7 +9,7 @@
 
 class ExternalPartitionModel {
 public:
-  virtual ~ExternalPartitionModel() noexcept = 0;
+  virtual ~ExternalPartitionModel() noexcept = default;
 public:
   virtual void sendFeatures(aom_partition_features_t const* features) = 0;
   virtual void getDecision(aom_partition_decision_t *decision) = 0;
@@ -18,7 +18,7 @@ public:
 
 class ExternalPartitionModelFactory {
 public:
-  virtual ~ExternalPartitionModelFactory() noexcept = 0;
+  virtual ~ExternalPartitionModelFactory() noexcept = default;
 public:
   virtual ExternalPartitionModel* create(aom_ext_part_config_t const* part_config) = 0;
   virtual aom_ext_part_decision_mode_t decisionMode() = 0;

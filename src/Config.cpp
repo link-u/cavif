@@ -7,6 +7,10 @@
 
 #include "Config.hpp"
 
+#include "ext/ExternalPartitionModelFactoryContainer.hpp"
+#include "ext/ExternalPartitionModel.hpp"
+#include "ext/models/NonSplitPartitionModel.hpp"
+
 namespace {
 
 std::string basename(std::string const& path) {
@@ -241,7 +245,8 @@ clipp::group Config::createCommandLineFlags() {
       option("--qm-min-y").doc("Min quant matrix flatness for Y") & integer("0-15 (default: 10)", qmMinY),
       option("--qm-min-u").doc("Min quant matrix flatness for U") & integer("0-15 (default: 11)", qmMinU),
       option("--qm-min-v").doc("Min quant matrix flatness for V") & integer("0-15 (default: 12)", qmMinV),
-      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("SSIM(structural similarity)").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("PSNR(peak signal-to-noise ratio)").set(tune, AOM_TUNE_PSNR)  | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-without-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN) | parameter("vmaf-neg-max-gain").doc("vmaf-neg-max-gain").set(tune, AOM_TUNE_VMAF_NEG_MAX_GAIN) | parameter("butteraugli").doc("google's butteraugli algorithm (github.com/google/butteraugli)").set(tune, AOM_TUNE_BUTTERAUGLI)),
+      // TODO(ledyba-z): Support butteraugli. Don't forget to set CONFIG_TUNE_BUTTERAUGLI in CMakeLists.txt
+      option("--tune").doc("Quality metric to tune") & (parameter("ssim").doc("SSIM(structural similarity)").set(tune, AOM_TUNE_SSIM) | parameter("psnr").doc("PSNR(peak signal-to-noise ratio)").set(tune, AOM_TUNE_PSNR)  | parameter("vmaf-with-preprocessing").doc("vmaf-with-preprocessing").set(tune, AOM_TUNE_VMAF_WITH_PREPROCESSING) | parameter("vmaf-without-preprocessing").doc("vmaf-without-preprocessing").set(tune, AOM_TUNE_VMAF_WITHOUT_PREPROCESSING) | parameter("vmaf-max-gain").doc("vmaf-max-gain").set(tune, AOM_TUNE_VMAF_MAX_GAIN) | parameter("vmaf-neg-max-gain").doc("vmaf-neg-max-gain").set(tune, AOM_TUNE_VMAF_NEG_MAX_GAIN) /* | parameter("butteraugli").doc("google's butteraugli algorithm (github.com/google/butteraugli)").set(tune, AOM_TUNE_BUTTERAUGLI)*/),
       option("--content-type").doc("Content type") & (parameter("default").doc("Regular video content (default)").set(contentType, AOM_CONTENT_DEFAULT) | parameter("screen").doc("Screen capture content").set(contentType, AOM_CONTENT_SCREEN) | parameter("film").doc("Film content").set(contentType, AOM_CONTENT_FILM)),
       option("--vmaf-model-path").doc("VMAF model file path to tuning image quality") & value("<path-to-vmaf-model-file>", vmafModelPath),
       option("--lossless").doc("Enable lossless encoding").set(lossless, true)
@@ -302,9 +307,16 @@ clipp::group Config::createCommandLineFlags() {
       option("--disable-intrabc").doc("disable intra block copy mode").set(enableIntraBC, false),
       option("--enable-angle-delta").doc("enable intra angle delta (default)").set(enableAngleDelta, true),
       option("--disable-angle-delta").doc("disable intra angle delta").set(enableAngleDelta, false),
-      option("--enable-diagonal-intra").doc("enable usage of D45 to D203 intra modes. (default)").set(enableDiagonalIntra, true),
-      option("--disable-diagonal-intra").doc("disable usage of D45 to D203 intra modes.").set(enableDiagonalIntra, false)
+      option("--enable-diagonal-intra").doc("enable usage of D45 to D203 intra modes (default)").set(enableDiagonalIntra, true),
+      option("--disable-diagonal-intra").doc("disable usage of D45 to D203 intra modes").set(enableDiagonalIntra, false),
+      option("--enable-directional-intra").doc("turn on directional intra mode (default)").set(enableDiagonalIntra, true),
+      option("--disable-directional-intra").doc("turn off directional intra mode").set(enableDiagonalIntra, false),
+      option("--enable-tx-size-search").doc("turn on transform size search (default). Transforms always have the largest possible size").set(enableTxSizeSearch, true),
+      option("--disable-tx-size-search").doc("turn off transform size search. Search for the best transform size for each block").set(enableTxSizeSearch, false)
   );
+
+  //auto partitioning = (
+  //);
 
   return (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProcess, codingParameters) | support;
 }
@@ -480,6 +492,21 @@ void Config::modify(aom_codec_ctx_t* aom) {
   (void)AV1E_SET_ENABLE_DNL_DENOISING; // can be supported, but it is mainly for video (used in two pass mode).
 
   set(AV1E_SET_ENABLE_DIAGONAL_INTRA, enableDiagonalIntra ? 1 : 0);
+
+  (void)AV1E_SET_DV_COST_UPD_FREQ; // is for intrabc motion vectors, for video.
+
+  (void)AV1E_SET_PARTITION_INFO_PATH; // TODO(ledyba-z): It seems it's not recorded for keyframes. Read more papers!
+
+  if (false) { // FIXME(ledyba-z): Can be configured, but not invoked at all. Read more papers!
+    ExternalPartitionModelFactoryContainer container(std::make_unique<NonSplitPartitionModelFactory>());
+    auto bridge = container.makeBridge();
+    set(AV1E_SET_EXTERNAL_PARTITION, &bridge);
+  }
+
+  set(AV1E_SET_ENABLE_DIRECTIONAL_INTRA, enableDirectionalIntra ? 1 : 0);
+  set(AV1E_SET_ENABLE_TX_SIZE_SEARCH, enableTxSizeSearch ? 1 : 0);
+
+  (void)AV1E_SET_SVC_REF_FRAME_COMP_PRED; // is for video.
 
   #undef set
 }

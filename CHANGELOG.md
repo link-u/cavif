@@ -7,12 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+- New parameters for `--horizontal-scale-mode` and `--vertical-scale-mode` are introduced.
+  - `1/4`
+  - `3/4`
+  - `1/8`
 - `--cpu-used 9` is introduced.
-- `--(enable|disable)-diagonal-intra` is introduced. Enable by default.
+- `--enable-rect-tx` is introduced. Enabled by default.
+- `--(enable|disable)-diagonal-intra` is introduced. Enabled by default.
 - `--content-type (default|screen|film)` is introduced.
   - default: regular video content(default)
   - screen: Screen capture content
   - film: Film content
+- `--(enable|disable)-tx-size-search` is introduced. Enabled by default.
 
 ### Changed
 - libaom is upgraded to v3.2.0
