@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - libaom is upgraded to v3.2.0
-- libvmaf is upgrade to [9451ff498402e8f0a912161e5f8dea4de6b54ae2](https://github.com/Netflix/vmaf/tree/9451ff498402e8f0a912161e5f8dea4de6b54ae2).
+- libvmaf is upgrade to [441ab02a6b9df77a716f9bc1772340acd36e201b](https://github.com/Netflix/vmaf/tree/441ab02a6b9df77a716f9bc1772340acd36e201b).
 - [Remove URL from header to make image sizes smaller](https://github.com/link-u/cavif/pull/56).
 
 ### Fixed
