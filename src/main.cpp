@@ -84,9 +84,9 @@ int internal::main(int argc, char** argv) {
   config.codec.rc_target_bitrate = 0;
   config.codec.g_threads = std::thread::hardware_concurrency();
   {
-    int const parsrResult = config.parse();
-    if(parsrResult != 0) {
-      return parsrResult;
+    int const parseResult = config.parse();
+    if(parseResult != 0) {
+      return parseResult;
     }
     if(config.showHelp) {
       config.usage();
