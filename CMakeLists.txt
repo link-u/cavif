@@ -95,8 +95,8 @@ endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 
 install(TARGETS cavif
     RUNTIME DESTINATION bin
-    )
+)
 
 install(DIRECTORY external/vmaf/model
     DESTINATION share/cavif
-    )
+)
