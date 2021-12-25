@@ -69,7 +69,10 @@ target_compile_features(cavif PRIVATE cxx_std_17)
 # https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD.html
 set_property(TARGET cavif PROPERTY CXX_STANDARD 17)
 set_property(TARGET cavif PROPERTY CXX_STANDARD_REQUIRED ON)
-set_property(TARGET cavif PROPERTY CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  set_property(TARGET cavif PROPERTY CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
+endif()
 
 target_link_libraries(cavif PRIVATE aom)
 target_link_libraries(cavif PRIVATE fmt::fmt)
