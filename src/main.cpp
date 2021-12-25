@@ -19,7 +19,7 @@
 namespace {
 
 // FIXME(ledyba-z): remove this function when the C++20 comes.
-bool endsWidh(std::string const& target, std::string const& suffix) {
+bool endsWith(std::string const& target, std::string const& suffix) {
   if(target.size() < suffix.size()) {
     return false;
   }
@@ -95,7 +95,7 @@ int internal::main(int argc, char** argv) {
   }
 
   // decoding input image
-  if(!endsWidh(config.input, ".png")) {
+  if(!endsWith(config.input, ".png")) {
     log.fatal("please give png file for input");
   }
   std::variant<avif::img::Image<8>, avif::img::Image<16>> loadedImage = PNGReader(config.input).read();
