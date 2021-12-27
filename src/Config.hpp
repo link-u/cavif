@@ -115,5 +115,3 @@ public:
   int parse();
   void modify(aom_codec_ctx_t* aom);
 };
-
-
