@@ -6,6 +6,7 @@
 
 #include <avif/av1/Parser.hpp>
 #include <avif/FileBox.hpp>
+#include <utility>
 
 class Config;
 class AVIFBuilder final {
@@ -20,7 +21,7 @@ public:
     Frame() = delete;
     explicit Frame(avif::img::ColorProfile colorProfile, avif::av1::SequenceHeader sequenceHeader, std::vector<uint8_t> configOBU, std::vector<uint8_t> data)
     :colorProfile_(std::move(colorProfile))
-    ,sequenceHeader_(sequenceHeader)
+    ,sequenceHeader_(std::move(sequenceHeader))
     ,configOBU_(std::move(configOBU))
     ,data_(std::move(data))
     {
@@ -60,7 +61,7 @@ public:
 
 private:
   [[ nodiscard ]] avif::FileBox buildFileBox();
-  void linkAuxImages(const uint32_t from, const uint32_t to);
+  void linkAuxImages(uint32_t const from, uint32_t const to);
   void fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const& frame, std::optional<std::string> const& auxType = {});
 };
 
