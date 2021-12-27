@@ -14,10 +14,7 @@
 #include <av1/encoder/encoder.h>
 #include "../external/clipp/include/clipp.h"
 
-class Configurator;
 class Config final {
-  friend class Configurator;
-
 public:
   std::string commandName{};
   bool showHelp = false;
