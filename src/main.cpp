@@ -54,8 +54,8 @@ size_t encode(avif::util::Logger& log, aom_codec_ctx_t& codec, aom_image* img, s
 
 namespace internal{
 int main(int argc, char** argv);
-}
 void printSequenceHeader(avif::util::Logger& log, avif::av1::SequenceHeader& seq);
+}
 
 int main(int argc, char** argv) {
   try {
@@ -218,7 +218,7 @@ int internal::main(int argc, char** argv) {
   return 0;
 }
 
-void printSequenceHeader(avif::util::Logger& log, avif::av1::SequenceHeader& seq) {
+void internal::printSequenceHeader(avif::util::Logger& log, avif::av1::SequenceHeader& seq) {
   log.info("<Encoding Result>");
   log.info(" - OBU Sequence Header:");
   log.info("   - AV1 Profile: {}", seq.seqProfile);
