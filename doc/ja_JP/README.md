@@ -4,7 +4,7 @@
 
 ## 参考になるかもしれないリンク集
 
--AV1/AVIF
+- AV1/AVIF
   - [AV1 Image File Format (AVIF)](https://people.xiph.org/~negge/AVIF2018.pdf)
   - [Into the Depths:
 The Technical Details Behind AV1](http://mile-high.video/files/mhv2018/pdf/day1/1_02_Egge.pdf)
