@@ -61,8 +61,8 @@ public:
 
 private:
   [[ nodiscard ]] avif::FileBox buildFileBox();
-  void linkAuxImages(uint32_t const from, uint32_t const to);
-  void fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const& frame, std::optional<std::string> const& auxType = {});
+  void linkAuxImages(uint32_t from, uint32_t to);
+  void fillFrameInfo(uint16_t itemID, AVIFBuilder::Frame const& frame, std::optional<std::string> const& auxType = {});
 };
 
 
