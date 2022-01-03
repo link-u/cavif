@@ -162,7 +162,7 @@ int internal::main(int argc, char** argv) {
   }
 
   if(packets.empty()) {
-    log.error("no packats to out.");
+    log.error("no packets to out.");
     return -1;
   }
   {
