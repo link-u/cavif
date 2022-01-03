@@ -36,7 +36,7 @@ public:
 
 private:
   avif::util::Logger& log_;
-  Config& config_;
+  Config const& config_;
   uint32_t const width_;
   uint32_t const height_;
   std::optional<Frame> frame_{};

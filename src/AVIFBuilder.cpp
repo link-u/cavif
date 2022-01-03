@@ -105,7 +105,7 @@ AVIFBuilder::Frame AVIFBuilder::Frame::load(avif::util::Logger& log, std::string
   return AVIFBuilder::Frame(colorProfile, std::move(seq.value()), std::move(configOBUs), std::move(mdat));
 }
 
-AVIFBuilder::AVIFBuilder(avif::util::Logger& log, Config& config, uint32_t width, uint32_t height)
+AVIFBuilder::AVIFBuilder(avif::util::Logger& log, Config& config, uint32_t const width, uint32_t const height)
 :log_(log)
 ,config_(config)
 ,width_(width)
