@@ -46,7 +46,7 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   }
 
   if(bit_depth == 16) {
-      png_set_swap(png);
+    png_set_swap(png);
   }
 
   avif::img::ColorProfile colorProfile;
