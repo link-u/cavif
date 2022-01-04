@@ -14,6 +14,7 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   if(!file) {
     throw std::filesystem::filesystem_error("failed to open", this->filename_, std::make_error_code(static_cast<std::errc>(errno)));
   }
+
   png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if(!png) {
     fclose(file);
@@ -50,13 +51,26 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   }
 
   avif::img::ColorProfile colorProfile;
-  if (png_get_valid(png, info, PNG_INFO_iCCP)) {
+  if (PNG_INFO_sRGB == png_get_valid(png, info, PNG_INFO_sRGB)) {
+    int intent = {};
+    if(PNG_INFO_sRGB == png_get_sRGB(png, info, &intent)) {
+      // see H.273
+      colorProfile = avif::ColourInformationBox::NCLX {
+          .colourPrimaries = 1,
+          .transferCharacteristics = 13,
+          .matrixCoefficients = 5,
+          .fullRangeFlag = true,
+      };
+    }
+  }
+
+  if (PNG_INFO_iCCP == png_get_valid(png, info, PNG_INFO_iCCP)) {
     png_charp name = {};
     int compression_type = {};
     png_bytep profdata = {};
-    png_uint_32 proflen = {};
-    if(PNG_INFO_iCCP == png_get_iCCP(png, info, &name, &compression_type, &profdata, &proflen)) {
-      std::vector<uint8_t> data(profdata, profdata + proflen);
+    png_uint_32 profLen = {};
+    if(PNG_INFO_iCCP == png_get_iCCP(png, info, &name, &compression_type, &profdata, &profLen)) {
+      std::vector<uint8_t> data(profdata, profdata + profLen);
       colorProfile = avif::img::ICCProfile(std::move(data));
     }
   }
