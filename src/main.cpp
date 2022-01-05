@@ -98,7 +98,7 @@ int internal::main(int argc, char** argv) {
   if(!endsWith(config.input, ".png")) {
     log.fatal("please give png file for input");
   }
-  std::variant<avif::img::Image<8>, avif::img::Image<16>> loadedImage = PNGReader(config.input).read();
+  std::variant<avif::img::Image<8>, avif::img::Image<16>> loadedImage = PNGReader::create(config.input).read();
 
   aom_image_t img;
   avif::img::ColorProfile colorProfile;
