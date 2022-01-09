@@ -36,9 +36,9 @@ public:
   std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropSize{};
   std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropOffset{};
   // color
-  uint8_t colorPrimaries = 1;
-  uint8_t transferCharacteristics = 13;
-  uint8_t matrixCoefficients = 1;
+  std::optional<uint8_t> colorPrimaries = {};
+  std::optional<uint8_t> transferCharacteristics = {};
+  std::optional<uint8_t> matrixCoefficients = {};
   // encoding
   aom_codec_enc_cfg codec{};
   aom_scaling_mode_t scaleMode = {
@@ -113,5 +113,6 @@ private:
 public:
   void usage();
   int parse();
+  void validate() const;
   void modify(aom_codec_ctx_t* aom);
 };
