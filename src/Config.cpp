@@ -181,13 +181,13 @@ clipp::group Config::createCommandLineFlags() {
       ),
       option("--matrix-coefficients").doc("Set matrix coefficients information value.") & (
           integer("Value defined in H.273").set(matrixCoefficients).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
-          parameter("bt709").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("Rec. ITU-R BT.709-6 (default)") |
-          parameter("sRGB").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
-          parameter("sYCC").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
+          parameter("bt709").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("Rec. ITU-R BT.709-6") |
           parameter("unspecified").set<uint8_t&, uint8_t>(matrixCoefficients, 2u).doc("Image characteristics are unknown or are determined by the application") |
           parameter("us-fcc").set<uint8_t&, uint8_t>(matrixCoefficients, 4u).doc("United States Federal Communications Commission (2003)") |
           parameter("bt470bg").set<uint8_t&, uint8_t>(matrixCoefficients, 4u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
           parameter("bt601").set<uint8_t&, uint8_t>(matrixCoefficients, 5u).doc("Rec. ITU-R BT.601-7 625") |
+          parameter("sRGB").set<uint8_t&, uint8_t>(matrixCoefficients, 5u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
+          parameter("sYCC").set<uint8_t&, uint8_t>(matrixCoefficients, 5u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
           parameter("ntsc").set<uint8_t&, uint8_t>(matrixCoefficients, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
           parameter("smpte240m").set<uint8_t&, uint8_t>(matrixCoefficients, 7u).doc("SMPTE 240M") |
           parameter("bt2020").set<uint8_t&, uint8_t>(matrixCoefficients, 9u).doc("Rec. ITU-R BT.2020-2 (non-constant luminance)")

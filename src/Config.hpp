@@ -38,7 +38,7 @@ public:
   // color
   uint8_t colorPrimaries = 1;
   uint8_t transferCharacteristics = 13;
-  uint8_t matrixCoefficients = 1;
+  uint8_t matrixCoefficients = 5;
   // encoding
   aom_codec_enc_cfg codec{};
   aom_scaling_mode_t scaleMode = {
