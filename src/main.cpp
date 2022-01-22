@@ -101,7 +101,7 @@ int internal::main(int argc, char** argv) {
   std::variant<avif::img::Image<8>, avif::img::Image<16>> loadedImage = PNGReader::create(config.input).read();
 
   aom_image_t img;
-  avif::img::ColorProfile colorProfileFromImage = std::monostate{};
+  avif::img::ColorProfile colorProfileFromImage{};
   if(std::holds_alternative<avif::img::Image<8>>(loadedImage)) {
     auto src = std::get<avif::img::Image<8>>(loadedImage);
     convert(config, src, img);

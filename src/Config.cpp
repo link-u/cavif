@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <thread>
 
 #include "Config.hpp"
 
@@ -65,7 +64,6 @@ Config::Config(int argc, char** argv)
 ,argv(argv)
 ,commandLineFlags(createCommandLineFlags())
 {
-  auto& aom = this->codec;
 }
 
 void Config::usage() {
@@ -73,7 +71,6 @@ void Config::usage() {
 }
 
 int Config::parse() {
-
   if(clipp::parse(argc, argv, commandLineFlags).any_error()) {
     this->usage();
     return -1;
@@ -140,6 +137,7 @@ clipp::group Config::createCommandLineFlags() {
           parameter("sRGB").set(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("sYCC").set(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("unspecified").set(colorPrimaries, 2u).doc("Image characteristics are unknown or are determined by the application.") |
+          /* 3 = For future use by ITU-T | ISO/IEC */
           parameter("bt470m").set(colorPrimaries, 4u).doc("Rec. ITU-R BT.470-6 System M (historical)") |
           parameter("bt470bg").set(colorPrimaries, 5u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
           parameter("bt601").set(colorPrimaries, 5u).doc("Rec. ITU-R BT.601-7 625") |
@@ -158,6 +156,7 @@ clipp::group Config::createCommandLineFlags() {
           integer("Value defined in H.273").set(transferCharacteristics).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
           parameter("bt709").set(transferCharacteristics, 1u).doc("Rec. ITU-R BT.709-6") |
           parameter("unspecified").set(transferCharacteristics, 2u).doc("Image characteristics are unknown or are determined by the application.") |
+          /* 3 = For future use by ITU-T | ISO/IEC */
           parameter("bt470m").set(transferCharacteristics, 4u).doc("Rec. ITU-R BT.470-6 System M (historical)") |
           parameter("bt470bg").set(transferCharacteristics, 5u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
           parameter("bt601").set(transferCharacteristics, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
@@ -184,10 +183,10 @@ clipp::group Config::createCommandLineFlags() {
           parameter("bt709").set(matrixCoefficients, 1u).doc("Rec. ITU-R BT.709-6 (default)") |
           parameter("sRGB").set(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
           parameter("unspecified").set(matrixCoefficients, 2u).doc("Image characteristics are unknown or are determined by the application") |
-          /* 3 = reserved */
+          /* 3 = For future use by ITU-T | ISO/IEC */
           parameter("us-fcc").set(matrixCoefficients, 4u).doc("United States Federal Communications Commission (2003)") |
           parameter("bt470bg").set(matrixCoefficients, 4u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
-          parameter("sYCC").set(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("sYCC").set(matrixCoefficients, 5u).doc("IEC 61966-2-1 sRGB or sYCC") |
           parameter("bt601").set(matrixCoefficients, 5u).doc("Rec. ITU-R BT.601-7 625") |
           parameter("ntsc").set(matrixCoefficients, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
           parameter("smpte240m").set(matrixCoefficients, 7u).doc("SMPTE 240M") |

@@ -6,24 +6,24 @@
 #include <fmt/format.h>
 #include "avif/img/Image.hpp"
 #include "avif/img/Conversion.hpp"
+#include "avif/img/color/Constants.hpp"
+#include "avif/img/color/Matrix.hpp"
 
-using MatrixCoefficients = avif::img::MatrixCoefficients;
+using MatrixCoefficients = avif::img::color::MatrixCoefficients;
 
 namespace detail {
 
-template <typename ConverterImpl, uint8_t rgbBits, uint8_t yuvBits, bool fromMonoRGB, bool isFullRange>
-void convertImage(ConverterImpl const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
+template <typename ConverterFactory, uint8_t rgbBits, uint8_t yuvBits, bool fromMonoRGB, bool isFullRange>
+void convertImage(ConverterFactory const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
   if(dst.monochrome) {
-    avif::img::FromRGB<ConverterImpl, rgbBits, yuvBits, fromMonoRGB, isFullRange>::toI400(
-        converter,
+    avif::img::FromRGB<ConverterFactory, rgbBits, yuvBits, fromMonoRGB, isFullRange>::toI400(
         src,
         dst.planes[0], dst.stride[0]);
   } else {
     switch (dst.fmt) {
       case AOM_IMG_FMT_I420:
       case AOM_IMG_FMT_I42016:
-        avif::img::FromRGB<ConverterImpl, rgbBits, yuvBits, fromMonoRGB, isFullRange>::toI420(
-            converter,
+        avif::img::FromRGB<ConverterFactory, rgbBits, yuvBits, fromMonoRGB, isFullRange>::toI420(
             src,
             dst.planes[0], dst.stride[0],
             dst.planes[1], dst.stride[1],
@@ -31,8 +31,7 @@ void convertImage(ConverterImpl const& converter, avif::img::Image<rgbBits>& src
         break;
       case AOM_IMG_FMT_I422:
       case AOM_IMG_FMT_I42216:
-        avif::img::FromRGB<ConverterImpl, rgbBits, yuvBits, fromMonoRGB, isFullRange>::toI422(
-            converter,
+        avif::img::FromRGB<ConverterFactory, rgbBits, yuvBits, fromMonoRGB, isFullRange>::toI422(
             src,
             dst.planes[0], dst.stride[0],
             dst.planes[1], dst.stride[1],
@@ -40,8 +39,7 @@ void convertImage(ConverterImpl const& converter, avif::img::Image<rgbBits>& src
         break;
       case AOM_IMG_FMT_I444:
       case AOM_IMG_FMT_I44416:
-        avif::img::FromRGB<ConverterImpl, rgbBits, yuvBits, fromMonoRGB, isFullRange>::toI444(
-            converter,
+        avif::img::FromRGB<ConverterFactory, rgbBits, yuvBits, fromMonoRGB, isFullRange>::toI444(
             src,
             dst.planes[0], dst.stride[0],
             dst.planes[1], dst.stride[1],
@@ -53,29 +51,28 @@ void convertImage(ConverterImpl const& converter, avif::img::Image<rgbBits>& src
   }
 }
 
-template <typename ConverterImpl, uint8_t rgbBits, uint8_t yuvBits, bool fromMonoRGB>
-void convertImage(ConverterImpl const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
+template <typename ConverterFactory, uint8_t rgbBits, uint8_t yuvBits, bool fromMonoRGB>
+void convertImage(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if(dst.range == AOM_CR_FULL_RANGE) {
-    convertImage<ConverterImpl, rgbBits, yuvBits, fromMonoRGB, true>(converter, src, dst);
+    convertImage<ConverterFactory, rgbBits, yuvBits, fromMonoRGB, true>(src, dst);
   } else {
-    convertImage<ConverterImpl, rgbBits, yuvBits, fromMonoRGB, false>(converter, src, dst);
+    convertImage<ConverterFactory, rgbBits, yuvBits, fromMonoRGB, false>(src, dst);
   }
 }
 
-template <typename ConverterImpl, uint8_t rgbBits, uint8_t yuvBits>
-void convertImage(ConverterImpl const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
+template <typename ConverterFactory, uint8_t rgbBits, uint8_t yuvBits>
+void convertImage(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if(src.isMonochrome()) {
-    convertImage<ConverterImpl, rgbBits, yuvBits, true>(converter, src, dst);
+    convertImage<ConverterFactory, rgbBits, yuvBits, true>(src, dst);
   } else {
-    convertImage<ConverterImpl, rgbBits, yuvBits, false>(converter, src, dst);
+    convertImage<ConverterFactory, rgbBits, yuvBits, false>(src, dst);
   }
 }
 
-template <typename ConverterImpl, uint8_t rgbBits, uint8_t yuvBits, bool isFullRange>
-void convertAlpha(ConverterImpl const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
+template <typename ConverterFactory, uint8_t rgbBits, uint8_t yuvBits, bool isFullRange>
+void convertAlpha(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if (dst.monochrome) {
-    avif::img::FromAlpha<ConverterImpl, rgbBits, yuvBits, isFullRange>::toI400(
-        converter,
+    avif::img::FromAlpha<ConverterFactory, rgbBits, yuvBits, isFullRange>::toI400(
         src,
         dst.planes[0], dst.stride[0]);
   } else {
@@ -83,56 +80,56 @@ void convertAlpha(ConverterImpl const& converter, avif::img::Image<rgbBits>& src
   }
 }
 
-template <typename ConverterImpl, uint8_t rgbBits, uint8_t yuvBits>
-void convertAlpha(ConverterImpl const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
+template <typename ConverterFactory, uint8_t rgbBits, uint8_t yuvBits>
+void convertAlpha(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if(dst.range == AOM_CR_FULL_RANGE) {
-    convertAlpha<ConverterImpl, rgbBits, yuvBits, true>(converter, src, dst);
+    convertAlpha<ConverterFactory, rgbBits, yuvBits, true>(src, dst);
   } else {
-    convertAlpha<ConverterImpl, rgbBits, yuvBits, false>(converter, src, dst);
+    convertAlpha<ConverterFactory, rgbBits, yuvBits, false>(src, dst);
   }
 }
 
 }
 
-template <typename ConverterImpl, Config::EncodeTarget target, uint8_t rgbBits, uint8_t yuvBits>
-void convert(ConverterImpl const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
+template <typename ConverterFactory, Config::EncodeTarget target, uint8_t rgbBits, uint8_t yuvBits>
+void convert(ConverterFactory const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
   switch (target) {
     case Config::EncodeTarget::Image:
-      detail::convertImage<ConverterImpl, rgbBits, yuvBits>(converter, src, dst);
+      detail::convertImage<ConverterFactory, rgbBits, yuvBits>(src, dst);
       break;
     case Config::EncodeTarget::Alpha:
-      detail::convertAlpha<ConverterImpl, rgbBits, yuvBits>(converter, src, dst);
+      detail::convertAlpha<ConverterFactory, rgbBits, yuvBits>(src, dst);
       break;
     default:
       throw std::invalid_argument(fmt::format("Unsupported EncodeTarget: {}", target));
   }
 }
 
-template <typename ConverterImpl, Config::EncodeTarget target, size_t rgbBits>
-void convert(ConverterImpl const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
+template <typename ConverterFactory, Config::EncodeTarget target, size_t rgbBits>
+void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
   switch (dst.bit_depth) {
     case 8:
-      convert<ConverterImpl, target, rgbBits, 8>(converter, src, dst);
+      convert<ConverterFactory, target, rgbBits, 8>(src, dst);
       break;
     case 10:
-      convert<ConverterImpl, target, rgbBits, 10>(converter, src, dst);
+      convert<ConverterFactory, target, rgbBits, 10>(src, dst);
       break;
     case 12:
-      convert<ConverterImpl, target, rgbBits, 12>(converter, src, dst);
+      convert<ConverterFactory, target, rgbBits, 12>(src, dst);
       break;
     default:
       throw std::invalid_argument(fmt::format("Unsupported YUV bit-depth: {}", dst.bit_depth));
   }
 }
 
-template <typename ConverterImpl, size_t rgbBits>
-void convert(Config& config, ConverterImpl const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
+template <typename ConverterFactory, size_t rgbBits>
+void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
   switch (config.encodeTarget) {
     case Config::EncodeTarget::Image:
-      convert<ConverterImpl, Config::EncodeTarget::Image, rgbBits>(converter, src, dst);
+      convert<ConverterFactory, Config::EncodeTarget::Image, rgbBits>(src, dst);
       break;
     case Config::EncodeTarget::Alpha:
-      convert<ConverterImpl, Config::EncodeTarget::Alpha, rgbBits>(converter, src, dst);
+      convert<ConverterFactory, Config::EncodeTarget::Alpha, rgbBits>(src, dst);
       break;
     default:
       assert(false && "[BUG] Unkown encoder target.");
@@ -148,79 +145,81 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
   dst.range = config.fullColorRange ? AOM_CR_FULL_RANGE : AOM_CR_STUDIO_RANGE;
   dst.monochrome = config.codec.monochrome ? 1 : 0;
   dst.bit_depth = config.codec.g_bit_depth;
-  if(std::holds_alternative<avif::img::ICCProfile>(src.colorProfile())) {
-    avif::img::ICCProfile const& profile = std::get<avif::img::ICCProfile>(src.colorProfile());
-    auto icc = profile.calcColorCoefficients();
-      convert<decltype(icc), rgbBits>(config, icc, src, dst);
-    return;
-  }
-  namespace converters = avif::img::converters;
-  auto matrix = static_cast<MatrixCoefficients>(config.matrixCoefficients);
-  switch (matrix) {
+
+  switch (static_cast<MatrixCoefficients>(config.matrixCoefficients)) {
     case MatrixCoefficients::MC_IDENTITY: {
-      constexpr auto converter = converters::Identity;
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_IDENTITY>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
-    case MatrixCoefficients::MC_UNSPECIFIED:
     case MatrixCoefficients::MC_BT_709: {
-      constexpr auto converter = converters::BT_709;
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_BT_709>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
+      break;
+    }
+    case MatrixCoefficients::MC_UNSPECIFIED: {
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_UNSPECIFIED>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
+      break;
+    }
+    case MatrixCoefficients::MC_RESERVED_3: {
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_RESERVED_3>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
     case MatrixCoefficients::MC_FCC: {
-      constexpr auto converter = converters::FCC;
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_FCC>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
     case MatrixCoefficients::MC_BT_470_B_G: {
-      constexpr auto converter = converters::BT_470_B_G;
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_BT_470_B_G>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
-    case MatrixCoefficients::MC_BT_601: {
-      constexpr auto converter = converters::BT_601;
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+    case MatrixCoefficients::MC_NSTC: {
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_NSTC>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
     case MatrixCoefficients::MC_SMPTE_240: {
-      constexpr auto converter = converters::SMPTE_240;
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_SMPTE_240>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
     case MatrixCoefficients::MC_SMPTE_YCGCO: {
-      constexpr auto converter = converters::Unimplementd(MatrixCoefficients::MC_SMPTE_YCGCO);
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_SMPTE_YCGCO>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
     case MatrixCoefficients::MC_BT_2020_NCL: {
-      auto converter = converters::Unimplementd(matrix);
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_BT_2020_NCL>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
     case MatrixCoefficients::MC_BT_2020_CL:{
-      auto converter = converters::Unimplementd(matrix);
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_BT_2020_CL>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
     case MatrixCoefficients::MC_SMPTE_2085:{
-      auto converter = converters::Unimplementd(matrix);
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_SMPTE_2085>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
     case MatrixCoefficients::MC_CHROMAT_NCL:{
-      auto converter = converters::Unimplementd(matrix);
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_CHROMAT_NCL>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
     case MatrixCoefficients::MC_CHROMAT_CL:{
-      auto converter = converters::Unimplementd(matrix);
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_CHROMAT_CL>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
-    case MatrixCoefficients::MC_ICTCP:{
-      auto converter = converters::Unimplementd(matrix);
-      convert<decltype(converter), rgbBits>(config, converter, src, dst);
+    case MatrixCoefficients::MC_BT_2100_ICTCP: {
+      using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_BT_2100_ICTCP>;
+      convert<ConvereterFactoryType, rgbBits>(config, src, dst);
       break;
     }
     default:

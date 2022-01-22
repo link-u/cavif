@@ -86,7 +86,7 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
     int intent = {};
     if(PNG_INFO_sRGB == png_get_sRGB(png_, info_, &intent)) {
       // see H.273
-      colorProfile = avif::ColourInformationBox::CICP {
+      colorProfile.cicp = avif::ColourInformationBox::CICP {
           .colourPrimaries = 1,
           .transferCharacteristics = 13,
           .matrixCoefficients = 5,
@@ -102,7 +102,7 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
     png_uint_32 profLen = {};
     if(PNG_INFO_iCCP == png_get_iCCP(png_, info_, &name, &compression_type, &profdata, &profLen)) {
       std::vector<uint8_t> data(profdata, profdata + profLen);
-      colorProfile = avif::img::ICCProfile(std::move(data));
+      colorProfile.iccProfile = avif::img::ICCProfile(std::move(data));
     }
   }
 
@@ -115,45 +115,25 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
     }
   }
 
-  int bytesPerPixel = {};
   avif::img::PixelOrder pixelOrder = {};
   switch(colorType) {
     case PNG_COLOR_TYPE_GRAY:
       pixelOrder = avif::img::PixelOrder::Mono;
-      if(bitDepth == 16) {
-        bytesPerPixel = 2;
-      } else {
-        bytesPerPixel = 1;
-      }
       break;
     case PNG_COLOR_TYPE_RGB:
     case PNG_COLOR_TYPE_PALETTE:
       pixelOrder = avif::img::PixelOrder::RGB;
-      if(bitDepth == 16) {
-        bytesPerPixel = 6;
-      } else {
-        bytesPerPixel = 3;
-      }
       break;
     case PNG_COLOR_TYPE_GRAY_ALPHA:
       pixelOrder = avif::img::PixelOrder::MonoA;
-      if(bitDepth == 16) {
-        bytesPerPixel = 4;
-      } else {
-        bytesPerPixel = 2;
-      }
       break;
     case PNG_COLOR_TYPE_RGB_ALPHA:
       pixelOrder = avif::img::PixelOrder::RGBA;
-      if(bitDepth == 16) {
-        bytesPerPixel = 8;
-      } else {
-        bytesPerPixel = 4;
-      }
       break;
     default:
       throw std::logic_error(fmt::format("Unknown bit depth: {}", bitDepth));
   }
+  size_t const bytesPerPixel = avif::img::calcNumComponents(pixelOrder) * (bitDepth / 8);
   png_read_update_info(png_, info_);
   std::vector<uint8_t> data;
   data.resize(bytesPerPixel * width * height);
@@ -165,8 +145,8 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   png_read_image(png_, rows.data());
 
   if(bitDepth == 16) {
-    return avif::img::Image<16>(std::move(colorProfile), pixelOrder, width, height, bytesPerPixel, width * bytesPerPixel, std::move(data));
+    return avif::img::Image<16>(std::move(colorProfile), pixelOrder, width, height, width * bytesPerPixel, std::move(data));
   } else {
-    return avif::img::Image<8>(std::move(colorProfile), pixelOrder, width, height, bytesPerPixel, width * bytesPerPixel, std::move(data));
+    return avif::img::Image<8>(std::move(colorProfile), pixelOrder, width, height, width * bytesPerPixel, std::move(data));
   }
 }

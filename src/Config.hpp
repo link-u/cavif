@@ -12,7 +12,9 @@
 #include <avif/ImageRotationBox.hpp>
 #include <avif/ImageMirrorBox.hpp>
 #include <av1/encoder/encoder.h>
+
 #include "../external/clipp/include/clipp.h"
+#include "avif/img/color/Constants.hpp"
 
 class Config final {
 public:
@@ -38,7 +40,7 @@ public:
   // color
   std::optional<uint8_t> colorPrimaries = {};
   std::optional<uint8_t> transferCharacteristics = {};
-  std::optional<uint8_t> matrixCoefficients = {};
+  avif::img::color::MatrixCoefficients matrixCoefficients = {};
   // encoding
   aom_codec_enc_cfg codec{};
   aom_scaling_mode_t scaleMode = {
