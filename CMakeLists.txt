@@ -25,6 +25,7 @@ add_subdirectory(external/libavif-container EXCLUDE_FROM_ALL)
 # zlib
 set(ASM686L OFF CACHE BOOL "Enable building i686 assembly implementation" FORCE)
 set(ASM686 OFF CACHE BOOL "Enable building amd64 assembly implementation" FORCE)
+enable_language(ASM) # FIXME(ledyba-z): This line is required to generate ninja scripts.
 add_subdirectory(external/zlib EXCLUDE_FROM_ALL)
 set(ZLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/zlib" "${CMAKE_CURRENT_BINARY_DIR}/external/zlib")
 set(ZLIB_ROOT "${CMAKE_BINARY_DIR}/zlib")
@@ -61,7 +62,6 @@ set(CONFIG_PARTITION_SEARCH_ORDER 1 CACHE INTERNAL "AV1 experiment: Use alternat
 #  --- Disabled CONFIG_DIST_8X8, incompatible with CONFIG_MULTITHREAD.
 #
 set(CONFIG_AV1_DECODER 0 CACHE STRING "Enable AV1 decoder." FORCE)
-enable_language(ASM) # FIXME(ledyba-z): This line is required to generate ninja scripts.
 add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
 ###############################################################################
 
