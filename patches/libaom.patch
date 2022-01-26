@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bf290bacf..5ca74d10b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -616,7 +616,7 @@ if(CONFIG_AV1_ENCODER)
+         target_link_libraries(aom PRIVATE ${VMAF_LDFLAGS} ${VMAF_LIBRARIES})
+       else()
+         target_link_libraries(aom
+-                              PRIVATE ${VMAF_LDFLAGS} ${VMAF_LIBRARIES} -static)
++                              PRIVATE ${VMAF_LDFLAGS} ${VMAF_LIBRARIES})
+       endif()
+       target_include_directories(aom PRIVATE ${VMAF_INCLUDE_DIRS})
+       if(VMAF_CFLAGS)
