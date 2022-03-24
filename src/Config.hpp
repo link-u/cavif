@@ -120,5 +120,5 @@ public:
   void modify(aom_codec_ctx_t* aom);
 
 public:
-  std::optional<avif::img::ColorProfile> calcColorProfile() const;
+  [[nodiscard]] std::optional<avif::img::ColorProfile> calcColorProfile() const;
 };
