@@ -79,9 +79,11 @@ AVIFBuilder::Frame AVIFBuilder::Frame::load(avif::util::Logger& log, std::string
   if(colr.has_value()) {
     auto profile = colr.value().profile;
     if(std::holds_alternative<avif::ColourInformationBox::RestrictedICC>(profile)) {
-      colorProfile = avif::img::ICCProfile(std::get<avif::ColourInformationBox::RestrictedICC>(profile).payload);
+      colorProfile.iccProfile = avif::img::ICCProfile(std::get<avif::ColourInformationBox::RestrictedICC>(profile).payload);
     } else if(std::holds_alternative<avif::ColourInformationBox::UnrestrictedICC>(profile)) {
-      colorProfile = avif::img::ICCProfile(std::get<avif::ColourInformationBox::UnrestrictedICC>(profile).payload);
+      colorProfile.iccProfile = avif::img::ICCProfile(std::get<avif::ColourInformationBox::UnrestrictedICC>(profile).payload);
+    } else if(std::holds_alternative<avif::ColourInformationBox::CICP>(profile)) {
+      colorProfile.cicp = std::get<avif::ColourInformationBox::CICP>(profile);
     }
   }
 
@@ -126,6 +128,8 @@ avif::FileBox AVIFBuilder::buildFileBox() {
     fileTypeBox.majorBrand = "avif";
     fileTypeBox.minorVersion = 0;
     fileTypeBox.compatibleBrands.emplace_back("avif");
+    // ISO/IEC 23000-22:2019/Amd. 2:2021(E)
+    // The FileTypeBox should contain, in the compatible_brands list, the 'mif1' brand
     fileTypeBox.compatibleBrands.emplace_back("mif1");
     // https://aomediacodec.github.io/av1-avif/#profiles-constraints
     fileTypeBox.compatibleBrands.emplace_back("miaf");
@@ -218,13 +222,21 @@ std::vector<uint8_t> AVIFBuilder::build() {
   avif::Writer(log_, out).write(fileBox);
   std::vector<uint8_t> data = out.buffer();
   auto beg = std::begin(data);
+  std::size_t mdatIdx = 0;
   if(frame_.has_value()) {
     Frame& frame = frame_.value();
-    std::copy(std::begin(frame.data()), std::end(frame.data()), std::next(beg, fileBox.mediaDataBoxes.at(0).offset));
+    std::copy(std::begin(frame.data()), std::end(frame.data()), std::next(beg, fileBox.mediaDataBoxes.at(mdatIdx).offset));
+    ++mdatIdx;
   }
   if(alpha_.has_value()){
     Frame& frame = alpha_.value();
-    std::copy(std::begin(frame.data()), std::end(frame.data()), std::next(beg, fileBox.mediaDataBoxes.at(1).offset));
+    std::copy(std::begin(frame.data()), std::end(frame.data()), std::next(beg, fileBox.mediaDataBoxes.at(mdatIdx).offset));
+    ++mdatIdx;
+  }
+  if(depth_.has_value()){
+    Frame& frame = depth_.value();
+    std::copy(std::begin(frame.data()), std::end(frame.data()), std::next(beg, fileBox.mediaDataBoxes.at(mdatIdx).offset));
+    ++mdatIdx;
   }
   return data;
 }
@@ -355,15 +367,23 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }
-    {
-      if(std::holds_alternative<avif::img::ICCProfile>(frame.colorProfile())) {
-        auto const& icc = std::get<avif::img::ICCProfile>(frame.colorProfile());
-        propertiesBox.propertyContainers.properties.emplace_back(ColourInformationBox {
-            .profile = ColourInformationBox::UnrestrictedICC{
-                .payload = icc.payload(),
-            }
-        });
-      }
+    if (frame.colorProfile().iccProfile.has_value()){
+      auto const& icc = frame.colorProfile().iccProfile.value();
+      propertiesBox.propertyContainers.properties.emplace_back(ColourInformationBox {
+          .profile = ColourInformationBox::UnrestrictedICC{
+              .payload = icc.payload(),
+          }
+      });
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
+          .essential = false,
+          .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
+      });
+    }
+    if (frame.colorProfile().cicp.has_value()) {
+      auto const& cicp = frame.colorProfile().cicp.value();
+      propertiesBox.propertyContainers.properties.emplace_back(ColourInformationBox {
+          .profile = cicp
+      });
       item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
           .essential = false,
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),

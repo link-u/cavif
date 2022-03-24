@@ -9,12 +9,13 @@
 #include <aom/aom_encoder.h>
 #include <aom/aom_codec.h>
 #include <aom/aomcx.h>
+#include <avif/img/color/Constants.hpp>
+#include <avif/img/Image.hpp>
 #include <avif/ImageRotationBox.hpp>
 #include <avif/ImageMirrorBox.hpp>
 #include <av1/encoder/encoder.h>
 
 #include "../external/clipp/include/clipp.h"
-#include "avif/img/color/Constants.hpp"
 
 class Config final {
 public:
@@ -38,9 +39,9 @@ public:
   std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropSize{};
   std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropOffset{};
   // color
-  std::optional<uint8_t> colorPrimaries = {};
-  std::optional<uint8_t> transferCharacteristics = {};
-  avif::img::color::MatrixCoefficients matrixCoefficients = {};
+  std::optional<avif::img::color::ColorPrimaries> colorPrimaries = {};
+  std::optional<avif::img::color::TransferCharacteristics> transferCharacteristics = {};
+  std::optional<avif::img::color::MatrixCoefficients> matrixCoefficients = {};
   // encoding
   aom_codec_enc_cfg codec{};
   aom_scaling_mode_t scaleMode = {
@@ -117,4 +118,7 @@ public:
   int parse();
   void validate() const;
   void modify(aom_codec_ctx_t* aom);
+
+public:
+  std::optional<avif::img::ColorProfile> calcColorProfile() const;
 };

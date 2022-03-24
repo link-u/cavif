@@ -14,7 +14,7 @@ using MatrixCoefficients = avif::img::color::MatrixCoefficients;
 namespace detail {
 
 template <typename ConverterFactory, uint8_t rgbBits, uint8_t yuvBits, bool fromMonoRGB, bool isFullRange>
-void convertImage(ConverterFactory const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
+void convertImage(avif::img::Image<rgbBits>& src, aom_image& dst) {
   if(dst.monochrome) {
     avif::img::FromRGB<ConverterFactory, rgbBits, yuvBits, fromMonoRGB, isFullRange>::toI400(
         src,
@@ -92,7 +92,7 @@ void convertAlpha(avif::img::Image<rgbBits>& src, aom_image& dst) {
 }
 
 template <typename ConverterFactory, Config::EncodeTarget target, uint8_t rgbBits, uint8_t yuvBits>
-void convert(ConverterFactory const& converter, avif::img::Image<rgbBits>& src, aom_image& dst) {
+void convert(avif::img::Image<rgbBits>& src, aom_image& dst) {
   switch (target) {
     case Config::EncodeTarget::Image:
       detail::convertImage<ConverterFactory, rgbBits, yuvBits>(src, dst);
@@ -132,7 +132,7 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
       convert<ConverterFactory, Config::EncodeTarget::Alpha, rgbBits>(src, dst);
       break;
     default:
-      assert(false && "[BUG] Unkown encoder target.");
+      assert(false && "[BUG] Unknown encoder target.");
   }
 }
 
@@ -146,7 +146,8 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
   dst.monochrome = config.codec.monochrome ? 1 : 0;
   dst.bit_depth = config.codec.g_bit_depth;
 
-  switch (static_cast<MatrixCoefficients>(config.matrixCoefficients)) {
+  auto m = static_cast<MatrixCoefficients>(src.colorProfile().cicp.value_or(avif::ColourInformationBox::CICP()).matrixCoefficients);
+  switch (m) {
     case MatrixCoefficients::MC_IDENTITY: {
       using ConvereterFactoryType = avif::img::color::ConverterFactory<MatrixCoefficients::MC_IDENTITY>;
       convert<ConvereterFactoryType, rgbBits>(config, src, dst);

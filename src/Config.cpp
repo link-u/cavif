@@ -56,6 +56,12 @@ std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>> parseFra
   return std::make_pair(parseFraction(first), parseFraction(second));
 }
 
+template <typename T>
+std::optional<T> parseEnumFromInt(std::string const& str) {
+  auto i = std::stoi(str);
+  return std::make_optional(static_cast<T>(i));
+}
+
 }
 
 Config::Config(int argc, char** argv)
@@ -132,65 +138,66 @@ clipp::group Config::createCommandLineFlags() {
   // colors
   group color = (
       option("--color-primaries").doc("Set color primaries information value.") & (
-          integer("Value defined in H.273").set(colorPrimaries).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
-          parameter("bt709").set(colorPrimaries, 1u).doc("Rec. ITU-R BT.709-6") |
-          parameter("sRGB").set(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
-          parameter("sYCC").set(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC") |
-          parameter("unspecified").set(colorPrimaries, 2u).doc("Image characteristics are unknown or are determined by the application.") |
+          /* 0 = For future use by ITU-T | ISO/IEC */
+          integer("Value defined in H.273").call([&](std::string const& str){ colorPrimaries = parseEnumFromInt<avif::img::color::ColorPrimaries>(str); }).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
+          parameter("bt709").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(1u))).doc("Rec. ITU-R BT.709-6") |
+          parameter("sRGB").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(1u))).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("sYCC").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(1u))).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("unspecified").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(2u))).doc("Image characteristics are unknown or are determined by the application.") |
           /* 3 = For future use by ITU-T | ISO/IEC */
-          parameter("bt470m").set(colorPrimaries, 4u).doc("Rec. ITU-R BT.470-6 System M (historical)") |
-          parameter("bt470bg").set(colorPrimaries, 5u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
-          parameter("bt601").set(colorPrimaries, 5u).doc("Rec. ITU-R BT.601-7 625") |
-          parameter("ntsc").set(colorPrimaries, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
-          parameter("smpte240m").set(colorPrimaries, 7u).doc("SMPTE 240M (1999) (historical)") |
-          parameter("generic-film").set(colorPrimaries, 8u).doc("Generic film (colour filters using Illuminant C)") |
-          parameter("bt2020").set(colorPrimaries, 9u).doc("Rec. ITU-R BT.2020-2") |
-          parameter("bt2100").set(colorPrimaries, 9u).doc("Rec. ITU-R BT.2100-0") |
-          parameter("xyz").set(colorPrimaries, 10u).doc("(CIE 1931 XYZ as in ISO 11664-1)") |
-          parameter("smpte428").set(colorPrimaries, 10u).doc("SMPTE ST 428-1") |
-          parameter("smpte431").set(colorPrimaries, 11u).doc("SMPTE RP 431-2 (2011)") |
-          parameter("smpte432").set(colorPrimaries, 12u).doc("SMPTE EG 432-1 (2010)") |
-          parameter("ebu3213").set(colorPrimaries, 22u).doc("EBU Tech. 3213-E (1975)")
+          parameter("bt470m").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(4u))).doc("Rec. ITU-R BT.470-6 System M (historical)") |
+          parameter("bt470bg").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(5u))).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
+          parameter("bt601").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(5u))).doc("Rec. ITU-R BT.601-7 625") |
+          parameter("ntsc").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(6u))).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("smpte240m").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(7u))).doc("SMPTE ST 240 (1999)") |
+          parameter("generic-film").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(8u))).doc("Generic film (colour filters using Illuminant C)") |
+          parameter("bt2020").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(9u))).doc("Rec. ITU-R BT.2020-2") |
+          parameter("bt2100").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(9u))).doc("Rec. ITU-R BT.2100-0") |
+          parameter("smpte428").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(10u))).doc("SMPTE ST 428-1") |
+          parameter("xyz").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(10u))).doc("(CIE 1931 XYZ as in ISO 11664-1)") |
+          parameter("smpte431").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(11u))).doc("SMPTE RP 431-2 (2011)") |
+          parameter("smpte432").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(12u))).doc("SMPTE EG 432-1 (2010)") |
+          parameter("22").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(22u))).doc("No corresponding industry specification identified")
       ),
       option("--transfer-characteristics").doc("Set transfer characteristics information value.") & (
-          integer("Value defined in H.273").set(transferCharacteristics).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
-          parameter("bt709").set(transferCharacteristics, 1u).doc("Rec. ITU-R BT.709-6") |
-          parameter("unspecified").set(transferCharacteristics, 2u).doc("Image characteristics are unknown or are determined by the application.") |
+          integer("Value defined in H.273").call([&](std::string const& str){ transferCharacteristics = parseEnumFromInt<avif::img::color::TransferCharacteristics>(str); }).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
+          parameter("bt709").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(1u))).doc("Rec. ITU-R BT.709-6") |
+          parameter("unspecified").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(2u))).doc("Image characteristics are unknown or are determined by the application.") |
           /* 3 = For future use by ITU-T | ISO/IEC */
-          parameter("bt470m").set(transferCharacteristics, 4u).doc("Rec. ITU-R BT.470-6 System M (historical)") |
-          parameter("bt470bg").set(transferCharacteristics, 5u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
-          parameter("bt601").set(transferCharacteristics, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
-          parameter("ntsc").set(transferCharacteristics, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
-          parameter("smpte240m").set(transferCharacteristics, 7u).doc("SMPTE 240M (1999) (historical)") |
-          parameter("linear").set(transferCharacteristics, 8u).doc("Linear transfer characteristics") |
-          parameter("log100").set(transferCharacteristics, 9u).doc("Logarithmic transfer characteristic (100:1 range)") |
-          parameter("log100sqrt10").set(transferCharacteristics, 10u).doc("Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)") |
-          parameter("iec61966").set(transferCharacteristics, 11u).doc("IEC 61966-2-4") |
-          parameter("bt1361").set(transferCharacteristics, 12u).doc("Rec. ITU-R BT.1361-0 extended colour gamut system (historical)") |
-          parameter("sRGB").set(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC") |
-          parameter("sYCC").set(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC") |
-          parameter("bt2020").set(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
-          parameter("bt2020-10bit").set(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
-          parameter("bt2020-12bit").set(transferCharacteristics, 15u).doc("Rec. ITU-R BT.2020-2 (12-bit system)") |
-          parameter("smpte2084").set(transferCharacteristics, 16u).doc("SMPTE ST 2084 for 10-, 12-, 14- and 16-bit systems") |
-          parameter("bt2100pq").set(transferCharacteristics, 16u).doc("Rec. ITU-R BT.2100-0 perceptual quantization (PQ) system") |
-          parameter("smpte428").set(transferCharacteristics, 17u).doc("SMPTE ST 428-1") |
-          parameter("bt2100hlg").set(transferCharacteristics, 18u).doc("Rec. ITU-R BT.2100-0 hybrid log-gamma (HLG) system") |
-          parameter("arib-b67").set(transferCharacteristics, 18u).doc("ARIB STD-B67")
+          parameter("bt470m").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(4u))).doc("Rec. ITU-R BT.470-6 System M (historical)") |
+          parameter("bt470bg").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(5u))).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
+          parameter("bt601").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(6u))).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("ntsc").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(6u))).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("smpte240m").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(7u))).doc("SMPTE 240M (1999) (historical)") |
+          parameter("linear").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(8u))).doc("Linear transfer characteristics") |
+          parameter("log100").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(9u))).doc("Logarithmic transfer characteristic (100:1 range)") |
+          parameter("log100sqrt10").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(10u))).doc("Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)") |
+          parameter("iec61966").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(11u))).doc("IEC 61966-2-4") |
+          parameter("bt1361").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(12u))).doc("Rec. ITU-R BT.1361-0 extended colour gamut system (historical)") |
+          parameter("sRGB").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(13u))).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("sYCC").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(13u))).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("bt2020").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(14u))).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
+          parameter("bt2020-10bit").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(14u))).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
+          parameter("bt2020-12bit").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(15u))).doc("Rec. ITU-R BT.2020-2 (12-bit system)") |
+          parameter("smpte2084").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(16u))).doc("SMPTE ST 2084 for 10-, 12-, 14- and 16-bit systems") |
+          parameter("bt2100pq").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(16u))).doc("Rec. ITU-R BT.2100-0 perceptual quantization (PQ) system") |
+          parameter("smpte428").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(17u))).doc("SMPTE ST 428-1") |
+          parameter("bt2100hlg").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(18u))).doc("Rec. ITU-R BT.2100-0 hybrid log-gamma (HLG) system") |
+          parameter("arib-b67").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(18u))).doc("ARIB STD-B67")
       ),
       option("--matrix-coefficients").doc("Set matrix coefficients information value.") & (
-          integer("Value defined in H.273").set(matrixCoefficients).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
-          parameter("bt709").set(matrixCoefficients, 1u).doc("Rec. ITU-R BT.709-6 (default)") |
-          parameter("sRGB").set(matrixCoefficients, 1u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
-          parameter("unspecified").set(matrixCoefficients, 2u).doc("Image characteristics are unknown or are determined by the application") |
+          integer("Value defined in H.273").call([&](std::string const& str){ matrixCoefficients = parseEnumFromInt<avif::img::color::MatrixCoefficients>(str); }).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
+          parameter("bt709").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(1u))).doc("Rec. ITU-R BT.709-6 (default)") |
+          parameter("sRGB").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(1u))).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
+          parameter("unspecified").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(2u))).doc("Image characteristics are unknown or are determined by the application") |
           /* 3 = For future use by ITU-T | ISO/IEC */
-          parameter("us-fcc").set(matrixCoefficients, 4u).doc("United States Federal Communications Commission (2003)") |
-          parameter("bt470bg").set(matrixCoefficients, 4u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
-          parameter("sYCC").set(matrixCoefficients, 5u).doc("IEC 61966-2-1 sRGB or sYCC") |
-          parameter("bt601").set(matrixCoefficients, 5u).doc("Rec. ITU-R BT.601-7 625") |
-          parameter("ntsc").set(matrixCoefficients, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
-          parameter("smpte240m").set(matrixCoefficients, 7u).doc("SMPTE 240M") |
-          parameter("bt2020").set(matrixCoefficients, 9u).doc("Rec. ITU-R BT.2020-2 (non-constant luminance)")
+          parameter("us-fcc").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(4u))).doc("United States Federal Communications Commission (2003)") |
+          parameter("bt470bg").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(4u))).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
+          parameter("sYCC").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(5u))).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("bt601").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(5u))).doc("Rec. ITU-R BT.601-7 625") |
+          parameter("ntsc").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(6u))).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("smpte240m").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(7u))).doc("SMPTE 240M") |
+          parameter("bt2020").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(9u))).doc("Rec. ITU-R BT.2020-2 (non-constant luminance)")
       )
   );
 
@@ -328,6 +335,18 @@ void Config::validate() const {
   ) {
     throw std::invalid_argument("All of (or none of) --color-primaries, --transfer-characteristics and --matrix-coefficients should be set.");
   }
+}
+
+std::optional<avif::img::ColorProfile> Config::calcColorProfile() const {
+  if(colorPrimaries.has_value() && transferCharacteristics.has_value() && matrixCoefficients.has_value()) {
+    avif::img::ColorProfile profile;
+    profile.cicp->colourPrimaries = static_cast<uint16_t>(colorPrimaries.value());
+    profile.cicp->transferCharacteristics = static_cast<uint16_t>(transferCharacteristics.value());
+    profile.cicp->colourPrimaries = static_cast<uint16_t>(colorPrimaries.value());
+    profile.cicp->fullRangeFlag = fullColorRange;
+    return profile;
+  }
+  return {};
 }
 
 void Config::modify(aom_codec_ctx_t* aom) {

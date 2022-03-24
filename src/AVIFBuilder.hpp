@@ -4,9 +4,10 @@
 
 #pragma once
 
+#include <utility>
+#include <avif/img/Image.hpp>
 #include <avif/av1/Parser.hpp>
 #include <avif/FileBox.hpp>
-#include <utility>
 
 class Config;
 class AVIFBuilder final {

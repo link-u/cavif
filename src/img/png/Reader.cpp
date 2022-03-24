@@ -2,19 +2,26 @@
 // Created by psi on 2020/01/05.
 //
 
-#include "PNGReader.hpp"
+#include "Reader.hpp"
 #include <filesystem>
 #include <system_error>
-#include <fmt/format.h>
+#include "fmt/format.h"
 
-PNGReader::PNGReader(FILE *file, png_structp png, png_infop info)
-:file_(file)
+namespace img::png {
+
+Reader::Reader(avif::util::FileLogger& log, FILE* const file, png_structp png, png_infop info)
+:log_(log)
+,file_(file)
 ,png_(png)
 ,info_(info)
 {
 }
 
-PNGReader PNGReader::create(std::string const& filename) {
+char const* Reader::version() {
+  return PNG_LIBPNG_VER_STRING;
+}
+
+Reader Reader::create(avif::util::FileLogger& log, std::string const& filename) {
   // See http://www.libpng.org/pub/png/libpng-manual.txt
   FILE* const file = fopen(filename.c_str(), "rb");
   if(!file) {
@@ -45,17 +52,17 @@ PNGReader PNGReader::create(std::string const& filename) {
   png_init_io(png, file);
   png_set_sig_bytes(png, 8);
 
-  return PNGReader(file, png, info);
+  return Reader(log, file, png, info);
 }
 
-PNGReader::~PNGReader() noexcept {
+Reader::~Reader() noexcept {
   // Clean up reader
   png_destroy_read_struct(&png_, &info_, nullptr);
   // Close file
   fclose(file_);
 }
 
-std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
+Reader::Result Reader::read() {
   png_read_info(png_, info_);
 
   uint32_t const width = png_get_image_width(png_, info_);
@@ -81,17 +88,13 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
     png_set_swap(png_);
   }
 
-  avif::img::ColorProfile colorProfile;
+  Reader::Result result = {};
+
   if (PNG_INFO_sRGB == png_get_valid(png_, info_, PNG_INFO_sRGB)) {
     int intent = {};
     if(PNG_INFO_sRGB == png_get_sRGB(png_, info_, &intent)) {
-      // see H.273
-      colorProfile.cicp = avif::ColourInformationBox::CICP {
-          .colourPrimaries = 1,
-          .transferCharacteristics = 13,
-          .matrixCoefficients = 5,
-          .fullRangeFlag = true,
-      };
+      // indicate sRGB
+      result.sRGB = std::monostate();
     }
   }
 
@@ -101,17 +104,31 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
     png_bytep profdata = {};
     png_uint_32 profLen = {};
     if(PNG_INFO_iCCP == png_get_iCCP(png_, info_, &name, &compression_type, &profdata, &profLen)) {
-      std::vector<uint8_t> data(profdata, profdata + profLen);
-      colorProfile.iccProfile = avif::img::ICCProfile(std::move(data));
+      result.iccProfile = std::vector<uint8_t>(profdata, profdata + profLen);
     }
   }
 
   if (PNG_INFO_cHRM == png_get_valid(png_, info_, PNG_INFO_cHRM)) {
-    png_fixed_point redX, redY, redZ;
-    png_fixed_point greenX, greenY, greenZ;
-    png_fixed_point blueX, blueY, blueZ;
-    if (PNG_INFO_cHRM == png_get_cHRM_XYZ_fixed(png_, info_, &redX, &redY, &redZ, &greenX, &greenY, &greenZ, &blueX, &blueY, &blueZ)) {
-      // TODO(ledyba-z): Support.
+    ColorPrimaries colorPrimaries = {};
+    if (PNG_INFO_cHRM == png_get_cHRM_fixed(
+        png_,
+        info_,
+        &colorPrimaries.whiteX,
+        &colorPrimaries.whiteY,
+        &colorPrimaries.redX,
+        &colorPrimaries.redY,
+        &colorPrimaries.greenX,
+        &colorPrimaries.greenY,
+        &colorPrimaries.blueX,
+        &colorPrimaries.blueY)) {
+      result.colorPrimaries = colorPrimaries;
+    }
+  }
+
+  if (PNG_INFO_gAMA == png_get_valid(png_, info_, PNG_INFO_gAMA)) {
+    png_fixed_point gamma = {};
+    if (PNG_INFO_gAMA == png_get_gAMA_fixed(png_, info_, &gamma)) {
+      result.gamma = gamma;
     }
   }
 
@@ -145,8 +162,11 @@ std::variant<avif::img::Image<8>, avif::img::Image<16>> PNGReader::read() {
   png_read_image(png_, rows.data());
 
   if(bitDepth == 16) {
-    return avif::img::Image<16>(std::move(colorProfile), pixelOrder, width, height, width * bytesPerPixel, std::move(data));
+    result.image = avif::img::Image<16>(avif::img::ColorProfile{}, pixelOrder, width, height, width * bytesPerPixel, std::move(data));
   } else {
-    return avif::img::Image<8>(std::move(colorProfile), pixelOrder, width, height, width * bytesPerPixel, std::move(data));
+    result.image = avif::img::Image<8>(avif::img::ColorProfile{}, pixelOrder, width, height, width * bytesPerPixel, std::move(data));
   }
+  return result;
+}
+
 }

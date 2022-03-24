@@ -7,13 +7,11 @@
 #include <avif/av1/Parser.hpp>
 #include <avif/util/FileLogger.hpp>
 #include <avif/util/File.hpp>
-#include <avif/FileBox.hpp>
-#include <avif/Writer.hpp>
 #include <avif/img/Image.hpp>
 
 #include "Config.hpp"
 #include "AVIFBuilder.hpp"
-#include "img/PNGReader.hpp"
+#include "img/png/Reader.hpp"
 #include "img/Conversion.hpp"
 
 namespace {
@@ -50,6 +48,49 @@ size_t encode(avif::util::Logger& log, aom_codec_ctx_t& codec, aom_image* img, s
   return numPackets;
 }
 
+avif::img::ColorProfile mergeColorProfile(avif::util::FileLogger& log, Config const& config, img::png::Reader::Result const& loadResult) {
+  avif::img::ColorProfile mergedColorProfile{};
+  std::optional<avif::img::ColorProfile> configProfile = config.calcColorProfile();
+
+  if(loadResult.iccProfile.has_value()) {
+    mergedColorProfile.iccProfile = avif::img::ICCProfile(loadResult.iccProfile.value());
+  }
+  if(loadResult.colorPrimaries.has_value()) {
+    auto const& colorPrimaries = loadResult.colorPrimaries.value();
+    // TODO(ledyba-z): Support.
+    log.warn("cHRM chunk in PNG is not supported yet. white=({}, {}) red=({},{}) green=({},{}) blue=({},{})",
+             static_cast<float>(colorPrimaries.whiteX) / 100000.0f,
+             static_cast<float>(colorPrimaries.whiteY) / 100000.0f,
+             static_cast<float>(colorPrimaries.redX) / 100000.0f,
+             static_cast<float>(colorPrimaries.redY) / 100000.0f,
+             static_cast<float>(colorPrimaries.greenX) / 100000.0f,
+             static_cast<float>(colorPrimaries.greenY) / 100000.0f,
+             static_cast<float>(colorPrimaries.blueX) / 100000.0f,
+             static_cast<float>(colorPrimaries.blueY) / 100000.0f);
+  }
+  if(loadResult.gamma.has_value()) {
+    // TODO(ledyba-z): Support.
+    log.warn("gAMA chunk in PNG is not supported yet. gamma = {}",
+             static_cast<float>(loadResult.gamma.value()) / 100000.0f);
+  }
+  if(loadResult.sRGB.has_value()) {
+    auto cicp = avif::ColourInformationBox::CICP(); // default value indicates sRGB.
+    cicp.fullRangeFlag = config.fullColorRange;
+    mergedColorProfile.cicp = cicp;
+  }
+  if(configProfile.has_value()) {
+    if(configProfile.value().cicp.has_value()) {
+      log.info("CICP information will be overridden by flags");
+      mergedColorProfile.cicp = configProfile.value().cicp;
+    }
+    if(configProfile.value().iccProfile.has_value()) {
+      log.info("ICC profile will be overridden by flags");
+      mergedColorProfile.iccProfile = configProfile.value().iccProfile;
+    }
+  }
+  return mergedColorProfile;
+}
+
 }
 
 namespace internal{
@@ -71,6 +112,7 @@ int internal::main(int argc, char** argv) {
   avif::util::FileLogger log(stdout, stderr, avif::util::Logger::Level::DEBUG);
   log.info("cavif");
   log.info("libaom ver: {}", aom_codec_version_str());
+  log.info("libpng ver:{}", img::png::Reader::version());
 
   aom_codec_iface_t* av1codec = aom_codec_av1_cx();
   if(!av1codec) {
@@ -98,18 +140,18 @@ int internal::main(int argc, char** argv) {
   if(!endsWith(config.input, ".png")) {
     log.fatal("please give png file for input");
   }
-  std::variant<avif::img::Image<8>, avif::img::Image<16>> loadedImage = PNGReader::create(config.input).read();
-
+  img::png::Reader::Result loadResult = img::png::Reader::create(log, config.input).read();
   aom_image_t img;
-  avif::img::ColorProfile colorProfileFromImage{};
-  if(std::holds_alternative<avif::img::Image<8>>(loadedImage)) {
-    auto src = std::get<avif::img::Image<8>>(loadedImage);
+
+  auto colorProfile = mergeColorProfile(log, config, loadResult);
+  if(std::holds_alternative<avif::img::Image<8>>(loadResult.image)) {
+    auto src = std::get<avif::img::Image<8>>(loadResult.image);
+    src.colorProfile() = colorProfile;
     convert(config, src, img);
-    colorProfileFromImage = src.colorProfile();
   } else {
-    auto src = std::get<avif::img::Image<16>>(loadedImage);
+    auto src = std::get<avif::img::Image<16>>(loadResult.image);
+    src.colorProfile() = colorProfile;
     convert(config, src, img);
-    colorProfileFromImage = src.colorProfile();
   }
   config.validate();
 
@@ -197,7 +239,7 @@ int internal::main(int argc, char** argv) {
     if (!seq.has_value()) {
       throw std::logic_error("No sequence header OBU.");
     }
-    builder.setPrimaryFrame(AVIFBuilder::Frame(colorProfileFromImage, seq.value(), std::move(configOBUs), std::move(mdat)));
+    builder.setPrimaryFrame(AVIFBuilder::Frame(colorProfile, seq.value(), std::move(configOBUs), std::move(mdat)));
     if(config.alphaInput.has_value()) {
       log.info("Attaching {} as Alpha plane.", config.alphaInput.value());
       builder.setAlphaFrame(AVIFBuilder::Frame::load(log, config.alphaInput.value()));
