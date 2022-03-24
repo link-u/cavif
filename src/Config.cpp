@@ -12,6 +12,14 @@
 
 namespace {
 
+// FIXME(ledyba-z): remove this function when the C++20 comes.
+bool endsWith(std::string const& target, std::string const& suffix) {
+  if(target.size() < suffix.size()) {
+    return false;
+  }
+  return target.substr(target.size()-suffix.size()) == suffix;
+}
+
 std::string basename(std::string const& path) {
   auto pos = path.find_last_of('/');
   if(pos == std::string::npos) {
@@ -30,23 +38,23 @@ std::string trim(std::string str) {
   return str;
 }
 
-std::pair<int32_t, uint32_t> parseFraction(std::string const& str) {
+Fraction parseFraction(std::string const& str) {
   auto pos = str.find('/');
   if(pos == std::string::npos) {
-    return std::make_pair(std::stoi(trim(str)), 1);
+    return Fraction(std::stoi(trim(str)), 1);
   } else {
     std::string first = trim(str.substr(0, pos));
     std::string second = trim(str.substr(pos + 1));
     int n = std::stoi(first);
     int d = std::stoi(second);
     if(d == 0) {
-      throw std::invalid_argument("denominator can't be 0.");
+      throw std::invalid_argument("denominator_ can't be 0.");
     }
-    return std::make_pair(static_cast<int32_t>(n), static_cast<uint32_t>(d));
+    return Fraction(static_cast<int32_t>(n), static_cast<int32_t>(d));
   }
 }
 
-std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>> parseFractionPair(std::string const& str) {
+std::pair<Fraction, Fraction> parseFractionPair(std::string const& str) {
   auto pos = str.find(',');
   if(pos == std::string::npos) {
     throw std::invalid_argument(R"(Invalid fraction pair. Example: "30/4, 100/7", "100, 100/2" or "100, 100")");
@@ -84,19 +92,7 @@ int Config::parse() {
   if(showHelp) {
     return 0;
   }
-  { // validate
-    if(input == output) {
-      std::cerr << "Input and output can't be the same file!" << std::endl;
-      return -1;
-    }
-    if(!cropSize.has_value() && cropOffset.has_value()) {
-      std::cerr << "crop-size must also be set, when crop-offset is set." << std::endl << std::flush;
-      return -1;
-    }
-    if(cropSize.has_value() && !cropOffset.has_value()) {
-      cropOffset = std::make_pair(std::make_pair(0,1), std::make_pair(0,1));
-    }
-  }
+  validate();
   // MEMO(ledyba-z): These qp offset parameters are only used in video.
   //codec.use_fixed_qp_offsets = 1;
   //codec.fixed_qp_offsets[0] = 0;
@@ -126,8 +122,8 @@ clipp::group Config::createCommandLineFlags() {
   group meta = (
       option("--rotation").doc("Set rotation meta data(irot). Counter-clockwise.") & (parameter("0").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot0)) | parameter("90").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot90)) | parameter("180").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot180)) | parameter("270").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot270))),
       option("--mirror").doc("Set mirror meta data(imir).") & (parameter("vertical").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Vertical)) | parameter("horizontal").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Horizontal))),
-      option("--crop-size").doc("Set crop size.") & value("widthN/widthD,heightN/heightD").call([&](std::string const& str){ cropSize = parseFractionPair(str); }),
-      option("--crop-offset").doc("Set crop offset.") & value("horizOffN/horizOffD,vertOffN/vertOffD").call([&](std::string const& str){ cropOffset = parseFractionPair(str); })
+      option("--crop-size").doc("Set crop size.") & value("width,height").call([&](std::string const& str){ cropSize = parseFractionPair(str); }),
+      option("--crop-offset").doc("Set crop offset.") & value("horizontalOffset,verticalOffset").call([&](std::string const& str){ cropOffset = parseFractionPair(str); })
   );
   // av1 sequence header
   auto av1 = (
@@ -204,10 +200,10 @@ clipp::group Config::createCommandLineFlags() {
   auto scales = (
       option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL).doc("Do not scale (default)") | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO).doc("Scale to 1/2") | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE).doc("Scale to 3/5") | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE).doc("Scale to 4/5") | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR).doc("Scale to 1/4") | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR).doc("Scale to 3/4") | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT).doc("Scale to 1/8")),
       option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL).doc("Do not scale (default)") | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO).doc("Scale to 1/2") | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE).doc("Scale to 3/5") | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE).doc("Scale to 4/5") | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR).doc("Scale to 1/4") | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR).doc("Scale to 3/4") | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT).doc("Scale to 1/8")),
-      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)).doc("Do not resize") | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)).doc("Resize image using a denominator given by `--resize-denominator` arg") | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM)).doc("Resize image randomly!")),
-      option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16], default=8", codec.rc_resize_kf_denominator)),
-      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE).doc("Do not use superres mode") | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED).doc("Apply superres filter to image using a denominator given by `--superres-denominator` arg") | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM).doc("Apply superres filter to image with a random denominator!") | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH).doc("Apply or do not apply superres filter to image based on the q index") | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO).doc("Apply or do not apply superres filter to image automatically")),
-      option("--superres-denominator").doc("Set superres resize denominator.") & (integer("[8-16], default=8", codec.rc_superres_kf_denominator)),
+      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)).doc("Do not resize") | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)).doc("Resize image using a denominator_ given by `--resize-denominator_` arg") | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM)).doc("Resize image randomly!")),
+      option("--resize-denominator_").doc("Set resize denominator_.") & (integer("[8-16], default=8", codec.rc_resize_kf_denominator)),
+      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE).doc("Do not use superres mode") | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED).doc("Apply superres filter to image using a denominator_ given by `--superres-denominator_` arg") | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM).doc("Apply superres filter to image with a random denominator_!") | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH).doc("Apply or do not apply superres filter to image based on the q index") | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO).doc("Apply or do not apply superres filter to image automatically")),
+      option("--superres-denominator_").doc("Set superres resize denominator_.") & (integer("[8-16], default=8", codec.rc_superres_kf_denominator)),
       option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63], default=63 (Do not apply superres filter)", codec.rc_superres_kf_qthresh)),
       option("--render-width").doc("Set render width explicitly") & (integer("<render-width>", renderWidth)),
       option("--render-height").doc("Set render height explicitly") & (integer("<render-height>", renderHeight))
@@ -329,11 +325,68 @@ clipp::group Config::createCommandLineFlags() {
 }
 
 void Config::validate() const {
+  if(input == output) {
+    throw std::invalid_argument("Input and output can't be the same file!");
+  }
+  if(!endsWith(input, ".png")) {
+    throw std::invalid_argument("please give png file for input");
+  }
+  if(!endsWith(output, ".avif")) {
+    throw std::invalid_argument("please give avif file for output");
+  }
   if(
       (colorPrimaries.has_value() || transferCharacteristics.has_value() || matrixCoefficients.has_value()) &&
-      (colorPrimaries.has_value() && transferCharacteristics.has_value() && matrixCoefficients.has_value())
+      !(colorPrimaries.has_value() && transferCharacteristics.has_value() && matrixCoefficients.has_value())
   ) {
     throw std::invalid_argument("All of (or none of) --color-primaries, --transfer-characteristics and --matrix-coefficients should be set.");
+  }
+
+  /*
+ISO/IEC 23000-22:2019/Amd. 2:2021(E)
+
+7.3.6.7
+Replace the text with the following:
+The clean aperture (cropping) property may be associated with any image and shall be supported by
+the MIAF reader. The clean aperture property is restricted according to the chroma sampling format of
+the input image (4:4:4, 4:2:2:, 4:2:0, or 4:0:0) as follows:
+— cleanApertureWidth and cleanApertureHeight shall be integers;
+— The leftmost pixel and the topmost line of the clean aperture as defined in ISO/IEC 14496-12:2020,
+Section 12.1.4.1 shall be integers;
+— If chroma is subsampled horizontally (i.e., 4:2:2 and 4:2:0), the leftmost pixel of the clean aperture
+shall be even numbers;
+— If chroma is subsampled vertically (i.e., 4:2:0), the topmost line of the clean aperture shall be even
+numbers.
+   */
+  if(
+      (cropSize.has_value() || cropOffset.has_value()) &&
+      !(cropSize.has_value() && cropOffset.has_value())
+  ) {
+    throw std::invalid_argument("crop-size must also be set, when crop-offset is set.");
+  }
+  if(cropSize.has_value() && cropOffset.has_value()) {
+    auto const cropSize = this->cropSize.value();
+    auto const cropOffset = this->cropOffset.value();
+    if (!(cropSize.first.isInteger()  && cropSize.second.isInteger())) {
+      throw std::invalid_argument("crop size must be integers.");
+    }
+    auto const left = cropOffset.first.minus(cropSize.first.div(2));
+    auto const top = cropOffset.second.minus(cropSize.second.div(2));
+    if(!left.isInteger()) {
+      throw std::invalid_argument("The leftmost pixel must be an integer.");
+    }
+    if(!top.isInteger()) {
+      throw std::invalid_argument("The topmost pixel must be an integer.");
+    }
+    if(pixFmt == AOM_IMG_FMT_I420 || pixFmt == AOM_IMG_FMT_I422) {
+      if(left.numerator() % 2 != 0) {
+        throw std::invalid_argument("The leftmost pixel must be an even.");
+      }
+    }
+    if(pixFmt == AOM_IMG_FMT_I420) {
+      if(top.numerator() % 2 != 0) {
+        throw std::invalid_argument("The topmost pixel must be an even.");
+      }
+    }
   }
 }
 
@@ -349,7 +402,7 @@ std::optional<avif::img::ColorProfile> Config::calcColorProfile() const {
   return {};
 }
 
-void Config::modify(aom_codec_ctx_t* aom) {
+void Config::modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorProfile) {
   #define set(param, expr) \
     if(aom_codec_control(aom, param, (expr)) != AOM_CODEC_OK) { \
       throw std::invalid_argument(std::string("Failed to set [" #param "] : ") + aom_codec_error_detail(aom)); \
@@ -402,19 +455,15 @@ void Config::modify(aom_codec_ctx_t* aom) {
 
   (void)AV1E_SET_CDF_UPDATE_MODE; // is for video.
 
-  //FIXME(ledyba-z): support color profile. PNG can contain gamma correction and color profile.
-  // Gamma Correction and Precision Color (PNG: The Definitive Guide)
-  // http://www.libpng.org/pub/png/book/chapter10.html
-  //
-  set(AV1E_SET_COLOR_PRIMARIES, colorPrimaries);
-  set(AV1E_SET_TRANSFER_CHARACTERISTICS, transferCharacteristics);
-  set(AV1E_SET_MATRIX_COEFFICIENTS, matrixCoefficients);
+  set(AV1E_SET_COLOR_PRIMARIES, colorProfile.cicp->colourPrimaries);
+  set(AV1E_SET_TRANSFER_CHARACTERISTICS, colorProfile.cicp->transferCharacteristics);
+  set(AV1E_SET_MATRIX_COEFFICIENTS, colorProfile.cicp->matrixCoefficients);
 
  // FIXME(ledyba-z): It's not used. see libavif-container to see our choice.
   (void)AV1E_SET_CHROMA_SAMPLE_POSITION;
 
   (void)AV1E_SET_MIN_GF_INTERVAL; // for video
-  set(AV1E_SET_COLOR_RANGE, fullColorRange ? 1 : 0);
+  set(AV1E_SET_COLOR_RANGE, colorProfile.cicp->fullRangeFlag ? 1 : 0);
   (void)AV1E_SET_RENDER_SIZE; // should be the same as the output size. It's default.
   if(renderWidth > 0 && renderHeight > 0) {
     int renderSize[2] = {renderWidth, renderHeight};

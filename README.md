@@ -116,8 +116,8 @@ SYNOPSIS
               [--matrix-coefficients (<Value defined in
               H.273>|bt709|sRGB|sYCC|unspecified|us-fcc|bt470bg|bt601|ntsc|smpte240m|bt2020)]
               [--horizontal-scale-mode [1/1|4/5|3/5|1/2]] [--vertical-scale-mode [1/1|4/5|3/5|1/2]]
-              [--resize-mode [none|fixed|random]] [--resize-denominator <[8-16]>] [--superres-mode
-              [none|fixed|random|qthresh|auto]] [--superres-denominator <[8-16]>]
+              [--resize-mode [none|fixed|random]] [--resize-denominator_ <[8-16]>] [--superres-mode
+              [none|fixed|random|qthresh|auto]] [--superres-denominator_ <[8-16]>]
               [--superres-qthresh <[0-63]>] [--render-width <<render-width>>] [--render-height
               <<render-height>>] [--profile <0=base, 1=high, 2=professional>] [--pix-fmt
               [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--disable-full-color-range]
@@ -259,14 +259,14 @@ OPTIONS
         --resize-mode
                     Set resize mode
 
-        --resize-denominator
-                    Set resize denominator.
+        --resize-denominator_
+                    Set resize denominator_.
 
         --superres-mode
                     Set resize mode
 
-        --superres-denominator
-                    Set resize denominator.
+        --superres-denominator_
+                    Set resize denominator_.
 
         --superres-qthresh
                     Set q level threshold for superres.

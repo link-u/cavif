@@ -300,16 +300,20 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
     if(config_.cropSize.has_value() || config_.cropOffset.has_value()) {
       CleanApertureBox clap{};
       if(config_.cropSize.has_value()) {
-        clap.cleanApertureWidthN = config_.cropSize.value().first.first;
-        clap.cleanApertureWidthD = config_.cropSize.value().first.second;
-        clap.cleanApertureHeightN = config_.cropSize.value().second.first;
-        clap.cleanApertureHeightD = config_.cropSize.value().second.second;
+        auto const w = config_.cropSize.value().first.reduce();
+        auto const h = config_.cropSize.value().second.reduce();
+        clap.cleanApertureWidthN = w.numerator();
+        clap.cleanApertureWidthD = w.denominator();
+        clap.cleanApertureHeightN = h.numerator();
+        clap.cleanApertureHeightD = h.denominator();
       }
       if(config_.cropOffset.has_value()) {
-        clap.horizOffN = config_.cropOffset.value().first.first;
-        clap.horizOffD = config_.cropOffset.value().first.second;
-        clap.vertOffN = config_.cropOffset.value().second.first;
-        clap.vertOffD = config_.cropOffset.value().second.second;
+        auto const h = config_.cropOffset.value().first.reduce();
+        auto const v = config_.cropOffset.value().second.reduce();
+        clap.horizOffN = h.numerator();
+        clap.horizOffD = h.denominator();
+        clap.vertOffN = v.numerator();
+        clap.vertOffD = v.denominator();
       }
       propertiesBox.propertyContainers.properties.emplace_back(clap);
       item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {

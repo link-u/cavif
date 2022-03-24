@@ -16,14 +16,6 @@
 
 namespace {
 
-// FIXME(ledyba-z): remove this function when the C++20 comes.
-bool endsWith(std::string const& target, std::string const& suffix) {
-  if(target.size() < suffix.size()) {
-    return false;
-  }
-  return target.substr(target.size()-suffix.size()) == suffix;
-}
-
 size_t encode(avif::util::Logger& log, aom_codec_ctx_t& codec, aom_image* img, std::vector<std::vector<uint8_t>>& packets) {
   aom_codec_cx_pkt_t const* pkt;
   aom_codec_iter_t iter = nullptr;
@@ -49,7 +41,9 @@ size_t encode(avif::util::Logger& log, aom_codec_ctx_t& codec, aom_image* img, s
 }
 
 avif::img::ColorProfile mergeColorProfile(avif::util::FileLogger& log, Config const& config, img::png::Reader::Result const& loadResult) {
-  avif::img::ColorProfile mergedColorProfile{};
+  avif::img::ColorProfile mergedColorProfile{
+    .cicp = avif::ColourInformationBox::CICP(),
+  };
   std::optional<avif::img::ColorProfile> configProfile = config.calcColorProfile();
 
   if(loadResult.iccProfile.has_value()) {
@@ -125,21 +119,15 @@ int internal::main(int argc, char** argv) {
   config.codec.rc_end_usage = AOM_Q;
   config.codec.rc_target_bitrate = 0;
   config.codec.g_threads = std::thread::hardware_concurrency();
-  {
-    int const parseResult = config.parse();
-    if(parseResult != 0) {
-      return parseResult;
-    }
-    if(config.showHelp) {
-      config.usage();
-      return 0;
-    }
+  if(int parseResult = config.parse(); parseResult != 0) {
+    return parseResult;
+  }
+  if(config.showHelp) {
+    config.usage();
+    return 0;
   }
 
   // decoding input image
-  if(!endsWith(config.input, ".png")) {
-    log.fatal("please give png file for input");
-  }
   img::png::Reader::Result loadResult = img::png::Reader::create(log, config.input).read();
   aom_image_t img;
 
@@ -153,7 +141,6 @@ int internal::main(int argc, char** argv) {
     src.colorProfile() = colorProfile;
     convert(config, src, img);
   }
-  config.validate();
 
   uint32_t const width = aom_img_plane_width(&img, AOM_PLANE_Y);
   uint32_t const height = aom_img_plane_height(&img, AOM_PLANE_Y);
@@ -186,7 +173,7 @@ int internal::main(int argc, char** argv) {
     log.fatal("Failed to initialize encoder: {}", aom_codec_error_detail(&codec));
   }
 
-  config.modify(&codec);
+  config.modify(&codec, colorProfile);
 
   std::vector<std::vector<uint8_t>> packets;
   {

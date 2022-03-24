@@ -14,8 +14,8 @@
 #include <avif/ImageRotationBox.hpp>
 #include <avif/ImageMirrorBox.hpp>
 #include <av1/encoder/encoder.h>
-
 #include "../external/clipp/include/clipp.h"
+#include "math/Fraction.hpp"
 
 class Config final {
 public:
@@ -36,8 +36,8 @@ public:
   // meta
   std::optional<avif::ImageRotationBox::Rotation> rotation{};
   std::optional<avif::ImageMirrorBox::Axis> mirrorAxis{};
-  std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropSize{};
-  std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropOffset{};
+  std::optional<std::pair<Fraction, Fraction>> cropSize{};
+  std::optional<std::pair<Fraction, Fraction>> cropOffset{};
   // color
   std::optional<avif::img::color::ColorPrimaries> colorPrimaries = {};
   std::optional<avif::img::color::TransferCharacteristics> transferCharacteristics = {};
@@ -113,11 +113,11 @@ private:
   char** argv{};
   clipp::group commandLineFlags{};
   clipp::group createCommandLineFlags();
+  void validate() const;
 public:
   void usage();
   int parse();
-  void validate() const;
-  void modify(aom_codec_ctx_t* aom);
+  void modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorProfile);
 
 public:
   [[nodiscard]] std::optional<avif::img::ColorProfile> calcColorProfile() const;
