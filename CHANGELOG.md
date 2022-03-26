@@ -18,9 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--enable-rect-tx` is introduced. Enabled by default.
 - `--(enable|disable)-diagonal-intra` is introduced. Enabled by default.
 - `--content-type (default|screen|film)` is introduced.
-  - default: regular video content(default)
-  - screen: Screen capture content
-  - film: Film content
+  - `default`: regular video content(default)
+  - `screen`: Screen capture content
+  - `film`: Film content
 - `--(enable|disable)-tx-size-search` is introduced. Enabled by default.
 
 ### Changed
