@@ -37,5 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Now we can build cavif for mac OS and debian package.
+- `--crop-size` and `--crop-offset` are now validated according to [ISO/IEC 23000-22:2019/Amd 2:2021](https://www.iso.org/standard/81634.html):
+  - crop size must be integers.
+  - the leftmost pixel must be positioned in even line if pixel format is `yuv420` or `yuv422`.
+  - the topmost pixel must be positioned in even line if pixel format is `yuv420`.
 
 ### Removed
