@@ -53,8 +53,10 @@ public:
   aom_img_fmt_t pixFmt = AOM_IMG_FMT_I420;
   int crf = 10;
   int deltaQMode = 0;
+  int deltaQStrength = 100;
   bool enableChromaDeltaQ = false;
-  bool enableDeltaLoopfilter = false;
+  bool enableLoopFilter = true;
+  bool enableDeltaLoopFilter = false;
   bool useQM = false;
   int qmMin = DEFAULT_QM_FIRST;
   int qmMax = DEFAULT_QM_LAST;

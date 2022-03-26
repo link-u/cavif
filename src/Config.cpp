@@ -238,10 +238,13 @@ clipp::group Config::createCommandLineFlags() {
       option("--enable-adaptive-quantization-b").doc("use adaptive quantize_b").set(enableAdaptiveQuantizationB, true),
       option("--disable-adaptive-quantization-b").doc("use traditional adaptive quantization (default)").set(enableAdaptiveQuantizationB, false),
       option("--delta-q").doc("a mode of delta q mode feature, that allows modulating q per superblock") & (parameter("none").doc("disable deltaQ").set(deltaQMode, int(NO_DELTA_Q)) | parameter("objective").doc("Use modulation to maximize objective quality").set(deltaQMode, int(DELTA_Q_OBJECTIVE)) | parameter("perceptual").doc("Use modulation to maximize perceptual quality").set(deltaQMode, int(DELTA_Q_PERCEPTUAL))),
+      option("--delta-q-strength").doc("strength of deltaQ [0..1000] (default = 100)").set(deltaQStrength),
       option("--enable-chroma-delta-q").doc("enable delta quantization in chroma").set(enableChromaDeltaQ, true),
       option("--disable-chroma-delta-q").doc("disable delta quantization in chroma").set(enableChromaDeltaQ, false),
-      option("--enable-delta-lf").doc("enable delta loop filter").set(enableDeltaLoopfilter, true),
-      option("--disable-delta-lf").doc("disable delta loop filter").set(enableDeltaLoopfilter, false),
+      option("--enable-loop-filter").doc("enable loop filter (default)").set(enableLoopFilter, true),
+      option("--disable-loop-filter").doc("disable loop filter").set(enableLoopFilter, false),
+      option("--enable-delta-lf").doc("enable delta loop filter").set(enableDeltaLoopFilter, true),
+      option("--disable-delta-lf").doc("disable delta loop filter (default)").set(enableDeltaLoopFilter, false),
       option("--use-qm").doc("Use QMatrix").set(useQM, true),
       option("--qm-min").doc("Min quant matrix flatness") & integer("0-15 (default: 5)", qmMin),
       option("--qm-max").doc("Max quant matrix flatness") & integer("0-15 (default: 9)", qmMax),
@@ -533,7 +536,7 @@ void Config::modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorPr
   set(AV1E_SET_ENABLE_PALETTE, enablePalette ? 1 : 0);
   set(AV1E_SET_ENABLE_INTRABC, enableIntraBC ? 1 : 0);
   set(AV1E_SET_DELTAQ_MODE, deltaQMode);
-  set(AV1E_SET_DELTALF_MODE, enableDeltaLoopfilter ? 1 : 0);
+  set(AV1E_SET_DELTALF_MODE, enableDeltaLoopFilter ? 1 : 0);
   (void)AV1E_SET_SINGLE_TILE_DECODING; // We are working on encoding.
   (void)AV1E_ENABLE_MOTION_VECTOR_UNIT_TEST; // is for video.
   (void)AV1E_SET_TIMING_INFO_TYPE; // is for video.
@@ -584,6 +587,9 @@ void Config::modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorPr
   set(AV1E_SET_ENABLE_TX_SIZE_SEARCH, enableTxSizeSearch ? 1 : 0);
 
   (void)AV1E_SET_SVC_REF_FRAME_COMP_PRED; // is for video.
+
+  set(AV1E_SET_DELTAQ_STRENGTH, deltaQStrength);
+  set(AV1E_SET_LOOPFILTER_CONTROL, enableLoopFilter ? LOOPFILTER_ALL : LOOPFILTER_NONE);
 
   #undef set
 }

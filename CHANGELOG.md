@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `screen`: Screen capture content
   - `film`: Film content
 - `--(enable|disable)-tx-size-search` is introduced. Enabled by default.
+- `--delta-q-strength (int)` is introduced. Takes 0 to 1000. Default is `100`.
+- `--(enable|disble)-loop-filter` is introduced. Enabled by default.
 
 ### Changed
 - libaom is upgraded to v3.3.0
