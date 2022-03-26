@@ -50,7 +50,7 @@ Fraction parseFraction(std::string const& str) {
     if(d == 0) {
       throw std::invalid_argument("denominator_ can't be 0.");
     }
-    return Fraction(static_cast<int32_t>(n), static_cast<int32_t>(d));
+    return Fraction(static_cast<int32_t>(n), static_cast<int32_t>(d)).reduce();
   }
 }
 
@@ -361,16 +361,16 @@ numbers.
       (cropSize.has_value() || cropOffset.has_value()) &&
       !(cropSize.has_value() && cropOffset.has_value())
   ) {
-    throw std::invalid_argument("crop-size must also be set, when crop-offset is set.");
+    throw std::invalid_argument("both crop-size and crop-offset must be set.");
   }
   if(cropSize.has_value() && cropOffset.has_value()) {
-    auto const cropSize = this->cropSize.value();
-    auto const cropOffset = this->cropOffset.value();
-    if (!(cropSize.first.isInteger()  && cropSize.second.isInteger())) {
+    auto const [width, height] = this->cropSize.value();
+    auto const [offX, offY] = this->cropSize.value();
+    if (!(width.isInteger()  && height.isInteger())) {
       throw std::invalid_argument("crop size must be integers.");
     }
-    auto const left = cropOffset.first.minus(cropSize.first.div(2));
-    auto const top = cropOffset.second.minus(cropSize.second.div(2));
+    auto const left = offX.minus(width.div(2));
+    auto const top = offY.minus(height.div(2));
     if(!left.isInteger()) {
       throw std::invalid_argument("The leftmost pixel must be an integer.");
     }
