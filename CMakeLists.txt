@@ -45,6 +45,8 @@ add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
 add_executable(cavif
     src/main.cpp
 
+    src/math/Fraction.hpp
+
     src/img/Conversion.hpp
     src/img/png/Reader.cpp
     src/img/png/Reader.hpp
@@ -61,7 +63,7 @@ add_executable(cavif
 
     src/ext/models/NonSplitPartitionModel.cpp
     src/ext/models/NonSplitPartitionModel.hpp
-    src/math/Fraction.hpp)
+)
 
 # https://cmake.org/cmake/help/latest/manual/cmake-compile-features.7.html#requiring-language-standards
 # https://stackoverflow.com/questions/45688522/how-to-enable-c17-in-cmake
