@@ -2,8 +2,6 @@
 // Created by psi on 2022/03/27.
 //
 
-#include <vector>
-#include <memory>
 #include <gtest/gtest.h>
 #include "../src/math/Fraction.hpp"
 
