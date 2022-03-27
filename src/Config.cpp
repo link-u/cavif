@@ -337,6 +337,9 @@ void Config::validate() const {
   if(!endsWith(output, ".avif")) {
     throw std::invalid_argument("please give avif file for output");
   }
+  if(codec.monochrome && codec.g_profile == 1) {
+    throw std::invalid_argument("Monochrome encoding are not allowed in Profile = 1. See https://aomediacodec.github.io/av1-spec/#general-sequence-header-obu-semantics");
+  }
   if(
       (colorPrimaries.has_value() || transferCharacteristics.has_value() || matrixCoefficients.has_value()) &&
       !(colorPrimaries.has_value() && transferCharacteristics.has_value() && matrixCoefficients.has_value())
