@@ -43,7 +43,7 @@ public:
   std::optional<avif::img::color::TransferCharacteristics> transferCharacteristics = {};
   std::optional<avif::img::color::MatrixCoefficients> matrixCoefficients = {};
   // encoding
-  aom_codec_enc_cfg codec{};
+  aom_codec_enc_cfg codec = {};
   aom_scaling_mode_t scaleMode = {
       .h_scaling_mode = AOME_NORMAL,
       .v_scaling_mode = AOME_NORMAL,
