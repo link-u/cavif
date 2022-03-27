@@ -125,3 +125,28 @@ install(TARGETS cavif
 install(DIRECTORY external/vmaf/model
     DESTINATION share/cavif
 )
+
+###############################################################################
+## Testing
+###############################################################################
+enable_testing()
+include(GoogleTest)
+add_subdirectory(external/libavif-container/external/gtest EXCLUDE_FROM_ALL)
+
+add_executable(cavif-tests
+    src/math/Fraction.hpp
+    test/MathTest.cpp
+)
+target_link_libraries(cavif-tests PRIVATE gtest)
+target_link_libraries(cavif-tests PRIVATE gtest_main)
+target_include_directories(cavif-tests PRIVATE external/gtest/googletest/include)
+set_property(TARGET cavif-tests PROPERTY CXX_STANDARD 17)
+set_property(TARGET cavif-tests PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET cavif-tests PROPERTY CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
+
+gtest_add_tests(
+    TARGET      cavif-tests
+    #TEST_SUFFIX .noArgs
+    TEST_LIST   ALL_TESTS
+)
+set_tests_properties(${ALL_TESTS} PROPERTIES TIMEOUT 10)
