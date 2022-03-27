@@ -4,6 +4,7 @@
 [submodule "external/libaom"]
 	path = external/libaom
 	url = https://aomedia.googlesource.com/aom
+	ignore = dirty
 [submodule "external/libpng"]
 	path = external/libpng
 	url = https://git.code.sf.net/p/libpng/code

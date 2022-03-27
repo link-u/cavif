@@ -12,4 +12,5 @@ set -eux
 set -o pipefail
 
 # libaom
-(cd external/libaom && patch -p1 --forward < ../../patches/libaom.patch || true)
+(cd external/libaom; patch -p1 --forward < ../../patches/libaom.patch || true)
+(cd external/zlib; patch -p1 --forward < ../../patches/zlib.patch || true)
