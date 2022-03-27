@@ -115,10 +115,10 @@ private:
   char** argv{};
   clipp::group commandLineFlags{};
   clipp::group createCommandLineFlags();
-  void validate() const;
 public:
   void usage();
-  int parse();
+  bool parse();
+  void validate() const;
   void modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorProfile);
 
 public:

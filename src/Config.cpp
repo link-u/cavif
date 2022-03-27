@@ -81,22 +81,12 @@ Config::Config(int argc, char** argv)
 }
 
 void Config::usage() {
-  std::cerr << make_man_page(commandLineFlags, commandName) << std::flush;
+  std::cerr << make_man_page(commandLineFlags, commandName);
+  std::cerr << std::flush;
 }
 
-int Config::parse() {
-  if(clipp::parse(argc, argv, commandLineFlags).any_error()) {
-    this->usage();
-    return -1;
-  }
-  if(showHelp) {
-    return 0;
-  }
-  validate();
-  // MEMO(ledyba-z): These qp offset parameters are only used in video.
-  //codec.use_fixed_qp_offsets = 1;
-  //codec.fixed_qp_offsets[0] = 0;
-  return 0;
+bool Config::parse() {
+  return !clipp::parse(argc, argv, commandLineFlags).any_error();
 }
 
 clipp::group Config::createCommandLineFlags() {
@@ -409,6 +399,10 @@ std::optional<avif::img::ColorProfile> Config::calcColorProfile() const {
 }
 
 void Config::modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorProfile) {
+  // MEMO(ledyba-z): These qp offset parameters are only used in video.
+  //codec.use_fixed_qp_offsets = 1;
+  //codec.fixed_qp_offsets[0] = 0;
+
   #define set(param, expr) \
     if(aom_codec_control(aom, param, (expr)) != AOM_CODEC_OK) { \
       throw std::invalid_argument(std::string("Failed to set [" #param "] : ") + aom_codec_error_detail(aom)); \

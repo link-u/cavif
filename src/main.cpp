@@ -8,6 +8,7 @@
 #include <avif/util/FileLogger.hpp>
 #include <avif/util/File.hpp>
 #include <avif/img/Image.hpp>
+#include <iostream>
 
 #include "Config.hpp"
 #include "AVIFBuilder.hpp"
@@ -119,12 +120,21 @@ int internal::main(int argc, char** argv) {
   config.codec.rc_end_usage = AOM_Q;
   config.codec.rc_target_bitrate = 0;
   config.codec.g_threads = std::thread::hardware_concurrency();
-  if(int parseResult = config.parse(); parseResult != 0) {
-    return parseResult;
+  if(!config.parse()) {
+    log.error("Failed to parse arguments!");
+    config.usage();
+    return -1;
   }
   if(config.showHelp) {
     config.usage();
     return 0;
+  }
+  try {
+    config.validate();
+  } catch (std::exception const& e) {
+    log.error("Arguments validation failed:");
+    log.error("{}", e.what());
+    return -2;
   }
 
   // decoding input image
