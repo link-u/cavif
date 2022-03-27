@@ -12,6 +12,7 @@ TEST(MathTest, GCD) {
   ASSERT_EQ(1, gcd(10, 3));
   ASSERT_EQ(1, gcd(114514, 997));
 }
+
 TEST(MathTest, LCD) {
   ASSERT_EQ(20, lcd(10, 20));
   ASSERT_EQ(20, lcd(20, 10));
@@ -19,3 +20,4 @@ TEST(MathTest, LCD) {
   ASSERT_EQ(30, lcd(10, 3));
   ASSERT_EQ(114514 * 997, lcd(114514, 997));
 }
+
