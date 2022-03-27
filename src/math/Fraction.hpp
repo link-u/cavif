@@ -7,15 +7,16 @@
 
 namespace {
 
-[[ nodiscard ]] int32_t gcd(int32_t const m, int32_t const n) {
+[[ nodiscard ]] int32_t gcd(int32_t m, int32_t n) {
   if(m < n) {
-    return gcd(n, m);
+    std::swap(m, n);
   }
-  if(n == 0) {
-    return m;
-  } else {
-    return gcd(n, m % n);
+  while (n != 0) {
+    auto const r = m % n;
+    m = n;
+    n = r;
   }
+  return m;
 }
 
 [[ nodiscard ]] int32_t lcd(int32_t const m, int32_t const n) {
