@@ -4,26 +4,7 @@
 #pragma once
 
 #include <cstdint>
-
-namespace {
-
-[[ nodiscard ]] int32_t gcd(int32_t m, int32_t n) {
-  if(m < n) {
-    std::swap(m, n);
-  }
-  while (n != 0) {
-    auto const r = m % n;
-    m = n;
-    n = r;
-  }
-  return m;
-}
-
-[[ nodiscard ]] int32_t lcd(int32_t const m, int32_t const n) {
-  return m / gcd(m,n) * n;
-}
-
-}
+#include <numeric>
 
 struct Fraction {
 private:
@@ -37,11 +18,11 @@ public:
   }
 
   [[ nodiscard ]] Fraction reduce() const {
-    int32_t r = gcd(std::abs(numerator_), std::abs(denominator_));
+    int32_t r = std::gcd(std::abs(numerator_), std::abs(denominator_));
     return Fraction(numerator_ / r, denominator_ / r);
   }
   [[ nodiscard ]] Fraction minus(Fraction const& b) const {
-    int32_t const r = lcd(std::abs(denominator_), std::abs(b.denominator_));
+    int32_t const r = std::lcm(std::abs(denominator_), std::abs(b.denominator_));
     return Fraction((r / denominator_ * numerator_) - (r / b.denominator_ * b.numerator_), r).reduce();
   }
   [[ nodiscard ]] int32_t numerator() const {
@@ -57,3 +38,4 @@ public:
     return Fraction(numerator_, denominator_ * d).reduce();
   }
 };
+
