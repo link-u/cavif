@@ -9,13 +9,13 @@
 #include <aom/aom_encoder.h>
 #include <aom/aom_codec.h>
 #include <aom/aomcx.h>
+#include <avif/math/Fraction.hpp>
 #include <avif/img/color/Constants.hpp>
 #include <avif/img/Image.hpp>
 #include <avif/ImageRotationBox.hpp>
 #include <avif/ImageMirrorBox.hpp>
 #include <av1/encoder/encoder.h>
 #include "../external/clipp/include/clipp.h"
-#include "math/Fraction.hpp"
 
 class Config final {
 public:
@@ -36,8 +36,8 @@ public:
   // meta
   std::optional<avif::ImageRotationBox::Rotation> rotation{};
   std::optional<avif::ImageMirrorBox::Axis> mirrorAxis{};
-  std::optional<std::pair<Fraction, Fraction>> cropSize{};
-  std::optional<std::pair<Fraction, Fraction>> cropOffset{};
+  std::optional<std::pair<avif::math::Fraction, avif::math::Fraction>> cropSize{};
+  std::optional<std::pair<avif::math::Fraction, avif::math::Fraction>> cropOffset{};
   // color
   std::optional<avif::img::color::ColorPrimaries> colorPrimaries = {};
   std::optional<avif::img::color::TransferCharacteristics> transferCharacteristics = {};

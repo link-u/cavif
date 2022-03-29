@@ -38,10 +38,10 @@ std::string trim(std::string str) {
   return str;
 }
 
-Fraction parseFraction(std::string const& str) {
+avif::math::Fraction parseFraction(std::string const& str) {
   auto pos = str.find('/');
   if(pos == std::string::npos) {
-    return Fraction(std::stoi(trim(str)), 1);
+    return avif::math::Fraction(std::stoi(trim(str)), 1);
   } else {
     std::string first = trim(str.substr(0, pos));
     std::string second = trim(str.substr(pos + 1));
@@ -50,17 +50,17 @@ Fraction parseFraction(std::string const& str) {
     if(d == 0) {
       throw std::invalid_argument("denominator_ can't be 0.");
     }
-    return Fraction(static_cast<int32_t>(n), static_cast<int32_t>(d)).reduce();
+    return avif::math::Fraction(static_cast<int32_t>(n), static_cast<int32_t>(d)).reduce();
   }
 }
 
-std::pair<Fraction, Fraction> parseFractionPair(std::string const& str) {
+std::pair<avif::math::Fraction, avif::math::Fraction> parseFractionPair(std::string const& str) {
   auto pos = str.find(',');
   if(pos == std::string::npos) {
     throw std::invalid_argument(R"(Invalid fraction pair. Example: "30/4, 100/7", "100, 100/2" or "100, 100")");
   }
-  std::string first = trim(str.substr(0, pos));
-  std::string second = trim(str.substr(pos + 1));
+  std::string const first = trim(str.substr(0, pos));
+  std::string const second = trim(str.substr(pos + 1));
   return std::make_pair(parseFraction(first), parseFraction(second));
 }
 

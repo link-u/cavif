@@ -68,8 +68,6 @@ add_subdirectory(external/libaom EXCLUDE_FROM_ALL)
 add_executable(cavif
     src/main.cpp
 
-    src/math/Fraction.hpp
-
     src/img/Conversion.hpp
     src/img/png/Reader.cpp
     src/img/png/Reader.hpp
@@ -134,7 +132,6 @@ include(GoogleTest)
 add_subdirectory(external/libavif-container/external/gtest EXCLUDE_FROM_ALL)
 
 add_executable(cavif-tests
-    src/math/Fraction.hpp
     test/NopTest.cpp
 )
 target_link_libraries(cavif-tests PRIVATE gtest)
