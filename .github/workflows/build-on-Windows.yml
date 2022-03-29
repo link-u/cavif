@@ -27,7 +27,7 @@ jobs:
       run: |
         set MSYSTEM=MINGW64
         set HOME=${{ github.workspace }}
-        C:\msys64\usr\bin\bash -lc "bash scripts/apply-patches.sh && bash scripts/build-deps.sh"
+        C:\msys64\usr\bin\bash -lc "bash scripts/reset-submodules.sh && bash scripts/apply-patches.sh && bash scripts/build-deps.sh"
     - name: configure
       shell: cmd
       run: |
