@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <thread>
 
 #include "Config.hpp"
 
@@ -12,6 +11,14 @@
 #include "ext/models/NonSplitPartitionModel.hpp"
 
 namespace {
+
+// FIXME(ledyba-z): remove this function when the C++20 comes.
+bool endsWith(std::string const& target, std::string const& suffix) {
+  if(target.size() < suffix.size()) {
+    return false;
+  }
+  return target.substr(target.size()-suffix.size()) == suffix;
+}
 
 std::string basename(std::string const& path) {
   auto pos = path.find_last_of('/');
@@ -31,23 +38,23 @@ std::string trim(std::string str) {
   return str;
 }
 
-std::pair<int32_t, uint32_t> parseFraction(std::string const& str) {
+Fraction parseFraction(std::string const& str) {
   auto pos = str.find('/');
   if(pos == std::string::npos) {
-    return std::make_pair(std::stoi(trim(str)), 1);
+    return Fraction(std::stoi(trim(str)), 1);
   } else {
     std::string first = trim(str.substr(0, pos));
     std::string second = trim(str.substr(pos + 1));
     int n = std::stoi(first);
     int d = std::stoi(second);
     if(d == 0) {
-      throw std::invalid_argument("denominator can't be 0.");
+      throw std::invalid_argument("denominator_ can't be 0.");
     }
-    return std::make_pair(static_cast<int32_t>(n), static_cast<uint32_t>(d));
+    return Fraction(static_cast<int32_t>(n), static_cast<int32_t>(d)).reduce();
   }
 }
 
-std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>> parseFractionPair(std::string const& str) {
+std::pair<Fraction, Fraction> parseFractionPair(std::string const& str) {
   auto pos = str.find(',');
   if(pos == std::string::npos) {
     throw std::invalid_argument(R"(Invalid fraction pair. Example: "30/4, 100/7", "100, 100/2" or "100, 100")");
@@ -55,6 +62,12 @@ std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>> parseFra
   std::string first = trim(str.substr(0, pos));
   std::string second = trim(str.substr(pos + 1));
   return std::make_pair(parseFraction(first), parseFraction(second));
+}
+
+template <typename T>
+std::optional<T> parseEnumFromInt(std::string const& str) {
+  auto i = std::stoi(str);
+  return std::make_optional(static_cast<T>(i));
 }
 
 }
@@ -65,39 +78,15 @@ Config::Config(int argc, char** argv)
 ,argv(argv)
 ,commandLineFlags(createCommandLineFlags())
 {
-  auto& aom = this->codec;
 }
 
 void Config::usage() {
-  std::cerr << make_man_page(commandLineFlags, commandName) << std::flush;
+  std::cerr << make_man_page(commandLineFlags, commandName);
+  std::cerr << std::flush;
 }
 
-int Config::parse() {
-
-  if(clipp::parse(argc, argv, commandLineFlags).any_error()) {
-    this->usage();
-    return -1;
-  }
-  if(showHelp) {
-    return 0;
-  }
-  { // validate
-    if(input == output) {
-      std::cerr << "Input and output can't be the same file!" << std::endl;
-      return -1;
-    }
-    if(!cropSize.has_value() && cropOffset.has_value()) {
-      std::cerr << "crop-size must also be set, when crop-offset is set." << std::endl << std::flush;
-      return -1;
-    }
-    if(cropSize.has_value() && !cropOffset.has_value()) {
-      cropOffset = std::make_pair(std::make_pair(0,1), std::make_pair(0,1));
-    }
-  }
-  // MEMO(ledyba-z): These qp offset parameters are only used in video.
-  //codec.use_fixed_qp_offsets = 1;
-  //codec.fixed_qp_offsets[0] = 0;
-  return 0;
+bool Config::parse() {
+  return !clipp::parse(argc, argv, commandLineFlags).any_error();
 }
 
 clipp::group Config::createCommandLineFlags() {
@@ -123,8 +112,8 @@ clipp::group Config::createCommandLineFlags() {
   group meta = (
       option("--rotation").doc("Set rotation meta data(irot). Counter-clockwise.") & (parameter("0").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot0)) | parameter("90").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot90)) | parameter("180").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot180)) | parameter("270").set(rotation, std::make_optional(avif::ImageRotationBox::Rotation::Rot270))),
       option("--mirror").doc("Set mirror meta data(imir).") & (parameter("vertical").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Vertical)) | parameter("horizontal").set(mirrorAxis, std::make_optional(avif::ImageMirrorBox::Axis::Horizontal))),
-      option("--crop-size").doc("Set crop size.") & value("widthN/widthD,heightN/heightD").call([&](std::string const& str){ cropSize = parseFractionPair(str); }),
-      option("--crop-offset").doc("Set crop offset.") & value("horizOffN/horizOffD,vertOffN/vertOffD").call([&](std::string const& str){ cropOffset = parseFractionPair(str); })
+      option("--crop-size").doc("Set crop size.") & value("width,height").call([&](std::string const& str){ cropSize = parseFractionPair(str); }),
+      option("--crop-offset").doc("Set crop offset.") & value("horizontalOffset,verticalOffset").call([&](std::string const& str){ cropOffset = parseFractionPair(str); })
   );
   // av1 sequence header
   auto av1 = (
@@ -135,72 +124,76 @@ clipp::group Config::createCommandLineFlags() {
   // colors
   group color = (
       option("--color-primaries").doc("Set color primaries information value.") & (
-          integer("Value defined in H.273").set(colorPrimaries).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
-          parameter("bt709").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("Rec. ITU-R BT.709-6 (default)") |
-          parameter("sRGB").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
-          parameter("sYCC").set<uint8_t&, uint8_t>(colorPrimaries, 1u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
-          parameter("unspecified").set<uint8_t&, uint8_t>(colorPrimaries, 2u).doc("Image characteristics are unknown or are determined by the application.") |
-          parameter("bt470m").set<uint8_t&, uint8_t>(colorPrimaries, 4u).doc("Rec. ITU-R BT.470-6 System M (historical)") |
-          parameter("bt470bg").set<uint8_t&, uint8_t>(colorPrimaries, 5u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
-          parameter("bt601").set<uint8_t&, uint8_t>(colorPrimaries, 5u).doc("Rec. ITU-R BT.601-7 625") |
-          parameter("ntsc").set<uint8_t&, uint8_t>(colorPrimaries, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
-          parameter("smpte240m").set<uint8_t&, uint8_t>(colorPrimaries, 7u).doc("SMPTE 240M (1999) (historical)") |
-          parameter("generic-film").set<uint8_t&, uint8_t>(colorPrimaries, 8u).doc("Generic film (colour filters using Illuminant C)") |
-          parameter("bt2020").set<uint8_t&, uint8_t>(colorPrimaries, 9u).doc("Rec. ITU-R BT.2020-2") |
-          parameter("bt2100").set<uint8_t&, uint8_t>(colorPrimaries, 9u).doc("Rec. ITU-R BT.2100-0") |
-          parameter("xyz").set<uint8_t&, uint8_t>(colorPrimaries, 10u).doc("(CIE 1931 XYZ as in ISO 11664-1)") |
-          parameter("smpte428").set<uint8_t&, uint8_t>(colorPrimaries, 10u).doc("SMPTE ST 428-1") |
-          parameter("smpte431").set<uint8_t&, uint8_t>(colorPrimaries, 11u).doc("SMPTE RP 431-2 (2011)") |
-          parameter("smpte432").set<uint8_t&, uint8_t>(colorPrimaries, 12u).doc("SMPTE EG 432-1 (2010)") |
-          parameter("ebu3213").set<uint8_t&, uint8_t>(colorPrimaries, 22u).doc("EBU Tech. 3213-E (1975)")
+          /* 0 = For future use by ITU-T | ISO/IEC */
+          integer("Value defined in H.273").call([&](std::string const& str){ colorPrimaries = parseEnumFromInt<avif::img::color::ColorPrimaries>(str); }).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
+          parameter("bt709").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(1u))).doc("Rec. ITU-R BT.709-6") |
+          parameter("sRGB").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(1u))).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("sYCC").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(1u))).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("unspecified").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(2u))).doc("Image characteristics are unknown or are determined by the application.") |
+          /* 3 = For future use by ITU-T | ISO/IEC */
+          parameter("bt470m").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(4u))).doc("Rec. ITU-R BT.470-6 System M (historical)") |
+          parameter("bt470bg").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(5u))).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
+          parameter("bt601").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(5u))).doc("Rec. ITU-R BT.601-7 625") |
+          parameter("ntsc").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(6u))).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("smpte240m").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(7u))).doc("SMPTE ST 240 (1999)") |
+          parameter("generic-film").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(8u))).doc("Generic film (colour filters using Illuminant C)") |
+          parameter("bt2020").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(9u))).doc("Rec. ITU-R BT.2020-2") |
+          parameter("bt2100").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(9u))).doc("Rec. ITU-R BT.2100-0") |
+          parameter("smpte428").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(10u))).doc("SMPTE ST 428-1") |
+          parameter("xyz").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(10u))).doc("(CIE 1931 XYZ as in ISO 11664-1)") |
+          parameter("smpte431").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(11u))).doc("SMPTE RP 431-2 (2011)") |
+          parameter("smpte432").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(12u))).doc("SMPTE EG 432-1 (2010)") |
+          parameter("22").set(colorPrimaries, std::make_optional(static_cast<avif::img::color::ColorPrimaries>(22u))).doc("No corresponding industry specification identified")
       ),
       option("--transfer-characteristics").doc("Set transfer characteristics information value.") & (
-          integer("Value defined in H.273").set(transferCharacteristics).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
-          parameter("bt709").set<uint8_t&, uint8_t>(transferCharacteristics, 1u).doc("Rec. ITU-R BT.709-6") |
-          parameter("unspecified").set<uint8_t&, uint8_t>(transferCharacteristics, 2u).doc("Image characteristics are unknown or are determined by the application.") |
-          parameter("bt470m").set<uint8_t&, uint8_t>(transferCharacteristics, 4u).doc("Rec. ITU-R BT.470-6 System M (historical)") |
-          parameter("bt470bg").set<uint8_t&, uint8_t>(transferCharacteristics, 5u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
-          parameter("bt601").set<uint8_t&, uint8_t>(transferCharacteristics, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
-          parameter("ntsc").set<uint8_t&, uint8_t>(transferCharacteristics, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
-          parameter("smpte240m").set<uint8_t&, uint8_t>(transferCharacteristics, 7u).doc("SMPTE 240M (1999) (historical)") |
-          parameter("linear").set<uint8_t&, uint8_t>(transferCharacteristics, 8u).doc("Linear transfer characteristics") |
-          parameter("log100").set<uint8_t&, uint8_t>(transferCharacteristics, 9u).doc("Logarithmic transfer characteristic (100:1 range)") |
-          parameter("log100sqrt10").set<uint8_t&, uint8_t>(transferCharacteristics, 10u).doc("Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)") |
-          parameter("iec61966").set<uint8_t&, uint8_t>(transferCharacteristics, 11u).doc("IEC 61966-2-4") |
-          parameter("bt1361").set<uint8_t&, uint8_t>(transferCharacteristics, 12u).doc("Rec. ITU-R BT.1361-0 extended colour gamut system (historical)") |
-          parameter("sRGB").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
-          parameter("sYCC").set<uint8_t&, uint8_t>(transferCharacteristics, 13u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
-          parameter("bt2020").set<uint8_t&, uint8_t>(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
-          parameter("bt2020-10bit").set<uint8_t&, uint8_t>(transferCharacteristics, 14u).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
-          parameter("bt2020-12bit").set<uint8_t&, uint8_t>(transferCharacteristics, 15u).doc("Rec. ITU-R BT.2020-2 (12-bit system)") |
-          parameter("smpte2084").set<uint8_t&, uint8_t>(transferCharacteristics, 16u).doc("SMPTE ST 2084 for 10-, 12-, 14- and 16-bit systems") |
-          parameter("bt2100pq").set<uint8_t&, uint8_t>(transferCharacteristics, 16u).doc("Rec. ITU-R BT.2100-0 perceptual quantization (PQ) system") |
-          parameter("smpte428").set<uint8_t&, uint8_t>(transferCharacteristics, 17u).doc("SMPTE ST 428-1") |
-          parameter("bt2100hlg").set<uint8_t&, uint8_t>(transferCharacteristics, 18u).doc("Rec. ITU-R BT.2100-0 hybrid log-gamma (HLG) system") |
-          parameter("arib-b67").set<uint8_t&, uint8_t>(transferCharacteristics, 18u).doc("ARIB STD-B67")
+          integer("Value defined in H.273").call([&](std::string const& str){ transferCharacteristics = parseEnumFromInt<avif::img::color::TransferCharacteristics>(str); }).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
+          parameter("bt709").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(1u))).doc("Rec. ITU-R BT.709-6") |
+          parameter("unspecified").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(2u))).doc("Image characteristics are unknown or are determined by the application.") |
+          /* 3 = For future use by ITU-T | ISO/IEC */
+          parameter("bt470m").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(4u))).doc("Rec. ITU-R BT.470-6 System M (historical)") |
+          parameter("bt470bg").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(5u))).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
+          parameter("bt601").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(6u))).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("ntsc").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(6u))).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("smpte240m").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(7u))).doc("SMPTE 240M (1999) (historical)") |
+          parameter("linear").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(8u))).doc("Linear transfer characteristics") |
+          parameter("log100").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(9u))).doc("Logarithmic transfer characteristic (100:1 range)") |
+          parameter("log100sqrt10").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(10u))).doc("Logarithmic transfer characteristic (100 * Sqrt( 10 ) : 1 range)") |
+          parameter("iec61966").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(11u))).doc("IEC 61966-2-4") |
+          parameter("bt1361").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(12u))).doc("Rec. ITU-R BT.1361-0 extended colour gamut system (historical)") |
+          parameter("sRGB").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(13u))).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("sYCC").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(13u))).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("bt2020").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(14u))).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
+          parameter("bt2020-10bit").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(14u))).doc("Rec. ITU-R BT.2020-2 (10-bit system)") |
+          parameter("bt2020-12bit").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(15u))).doc("Rec. ITU-R BT.2020-2 (12-bit system)") |
+          parameter("smpte2084").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(16u))).doc("SMPTE ST 2084 for 10-, 12-, 14- and 16-bit systems") |
+          parameter("bt2100pq").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(16u))).doc("Rec. ITU-R BT.2100-0 perceptual quantization (PQ) system") |
+          parameter("smpte428").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(17u))).doc("SMPTE ST 428-1") |
+          parameter("bt2100hlg").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(18u))).doc("Rec. ITU-R BT.2100-0 hybrid log-gamma (HLG) system") |
+          parameter("arib-b67").set(transferCharacteristics, std::make_optional(static_cast<avif::img::color::TransferCharacteristics>(18u))).doc("ARIB STD-B67")
       ),
       option("--matrix-coefficients").doc("Set matrix coefficients information value.") & (
-          integer("Value defined in H.273").set(matrixCoefficients).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
-          parameter("bt709").set<uint8_t&, uint8_t>(matrixCoefficients, 1u).doc("Rec. ITU-R BT.709-6") |
-          parameter("unspecified").set<uint8_t&, uint8_t>(matrixCoefficients, 2u).doc("Image characteristics are unknown or are determined by the application") |
-          parameter("us-fcc").set<uint8_t&, uint8_t>(matrixCoefficients, 4u).doc("United States Federal Communications Commission (2003)") |
-          parameter("bt470bg").set<uint8_t&, uint8_t>(matrixCoefficients, 4u).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
-          parameter("bt601").set<uint8_t&, uint8_t>(matrixCoefficients, 5u).doc("Rec. ITU-R BT.601-7 625") |
-          parameter("sRGB").set<uint8_t&, uint8_t>(matrixCoefficients, 5u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
-          parameter("sYCC").set<uint8_t&, uint8_t>(matrixCoefficients, 5u).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
-          parameter("ntsc").set<uint8_t&, uint8_t>(matrixCoefficients, 6u).doc("Rec. ITU-R BT.1700-0 NTSC") |
-          parameter("smpte240m").set<uint8_t&, uint8_t>(matrixCoefficients, 7u).doc("SMPTE 240M") |
-          parameter("bt2020").set<uint8_t&, uint8_t>(matrixCoefficients, 9u).doc("Rec. ITU-R BT.2020-2 (non-constant luminance)")
+          integer("Value defined in H.273").call([&](std::string const& str){ matrixCoefficients = parseEnumFromInt<avif::img::color::MatrixCoefficients>(str); }).doc("See https://www.itu.int/rec/T-REC-H.273-201612-I/en") |
+          parameter("bt709").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(1u))).doc("Rec. ITU-R BT.709-6 (default)") |
+          parameter("sRGB").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(1u))).doc("IEC 61966-2-1 sRGB or sYCC (default)") |
+          parameter("unspecified").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(2u))).doc("Image characteristics are unknown or are determined by the application") |
+          /* 3 = For future use by ITU-T | ISO/IEC */
+          parameter("us-fcc").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(4u))).doc("United States Federal Communications Commission (2003)") |
+          parameter("bt470bg").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(4u))).doc("Rec. ITU-R BT.470-6 System B, G (historical)") |
+          parameter("sYCC").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(5u))).doc("IEC 61966-2-1 sRGB or sYCC") |
+          parameter("bt601").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(5u))).doc("Rec. ITU-R BT.601-7 625") |
+          parameter("ntsc").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(6u))).doc("Rec. ITU-R BT.1700-0 NTSC") |
+          parameter("smpte240m").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(7u))).doc("SMPTE 240M") |
+          parameter("bt2020").set(matrixCoefficients, std::make_optional(static_cast<avif::img::color::MatrixCoefficients>(9u))).doc("Rec. ITU-R BT.2020-2 (non-constant luminance)")
       )
   );
 
   auto scales = (
       option("--horizontal-scale-mode").doc("Set horizontal scale mode") & (parameter("1/1").set(scaleMode.h_scaling_mode, AOME_NORMAL).doc("Do not scale (default)") | parameter("1/2").set(scaleMode.h_scaling_mode, AOME_ONETWO).doc("Scale to 1/2") | parameter("3/5").set(scaleMode.h_scaling_mode, AOME_THREEFIVE).doc("Scale to 3/5") | parameter("4/5").set(scaleMode.h_scaling_mode, AOME_FOURFIVE).doc("Scale to 4/5") | parameter("1/4").set(scaleMode.h_scaling_mode, AOME_ONEFOUR).doc("Scale to 1/4") | parameter("3/4").set(scaleMode.h_scaling_mode, AOME_THREEFOUR).doc("Scale to 3/4") | parameter("1/8").set(scaleMode.h_scaling_mode, AOME_ONEEIGHT).doc("Scale to 1/8")),
       option("--vertical-scale-mode").doc("Set vertical scale mode")     & (parameter("1/1").set(scaleMode.v_scaling_mode, AOME_NORMAL).doc("Do not scale (default)") | parameter("1/2").set(scaleMode.v_scaling_mode, AOME_ONETWO).doc("Scale to 1/2") | parameter("3/5").set(scaleMode.v_scaling_mode, AOME_THREEFIVE).doc("Scale to 3/5") | parameter("4/5").set(scaleMode.v_scaling_mode, AOME_FOURFIVE).doc("Scale to 4/5") | parameter("1/4").set(scaleMode.v_scaling_mode, AOME_ONEFOUR).doc("Scale to 1/4") | parameter("3/4").set(scaleMode.v_scaling_mode, AOME_THREEFOUR).doc("Scale to 3/4") | parameter("1/8").set(scaleMode.v_scaling_mode, AOME_ONEEIGHT).doc("Scale to 1/8")),
-      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)).doc("Do not resize") | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)).doc("Resize image using a denominator given by `--resize-denominator` arg") | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM)).doc("Resize image randomly!")),
-      option("--resize-denominator").doc("Set resize denominator.") & (integer("[8-16], default=8", codec.rc_resize_kf_denominator)),
-      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE).doc("Do not use superres mode") | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED).doc("Apply superres filter to image using a denominator given by `--superres-denominator` arg") | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM).doc("Apply superres filter to image with a random denominator!") | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH).doc("Apply or do not apply superres filter to image based on the q index") | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO).doc("Apply or do not apply superres filter to image automatically")),
-      option("--superres-denominator").doc("Set superres resize denominator.") & (integer("[8-16], default=8", codec.rc_superres_kf_denominator)),
+      option("--resize-mode").doc("Set resize mode") & (parameter("none").set(codec.rc_resize_mode, (unsigned int)(RESIZE_NONE)).doc("Do not resize") | parameter("fixed").set(codec.rc_resize_mode, (unsigned int)(RESIZE_FIXED)).doc("Resize image using a denominator_ given by `--resize-denominator_` arg") | parameter("random").set(codec.rc_resize_mode, (unsigned int)(RESIZE_RANDOM)).doc("Resize image randomly!")),
+      option("--resize-denominator_").doc("Set resize denominator_.") & (integer("[8-16], default=8", codec.rc_resize_kf_denominator)),
+      option("--superres-mode").doc("Set superres mode") & (parameter("none").set(codec.rc_superres_mode, AOM_SUPERRES_NONE).doc("Do not use superres mode") | parameter("fixed").set(codec.rc_superres_mode, AOM_SUPERRES_FIXED).doc("Apply superres filter to image using a denominator_ given by `--superres-denominator_` arg") | parameter("random").set(codec.rc_superres_mode, AOM_SUPERRES_RANDOM).doc("Apply superres filter to image with a random denominator_!") | parameter("qthresh").set(codec.rc_superres_mode, AOM_SUPERRES_QTHRESH).doc("Apply or do not apply superres filter to image based on the q index") | parameter("auto").set(codec.rc_superres_mode, AOM_SUPERRES_AUTO).doc("Apply or do not apply superres filter to image automatically")),
+      option("--superres-denominator_").doc("Set superres resize denominator_.") & (integer("[8-16], default=8", codec.rc_superres_kf_denominator)),
       option("--superres-qthresh").doc("Set q level threshold for superres.") & (integer("[0-63], default=63 (Do not apply superres filter)", codec.rc_superres_kf_qthresh)),
       option("--render-width").doc("Set render width explicitly") & (integer("<render-width>", renderWidth)),
       option("--render-height").doc("Set render height explicitly") & (integer("<render-height>", renderHeight))
@@ -235,10 +228,13 @@ clipp::group Config::createCommandLineFlags() {
       option("--enable-adaptive-quantization-b").doc("use adaptive quantize_b").set(enableAdaptiveQuantizationB, true),
       option("--disable-adaptive-quantization-b").doc("use traditional adaptive quantization (default)").set(enableAdaptiveQuantizationB, false),
       option("--delta-q").doc("a mode of delta q mode feature, that allows modulating q per superblock") & (parameter("none").doc("disable deltaQ").set(deltaQMode, int(NO_DELTA_Q)) | parameter("objective").doc("Use modulation to maximize objective quality").set(deltaQMode, int(DELTA_Q_OBJECTIVE)) | parameter("perceptual").doc("Use modulation to maximize perceptual quality").set(deltaQMode, int(DELTA_Q_PERCEPTUAL))),
+      option("--delta-q-strength").doc("strength of deltaQ [0..1000] (default = 100)").set(deltaQStrength),
       option("--enable-chroma-delta-q").doc("enable delta quantization in chroma").set(enableChromaDeltaQ, true),
       option("--disable-chroma-delta-q").doc("disable delta quantization in chroma").set(enableChromaDeltaQ, false),
-      option("--enable-delta-lf").doc("enable delta loop filter").set(enableDeltaLoopfilter, true),
-      option("--disable-delta-lf").doc("disable delta loop filter").set(enableDeltaLoopfilter, false),
+      option("--enable-loop-filter").doc("enable loop filter (default)").set(enableLoopFilter, true),
+      option("--disable-loop-filter").doc("disable loop filter").set(enableLoopFilter, false),
+      option("--enable-delta-lf").doc("enable delta loop filter").set(enableDeltaLoopFilter, true),
+      option("--disable-delta-lf").doc("disable delta loop filter (default)").set(enableDeltaLoopFilter, false),
       option("--use-qm").doc("Use QMatrix").set(useQM, true),
       option("--qm-min").doc("Min quant matrix flatness") & integer("0-15 (default: 5)", qmMin),
       option("--qm-max").doc("Max quant matrix flatness") & integer("0-15 (default: 9)", qmMax),
@@ -321,7 +317,89 @@ clipp::group Config::createCommandLineFlags() {
   return (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProcess, codingParameters) | support;
 }
 
-void Config::modify(aom_codec_ctx_t* aom) {
+void Config::validate() const {
+  if(input == output) {
+    throw std::invalid_argument("Input and output can't be the same file!");
+  }
+  if(!endsWith(input, ".png")) {
+    throw std::invalid_argument("please give png file for input");
+  }
+  if(!endsWith(output, ".avif")) {
+    throw std::invalid_argument("please give avif file for output");
+  }
+  if(
+      (colorPrimaries.has_value() || transferCharacteristics.has_value() || matrixCoefficients.has_value()) &&
+      !(colorPrimaries.has_value() && transferCharacteristics.has_value() && matrixCoefficients.has_value())
+  ) {
+    throw std::invalid_argument("All of (or none of) --color-primaries, --transfer-characteristics and --matrix-coefficients should be set.");
+  }
+
+  /*
+ISO/IEC 23000-22:2019/Amd. 2:2021(E)
+
+7.3.6.7
+Replace the text with the following:
+The clean aperture (cropping) property may be associated with any image and shall be supported by
+the MIAF reader. The clean aperture property is restricted according to the chroma sampling format of
+the input image (4:4:4, 4:2:2:, 4:2:0, or 4:0:0) as follows:
+— cleanApertureWidth and cleanApertureHeight shall be integers;
+— The leftmost pixel and the topmost line of the clean aperture as defined in ISO/IEC 14496-12:2020,
+Section 12.1.4.1 shall be integers;
+— If chroma is subsampled horizontally (i.e., 4:2:2 and 4:2:0), the leftmost pixel of the clean aperture
+shall be even numbers;
+— If chroma is subsampled vertically (i.e., 4:2:0), the topmost line of the clean aperture shall be even
+numbers.
+   */
+  if(
+      (cropSize.has_value() || cropOffset.has_value()) &&
+      !(cropSize.has_value() && cropOffset.has_value())
+  ) {
+    throw std::invalid_argument("both crop-size and crop-offset must be set.");
+  }
+  if(cropSize.has_value() && cropOffset.has_value()) {
+    auto const [width, height] = this->cropSize.value();
+    auto const [offX, offY] = this->cropSize.value();
+    if (!(width.isInteger()  && height.isInteger())) {
+      throw std::invalid_argument("crop size must be integers.");
+    }
+    auto const left = offX.minus(width.div(2));
+    auto const top = offY.minus(height.div(2));
+    if(!left.isInteger()) {
+      throw std::invalid_argument("The leftmost pixel must be an integer.");
+    }
+    if(!top.isInteger()) {
+      throw std::invalid_argument("The topmost pixel must be an integer.");
+    }
+    if(pixFmt == AOM_IMG_FMT_I420 || pixFmt == AOM_IMG_FMT_I422) {
+      if(left.numerator() % 2 != 0) {
+        throw std::invalid_argument("The leftmost pixel must be an even.");
+      }
+    }
+    if(pixFmt == AOM_IMG_FMT_I420) {
+      if(top.numerator() % 2 != 0) {
+        throw std::invalid_argument("The topmost pixel must be an even.");
+      }
+    }
+  }
+}
+
+std::optional<avif::img::ColorProfile> Config::calcColorProfile() const {
+  if(colorPrimaries.has_value() && transferCharacteristics.has_value() && matrixCoefficients.has_value()) {
+    avif::img::ColorProfile profile;
+    profile.cicp->colourPrimaries = static_cast<uint16_t>(colorPrimaries.value());
+    profile.cicp->transferCharacteristics = static_cast<uint16_t>(transferCharacteristics.value());
+    profile.cicp->colourPrimaries = static_cast<uint16_t>(colorPrimaries.value());
+    profile.cicp->fullRangeFlag = fullColorRange;
+    return profile;
+  }
+  return {};
+}
+
+void Config::modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorProfile) {
+  // MEMO(ledyba-z): These qp offset parameters are only used in video.
+  //codec.use_fixed_qp_offsets = 1;
+  //codec.fixed_qp_offsets[0] = 0;
+
   #define set(param, expr) \
     if(aom_codec_control(aom, param, (expr)) != AOM_CODEC_OK) { \
       throw std::invalid_argument(std::string("Failed to set [" #param "] : ") + aom_codec_error_detail(aom)); \
@@ -374,19 +452,15 @@ void Config::modify(aom_codec_ctx_t* aom) {
 
   (void)AV1E_SET_CDF_UPDATE_MODE; // is for video.
 
-  //FIXME(ledyba-z): support color profile. PNG can contain gamma correction and color profile.
-  // Gamma Correction and Precision Color (PNG: The Definitive Guide)
-  // http://www.libpng.org/pub/png/book/chapter10.html
-  //
-  set(AV1E_SET_COLOR_PRIMARIES, colorPrimaries);
-  set(AV1E_SET_TRANSFER_CHARACTERISTICS, transferCharacteristics);
-  set(AV1E_SET_MATRIX_COEFFICIENTS, matrixCoefficients);
+  set(AV1E_SET_COLOR_PRIMARIES, colorProfile.cicp->colourPrimaries);
+  set(AV1E_SET_TRANSFER_CHARACTERISTICS, colorProfile.cicp->transferCharacteristics);
+  set(AV1E_SET_MATRIX_COEFFICIENTS, colorProfile.cicp->matrixCoefficients);
 
  // FIXME(ledyba-z): It's not used. see libavif-container to see our choice.
   (void)AV1E_SET_CHROMA_SAMPLE_POSITION;
 
   (void)AV1E_SET_MIN_GF_INTERVAL; // for video
-  set(AV1E_SET_COLOR_RANGE, fullColorRange ? 1 : 0);
+  set(AV1E_SET_COLOR_RANGE, colorProfile.cicp->fullRangeFlag ? 1 : 0);
   (void)AV1E_SET_RENDER_SIZE; // should be the same as the output size. It's default.
   if(renderWidth > 0 && renderHeight > 0) {
     int renderSize[2] = {renderWidth, renderHeight};
@@ -456,7 +530,7 @@ void Config::modify(aom_codec_ctx_t* aom) {
   set(AV1E_SET_ENABLE_PALETTE, enablePalette ? 1 : 0);
   set(AV1E_SET_ENABLE_INTRABC, enableIntraBC ? 1 : 0);
   set(AV1E_SET_DELTAQ_MODE, deltaQMode);
-  set(AV1E_SET_DELTALF_MODE, enableDeltaLoopfilter ? 1 : 0);
+  set(AV1E_SET_DELTALF_MODE, enableDeltaLoopFilter ? 1 : 0);
   (void)AV1E_SET_SINGLE_TILE_DECODING; // We are working on encoding.
   (void)AV1E_ENABLE_MOTION_VECTOR_UNIT_TEST; // is for video.
   (void)AV1E_SET_TIMING_INFO_TYPE; // is for video.
@@ -507,6 +581,9 @@ void Config::modify(aom_codec_ctx_t* aom) {
   set(AV1E_SET_ENABLE_TX_SIZE_SEARCH, enableTxSizeSearch ? 1 : 0);
 
   (void)AV1E_SET_SVC_REF_FRAME_COMP_PRED; // is for video.
+
+  set(AV1E_SET_DELTAQ_STRENGTH, deltaQStrength);
+  set(AV1E_SET_LOOPFILTER_CONTROL, enableLoopFilter ? LOOPFILTER_ALL : LOOPFILTER_NONE);
 
   #undef set
 }

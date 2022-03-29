@@ -32,5 +32,5 @@ meson setup \
   "-Denable_tests=false" \
   "build" \
   "."
-(cd build && ninja && meson install)
+(cd build && meson compile -C . && meson install)
 EOF

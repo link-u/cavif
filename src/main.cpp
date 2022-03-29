@@ -7,24 +7,15 @@
 #include <avif/av1/Parser.hpp>
 #include <avif/util/FileLogger.hpp>
 #include <avif/util/File.hpp>
-#include <avif/FileBox.hpp>
-#include <avif/Writer.hpp>
 #include <avif/img/Image.hpp>
+#include <iostream>
 
 #include "Config.hpp"
 #include "AVIFBuilder.hpp"
-#include "img/PNGReader.hpp"
+#include "img/png/Reader.hpp"
 #include "img/Conversion.hpp"
 
 namespace {
-
-// FIXME(ledyba-z): remove this function when the C++20 comes.
-bool endsWith(std::string const& target, std::string const& suffix) {
-  if(target.size() < suffix.size()) {
-    return false;
-  }
-  return target.substr(target.size()-suffix.size()) == suffix;
-}
 
 size_t encode(avif::util::Logger& log, aom_codec_ctx_t& codec, aom_image* img, std::vector<std::vector<uint8_t>>& packets) {
   aom_codec_cx_pkt_t const* pkt;
@@ -50,6 +41,51 @@ size_t encode(avif::util::Logger& log, aom_codec_ctx_t& codec, aom_image* img, s
   return numPackets;
 }
 
+avif::img::ColorProfile mergeColorProfile(avif::util::FileLogger& log, Config const& config, img::png::Reader::Result const& loadResult) {
+  avif::img::ColorProfile mergedColorProfile{
+    .cicp = avif::ColourInformationBox::CICP(),
+  };
+  std::optional<avif::img::ColorProfile> configProfile = config.calcColorProfile();
+
+  if(loadResult.iccProfile.has_value()) {
+    mergedColorProfile.iccProfile = avif::img::ICCProfile(loadResult.iccProfile.value());
+  }
+  if(loadResult.colorPrimaries.has_value()) {
+    auto const& colorPrimaries = loadResult.colorPrimaries.value();
+    // TODO(ledyba-z): Support.
+    log.warn("cHRM chunk in PNG is not supported yet. white=({}, {}) red=({},{}) green=({},{}) blue=({},{})",
+             static_cast<float>(colorPrimaries.whiteX) / 100000.0f,
+             static_cast<float>(colorPrimaries.whiteY) / 100000.0f,
+             static_cast<float>(colorPrimaries.redX) / 100000.0f,
+             static_cast<float>(colorPrimaries.redY) / 100000.0f,
+             static_cast<float>(colorPrimaries.greenX) / 100000.0f,
+             static_cast<float>(colorPrimaries.greenY) / 100000.0f,
+             static_cast<float>(colorPrimaries.blueX) / 100000.0f,
+             static_cast<float>(colorPrimaries.blueY) / 100000.0f);
+  }
+  if(loadResult.gamma.has_value()) {
+    // TODO(ledyba-z): Support.
+    log.warn("gAMA chunk in PNG is not supported yet. gamma = {}",
+             static_cast<float>(loadResult.gamma.value()) / 100000.0f);
+  }
+  if(loadResult.sRGB.has_value()) {
+    auto cicp = avif::ColourInformationBox::CICP(); // default value indicates sRGB.
+    cicp.fullRangeFlag = config.fullColorRange;
+    mergedColorProfile.cicp = cicp;
+  }
+  if(configProfile.has_value()) {
+    if(configProfile.value().cicp.has_value()) {
+      log.info("CICP information will be overridden by flags");
+      mergedColorProfile.cicp = configProfile.value().cicp;
+    }
+    if(configProfile.value().iccProfile.has_value()) {
+      log.info("ICC profile will be overridden by flags");
+      mergedColorProfile.iccProfile = configProfile.value().iccProfile;
+    }
+  }
+  return mergedColorProfile;
+}
+
 }
 
 namespace internal{
@@ -71,6 +107,7 @@ int internal::main(int argc, char** argv) {
   avif::util::FileLogger log(stdout, stderr, avif::util::Logger::Level::DEBUG);
   log.info("cavif");
   log.info("libaom ver: {}", aom_codec_version_str());
+  log.info("libpng ver:{}", img::png::Reader::version());
 
   aom_codec_iface_t* av1codec = aom_codec_av1_cx();
   if(!av1codec) {
@@ -83,33 +120,36 @@ int internal::main(int argc, char** argv) {
   config.codec.rc_end_usage = AOM_Q;
   config.codec.rc_target_bitrate = 0;
   config.codec.g_threads = std::thread::hardware_concurrency();
-  {
-    int const parseResult = config.parse();
-    if(parseResult != 0) {
-      return parseResult;
-    }
-    if(config.showHelp) {
-      config.usage();
-      return 0;
-    }
+  if(!config.parse()) {
+    log.error("Failed to parse arguments!");
+    config.usage();
+    return -1;
+  }
+  if(config.showHelp) {
+    config.usage();
+    return 0;
+  }
+  try {
+    config.validate();
+  } catch (std::exception const& e) {
+    log.error("Arguments validation failed:");
+    log.error("{}", e.what());
+    return -2;
   }
 
   // decoding input image
-  if(!endsWith(config.input, ".png")) {
-    log.fatal("please give png file for input");
-  }
-  std::variant<avif::img::Image<8>, avif::img::Image<16>> loadedImage = PNGReader::create(config.input).read();
-
+  img::png::Reader::Result loadResult = img::png::Reader::create(log, config.input).read();
   aom_image_t img;
-  avif::img::ColorProfile colorProfile;
-  if(std::holds_alternative<avif::img::Image<8>>(loadedImage)) {
-    auto src = std::get<avif::img::Image<8>>(loadedImage);
+
+  auto colorProfile = mergeColorProfile(log, config, loadResult);
+  if(std::holds_alternative<avif::img::Image<8>>(loadResult.image)) {
+    auto src = std::get<avif::img::Image<8>>(loadResult.image);
+    src.colorProfile() = colorProfile;
     convert(config, src, img);
-    colorProfile = src.colorProfile();
   } else {
-    auto src = std::get<avif::img::Image<16>>(loadedImage);
+    auto src = std::get<avif::img::Image<16>>(loadResult.image);
+    src.colorProfile() = colorProfile;
     convert(config, src, img);
-    colorProfile = src.colorProfile();
   }
 
   uint32_t const width = aom_img_plane_width(&img, AOM_PLANE_Y);
@@ -143,7 +183,7 @@ int internal::main(int argc, char** argv) {
     log.fatal("Failed to initialize encoder: {}", aom_codec_error_detail(&codec));
   }
 
-  config.modify(&codec);
+  config.modify(&codec, colorProfile);
 
   std::vector<std::vector<uint8_t>> packets;
   {

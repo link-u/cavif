@@ -9,10 +9,13 @@
 #include <aom/aom_encoder.h>
 #include <aom/aom_codec.h>
 #include <aom/aomcx.h>
+#include <avif/img/color/Constants.hpp>
+#include <avif/img/Image.hpp>
 #include <avif/ImageRotationBox.hpp>
 #include <avif/ImageMirrorBox.hpp>
 #include <av1/encoder/encoder.h>
 #include "../external/clipp/include/clipp.h"
+#include "math/Fraction.hpp"
 
 class Config final {
 public:
@@ -33,14 +36,14 @@ public:
   // meta
   std::optional<avif::ImageRotationBox::Rotation> rotation{};
   std::optional<avif::ImageMirrorBox::Axis> mirrorAxis{};
-  std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropSize{};
-  std::optional<std::pair<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>> cropOffset{};
+  std::optional<std::pair<Fraction, Fraction>> cropSize{};
+  std::optional<std::pair<Fraction, Fraction>> cropOffset{};
   // color
-  uint8_t colorPrimaries = 1;
-  uint8_t transferCharacteristics = 13;
-  uint8_t matrixCoefficients = 5;
+  std::optional<avif::img::color::ColorPrimaries> colorPrimaries = {};
+  std::optional<avif::img::color::TransferCharacteristics> transferCharacteristics = {};
+  std::optional<avif::img::color::MatrixCoefficients> matrixCoefficients = {};
   // encoding
-  aom_codec_enc_cfg codec{};
+  aom_codec_enc_cfg codec = {};
   aom_scaling_mode_t scaleMode = {
       .h_scaling_mode = AOME_NORMAL,
       .v_scaling_mode = AOME_NORMAL,
@@ -50,8 +53,10 @@ public:
   aom_img_fmt_t pixFmt = AOM_IMG_FMT_I420;
   int crf = 10;
   int deltaQMode = 0;
+  int deltaQStrength = 100;
   bool enableChromaDeltaQ = false;
-  bool enableDeltaLoopfilter = false;
+  bool enableLoopFilter = true;
+  bool enableDeltaLoopFilter = false;
   bool useQM = false;
   int qmMin = DEFAULT_QM_FIRST;
   int qmMax = DEFAULT_QM_LAST;
@@ -112,6 +117,10 @@ private:
   clipp::group createCommandLineFlags();
 public:
   void usage();
-  int parse();
-  void modify(aom_codec_ctx_t* aom);
+  bool parse();
+  void validate() const;
+  void modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorProfile);
+
+public:
+  [[nodiscard]] std::optional<avif::img::ColorProfile> calcColorProfile() const;
 };

@@ -100,52 +100,61 @@ cavif -i <input.png> -o <output.avif> --encode-target image --attach-alpha <outp
 ## SYNOPSIS
 
 ```
-% cavif
-[2020/03/18 16:04:09 INFO ] cavif
-[2020/03/18 16:04:09 INFO ] libaom ver: 1.0.0-errata1-avif-414-g0cfdca944
+[2022/03/26 11:57:21 INFO ] cavif
+[2022/03/26 11:57:21 INFO ] libaom ver: 3.3.0
+[2022/03/26 11:57:21 INFO ] libpng ver:1.6.38.git
 SYNOPSIS
         cavif -i <input.png> -o <output.avif> [--attach-alpha <input-alpha.avif>] [--attach-depth
               <input-depth.avif>] [--encode-target [image|alpha]] [--show-result] [--rotation
-              [0|90|180|270]] [--mirror [vertical|horizontal]] [--crop-size
-              <widthN/widthD,heightN/heightD>] [--crop-offset
-              <horizOffN/horizOffD,vertOffN/vertOffD>] [--full-still-picture-header]
+              [0|90|180|270]] [--mirror [vertical|horizontal]] [--crop-size <width,height>]
+              [--crop-offset <horizontalOffset,verticalOffset>] [--full-still-picture-header]
               [--color-primaries (<Value defined in
-              H.273>|bt709|sRGB|sYCC|unspecified|bt470m|bt470bg|bt601|ntsc|smpte240m|generic-film|bt2020|bt2100|xyz|smpte428|smpte431|smpte432|ebu3213)]
+              H.273>|bt709|sRGB|sYCC|unspecified|bt470m|bt470bg|bt601|ntsc|smpte240m|generic-film|bt2020|bt2100|smpte428|xyz|smpte431|smpte432|22)]
               [--transfer-characteristics (<Value defined in
               H.273>|bt709|unspecified|bt470m|bt470bg|bt601|ntsc|smpte240m|linear|log100|log100sqrt10|iec61966|bt1361|sRGB|sYCC|bt2020|bt2020-10bit|bt2020-12bit|smpte2084|bt2100pq|smpte428|bt2100hlg|arib-b67)]
               [--matrix-coefficients (<Value defined in
-              H.273>|bt709|sRGB|sYCC|unspecified|us-fcc|bt470bg|bt601|ntsc|smpte240m|bt2020)]
-              [--horizontal-scale-mode [1/1|4/5|3/5|1/2]] [--vertical-scale-mode [1/1|4/5|3/5|1/2]]
-              [--resize-mode [none|fixed|random]] [--resize-denominator <[8-16]>] [--superres-mode
-              [none|fixed|random|qthresh|auto]] [--superres-denominator <[8-16]>]
-              [--superres-qthresh <[0-63]>] [--render-width <<render-width>>] [--render-height
-              <<render-height>>] [--profile <0=base, 1=high, 2=professional>] [--pix-fmt
-              [yuv420|yuv422|yuv444]] [--bit-depth [8|10|12]] [--disable-full-color-range]
-              [--enable-full-color-range] [--encoder-usage [good|realtime]] [--threads <Num of
-              threads to use>] [--row-mt] [--cpu-used <0-8>] [--rate-control [q|cq]] [--bit-rate
-              <kilo-bits per second>] [--crf <0-63>] [--qmin <0-63>] [--qmax <0-63>]
-              [--adaptive-quantization [none|variance|complexity|cyclic]]
-              [--enable-adaptive-quantization-b] [--disable-adaptive-quantization-b] [--delta-q
-              [none|objective|perceptual]] [--enable-chroma-delta-q] [--disable-chroma-delta-q]
-              [--enable-delta-lf] [--disable-delta-lf] [--use-qm] [--qm-min <0-15 (default: 5)>]
-              [--qm-max <0-15 (default: 9)>] [--qm-min-y <0-15 (default: 10)>] [--qm-min-u <0-15
-              (default: 11)>] [--qm-min-v <0-15 (default: 12)>] [--tune
-              [ssim|psnr|vmaf-with-preprocessing|vmaf-without-preprocessing|vmaf-max-gain]]
-              [--vmaf-model-path <<path-to-vmaf-model-file>>] [--lossless] [--monochrome]
-              [--sharpness <0-7>] [--disable-cdef] [--enable-cdef] [--disable-loop-restoration]
-              [--enable-loop-restoration] [--superblock-size [dynamic|128|64]] [--tile-rows <0-6>]
-              [--tile-columns <0-6>] [--disable-keyframe-temporal-filtering]
-              [--enable-keyframe-temporal-filtering] [--enable-rect-partitions]
-              [--disable-rect-partitions] [--enable-ab-partitions] [--disable-ab-partitions]
-              [--disable-1to4-partitions] [--enable-1to4-partitions] [--enable-intra-edge-filter]
-              [--disable-intra-edge-filter] [--min-partition-size [4|8|16|32|64|128]]
-              [--max-partition-size [4|8|16|32|64|128]] [--enable-tx64] [--disable-tx64]
-              [--enable-flip-idtx] [--use-dct-only] [--use-default-tx-only] [--use-reduced-tx-set]
+              H.273>|bt709|sRGB|unspecified|us-fcc|bt470bg|sYCC|bt601|ntsc|smpte240m|bt2020)]
+              [--horizontal-scale-mode [1/1|1/2|3/5|4/5|1/4|3/4|1/8]] [--vertical-scale-mode
+              [1/1|1/2|3/5|4/5|1/4|3/4|1/8]] [--resize-mode [none|fixed|random]]
+              [--resize-denominator_ <[8-16], default=8>] [--superres-mode
+              [none|fixed|random|qthresh|auto]] [--superres-denominator_ <[8-16], default=8>]
+              [--superres-qthresh <[0-63], default=63 (Do not apply superres filter)>]
+              [--render-width <<render-width>>] [--render-height <<render-height>>] [--profile
+              <0=base(default), 1=high, 2=professional>] [--pix-fmt [yuv420|yuv422|yuv444]]
+              [--bit-depth [8|10|12]] [--disable-full-color-range] [--enable-full-color-range]
+              [--encoder-usage [good|realtime]] [--threads <Num of threads to use (default=num of
+              logical cores)>] [--enable-row-mt] [--disable-row-mt] [--cpu-used <0-9, default=1.
+              Higher means slower encoding and better quality>] [--rate-control [cbr|q|cq]]
+              [--bit-rate <kilo-bits per frame(default=0)>] [--crf <0-63(default=10)>] [--qmin
+              <0-63(default=0)>] [--qmax <0-63(default=63)>] [--adaptive-quantization
+              [none|variance|complexity|cyclic]] [--enable-adaptive-quantization-b]
+              [--disable-adaptive-quantization-b] [--delta-q [none|objective|perceptual]]
+              [--delta-q-strength] [--enable-chroma-delta-q] [--disable-chroma-delta-q]
+              [--enable-loop-filter] [--disable-loop-filter] [--enable-delta-lf]
+              [--disable-delta-lf] [--use-qm] [--qm-min <0-15 (default: 5)>] [--qm-max <0-15
+              (default: 9)>] [--qm-min-y <0-15 (default: 10)>] [--qm-min-u <0-15 (default: 11)>]
+              [--qm-min-v <0-15 (default: 12)>] [--tune
+              [ssim|psnr|vmaf-with-preprocessing|vmaf-without-preprocessing|vmaf-max-gain|vmaf-neg-max-gain]]
+              [--content-type [default|screen|film]] [--vmaf-model-path <<path-to-vmaf-model-file>>]
+              [--lossless] [--monochrome] [--sharpness <0-7>] [--disable-cdef] [--enable-cdef]
+              [--disable-loop-restoration] [--enable-loop-restoration] [--superblock-size
+              [dynamic|128|64]] [--tile-rows <0-6>] [--tile-columns <0-6>]
+              [--keyframe-temporal-filter [disable|without-overlay|with-overlay]]
+              [--enable-rect-partitions] [--disable-rect-partitions] [--enable-ab-partitions]
+              [--disable-ab-partitions] [--disable-1to4-partitions] [--enable-1to4-partitions]
+              [--enable-intra-edge-filter] [--disable-intra-edge-filter] [--min-partition-size
+              [4|8|16|32|64|128]] [--max-partition-size [4|8|16|32|64|128]] [--enable-tx64]
+              [--disable-tx64] [--enable-flip-idtx] [--disable-flip-idtx] [--enable-rect-tx]
+              [--disable-rect-tx] [--use-dct-only] [--use-default-tx-only] [--use-reduced-tx-set]
               [--enable-filter-intra] [--disable-filter-intra] [--enable-smooth-intra]
               [--disable-smooth-intra] [--enable-paeth-intra] [--disable-paeth-intra]
               [--enable-chroma-from-luma] [--disable-chroma-from-luma] [--enable-superres]
               [--disable-superres] [--enable-palette] [--disable-palette] [--enable-intrabc]
               [--disable-intrabc] [--enable-angle-delta] [--disable-angle-delta]
+              [--enable-diagonal-intra] [--disable-diagonal-intra] [--enable-directional-intra]
+              [--disable-directional-intra] [--enable-tx-size-search] [--disable-tx-size-search]
+
+        cavif -h
 
 OPTIONS
         -i, --input Filename to input
@@ -153,16 +162,16 @@ OPTIONS
                     Filename to output
 
         --attach-alpha
-                    Attach alpha plane.
+                    Attach alpha plane
 
         --attach-depth
-                    Attach depth plane.
+                    Attach depth plane
 
         --encode-target
-                    Encode alpha image.
+                    Encode target
 
-        image       Encode image planes
-        alpha       Encode alpha planes
+        image       Encode image planes (default)
+        alpha       Encode an alpha plane
         --show-result
                     Show encoding result
 
@@ -189,17 +198,17 @@ OPTIONS
         bt470bg     Rec. ITU-R BT.470-6 System B, G (historical)
         bt601       Rec. ITU-R BT.601-7 625
         ntsc        Rec. ITU-R BT.1700-0 NTSC
-        smpte240m   SMPTE 240M (1999) (historical)
+        smpte240m   SMPTE ST 240 (1999)
         generic-film
                     Generic film (colour filters using Illuminant C)
 
         bt2020      Rec. ITU-R BT.2020-2
         bt2100      Rec. ITU-R BT.2100-0
-        xyz         (CIE 1931 XYZ as in ISO 11664-1)
         smpte428    SMPTE ST 428-1
+        xyz         (CIE 1931 XYZ as in ISO 11664-1)
         smpte431    SMPTE RP 431-2 (2011)
         smpte432    SMPTE EG 432-1 (2010)
-        ebu3213     EBU Tech. 3213-E (1975)
+        22          No corresponding industry specification identified
         --transfer-characteristics
                     Set transfer characteristics information value.
 
@@ -240,12 +249,12 @@ OPTIONS
         <Value defined in H.273>
                     See https://www.itu.int/rec/T-REC-H.273-201612-I/en
 
-        bt709       Rec. ITU-R BT.709-6
-        sRGB        IEC 61966-2-1 sRGB or sYCC
-        sYCC        IEC 61966-2-1 sRGB or sYCC
+        bt709       Rec. ITU-R BT.709-6 (default)
+        sRGB        IEC 61966-2-1 sRGB or sYCC (default)
         unspecified Image characteristics are unknown or are determined by the application
         us-fcc      United States Federal Communications Commission (2003)
         bt470bg     Rec. ITU-R BT.470-6 System B, G (historical)
+        sYCC        IEC 61966-2-1 sRGB or sYCC
         bt601       Rec. ITU-R BT.601-7 625
         ntsc        Rec. ITU-R BT.1700-0 NTSC
         smpte240m   SMPTE 240M
@@ -253,50 +262,86 @@ OPTIONS
         --horizontal-scale-mode
                     Set horizontal scale mode
 
+        1/1         Do not scale (default)
+        1/2         Scale to 1/2
+        3/5         Scale to 3/5
+        4/5         Scale to 4/5
+        1/4         Scale to 1/4
+        3/4         Scale to 3/4
+        1/8         Scale to 1/8
         --vertical-scale-mode
                     Set vertical scale mode
 
+        1/1         Do not scale (default)
+        1/2         Scale to 1/2
+        3/5         Scale to 3/5
+        4/5         Scale to 4/5
+        1/4         Scale to 1/4
+        3/4         Scale to 3/4
+        1/8         Scale to 1/8
         --resize-mode
                     Set resize mode
 
-        --resize-denominator
-                    Set resize denominator.
+        none        Do not resize
+        fixed       Resize image using a denominator_ given by `--resize-denominator_` arg
+        random      Resize image randomly!
+        --resize-denominator_
+                    Set resize denominator_.
 
         --superres-mode
-                    Set resize mode
+                    Set superres mode
 
-        --superres-denominator
-                    Set resize denominator.
+        none        Do not use superres mode
+        fixed       Apply superres filter to image using a denominator_ given by
+                    `--superres-denominator_` arg
+
+        random      Apply superres filter to image with a random denominator_!
+        qthresh     Apply or do not apply superres filter to image based on the q index
+        auto        Apply or do not apply superres filter to image automatically
+        --superres-denominator_
+                    Set superres resize denominator_.
 
         --superres-qthresh
                     Set q level threshold for superres.
 
         --render-width
-                    Set render width.
+                    Set render width explicitly
 
         --render-height
-                    Set render height.
+                    Set render height explicitly
 
         --profile   AV1 Profile(0=base, 1=high, 2=professional)
-        --pix-fmt   Pixel format of output image.
-        --bit-depth Bit depth of output image.
+        --pix-fmt   Pixel format of output image
+        yuv420      YUV420 format (default)
+        yuv422      YUV422 format
+        yuv444      YUV444 format (recommended for lossless images)
+        --bit-depth Bit depth of output image
+        8           8bits per color, 24bits per pixel (default)
+        10          10bits per color, 30bits per pixel
+        12          12bits per color, 36bits per pixel
         --disable-full-color-range
-                    Use limited YUV color range.
+                    Use limited YUV color range (default)
 
         --enable-full-color-range
-                    Use full YUV color range.
+                    Use full YUV color range
 
         --encoder-usage
                     Encoder usage
 
-        good        Good Quality mode
-        realtime    Real time encoding mode.
-        --row-mt    Enable row based multi-threading of encoder
+        good        Good Quality mode (default)
+        realtime    Real time encoding mode
+        --enable-row-mt
+                    Enable row based multi-threading of encoder
+
+        --disable-row-mt
+                    Disable row based multi-threading of encoder (default)
+
         --cpu-used  Quality/Speed ratio modifier
         --rate-control
                     Rate control method
 
-        q           Constant Quality
+        cbr         Constant Bit Rate mode. Please also set `--bit-rate` arg.
+        q           Constant Quality (default)
         cq          Constrained Quality
         --bit-rate  Bit rate of output image.
         --crf       CQ Level in CQ rate control mode
@@ -305,7 +350,7 @@ OPTIONS
         --adaptive-quantization
                     Set adaptive-quantization mode
 
-        none        none
+        none        none(default)
         variance    variance based
         complexity  complexity based
         cyclic      Cyclic refresh
@@ -313,23 +358,32 @@ OPTIONS
                     use adaptive quantize_b
 
         --disable-adaptive-quantization-b
-                    use traditional adaptive quantization
+                    use traditional adaptive quantization (default)
 
         --delta-q   a mode of delta q mode feature, that allows modulating q per superblock
         none        disable deltaQ
         objective   Use modulation to maximize objective quality
         perceptual  Use modulation to maximize perceptual quality
+        --delta-q-strength
+                    strength of deltaQ [0..1000] (default = 100)
+
         --enable-chroma-delta-q
                     enable delta quantization in chroma
 
         --disable-chroma-delta-q
                     disable delta quantization in chroma
 
+        --enable-loop-filter
+                    enable loop filter (default)
+
+        --disable-loop-filter
+                    disable loop filter
+
         --enable-delta-lf
                     enable delta loop filter
 
         --disable-delta-lf
-                    disable delta loop filter
+                    disable delta loop filter (default)
 
         --use-qm    Use QMatrix
         --qm-min    Min quant matrix flatness
@@ -338,8 +392,8 @@ OPTIONS
         --qm-min-u  Min quant matrix flatness for U
         --qm-min-v  Min quant matrix flatness for V
         --tune      Quality metric to tune
-        ssim        structural similarity
-        psnr        peak signal-to-noise ratio
+        ssim        SSIM(structural similarity)
+        psnr        PSNR(peak signal-to-noise ratio)
         vmaf-with-preprocessing
                     vmaf-with-preprocessing
 
@@ -349,22 +403,31 @@ OPTIONS
         vmaf-max-gain
                     vmaf-max-gain
 
+        vmaf-neg-max-gain
+                    vmaf-neg-max-gain
+
+        --content-type
+                    Content type
+
+        default     Regular video content (default)
+        screen      Screen capture content
+        film        Film content
         --vmaf-model-path
-                    VMAF model file path to tuning image quality.
+                    VMAF model file path to tuning image quality
 
         --lossless  Enable lossless encoding
         --monochrome
-                    Encode to monochrome image.
+                    Encode to monochrome image
 
         --sharpness Sharpening output
         --disable-cdef
-                    Disable Constrained Directional Enhancement Filter
+                    Disable Constrained Directional Enhancement Filter (default)
 
         --enable-cdef
                     Enable Constrained Directional Enhancement Filter
 
         --disable-loop-restoration
-                    Disable Loop Restoration Filter
+                    Disable Loop Restoration Filter (default)
 
         --enable-loop-restoration
                     Enable Loop Restoration Filter
@@ -379,32 +442,29 @@ OPTIONS
         --tile-columns
                     Number of tile columns
 
-        --disable-keyframe-temporal-filtering
-                    Disable temporal filtering on key frame
-
-        --enable-keyframe-temporal-filtering
+        --keyframe-temporal-filter
                     Enable temporal filtering on key frame
 
         --enable-rect-partitions
-                    enable rectangular partitions
+                    enable rectangular partitions (default)
 
         --disable-rect-partitions
                     disable rectangular partitions
 
         --enable-ab-partitions
-                    enable ab partitions
+                    enable ab partitions (default)
 
         --disable-ab-partitions
                     disable ab partitions
 
         --disable-1to4-partitions
-                    enable 1to4 partitions
+                    enable 1to4 partitions (default)
 
         --enable-1to4-partitions
                     disable 1to4 partitions
 
         --enable-intra-edge-filter
-                    enable intra edge filter
+                    enable intra edge filter (default)
 
         --disable-intra-edge-filter
                     disable intra edge filter
@@ -416,16 +476,25 @@ OPTIONS
                     max partition size
 
         --enable-tx64
-                    enable 64-length transforms
+                    enable 64-length transforms (default)
 
         --disable-tx64
                     disable 64-length transforms
 
         --enable-flip-idtx
-                    enable flip and identity transforms.
+                    enable flip and identity transforms (default)
+
+        --disable-flip-idtx
+                    disable flip and identity transforms
+
+        --enable-rect-tx
+                    enable rectangular transforms (default)
+
+        --disable-rect-tx
+                    disable rectangular transforms
 
         --use-dct-only
-                    use dct only.
+                    Use DCT tx onlyq
 
         --use-default-tx-only
                     use default tx type only
@@ -434,31 +503,31 @@ OPTIONS
                     use reduced tx set, transforms w/o flip (4) + Identity (1).
 
         --enable-filter-intra
-                    enable 
+                    enable (default)
 
         --disable-filter-intra
                     disable 
 
         --enable-smooth-intra
-                    enable 
+                    enable (default)
 
         --disable-smooth-intra
                     disable 
 
         --enable-paeth-intra
-                    enable 
+                    enable (default)
 
         --disable-paeth-intra
                     disable 
 
         --enable-chroma-from-luma
-                    enable 
+                    enable (default)
 
         --disable-chroma-from-luma
                     disable 
 
         --enable-superres
-                    enable frame superresolution
+                    enable frame superresolution (default)
 
         --disable-superres
                     disable frame superresolution
@@ -467,19 +536,41 @@ OPTIONS
                     enable palette mode
 
         --disable-palette
-                    disable palette mode
+                    disable palette mode (default)
 
         --enable-intrabc
-                    enable intra block copy mode
+                    enable intra block copy mode (default)
 
         --disable-intrabc
                     disable intra block copy mode
 
         --enable-angle-delta
-                    enable intra angle delta
+                    enable intra angle delta (default)
 
         --disable-angle-delta
                     disable intra angle delta
+
+        --enable-diagonal-intra
+                    enable usage of D45 to D203 intra modes (default)
+
+        --disable-diagonal-intra
+                    disable usage of D45 to D203 intra modes
+
+        --enable-directional-intra
+                    turn on directional intra mode (default)
+
+        --disable-directional-intra
+                    turn off directional intra mode
+
+        --enable-tx-size-search
+                    turn on transform size search (default). Transforms always have the largest
+                    possible size
+
+        --disable-tx-size-search
+                    turn off transform size search. Search for the best transform size for each
+                    block
+
+        -h, --help  Show help and exit.
 ```
 
 ## TODO

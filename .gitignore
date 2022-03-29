@@ -2,6 +2,7 @@
 *.bmp
 *.png
 *.avif
+*.csv
 /perf.data
 /perf.data.old
 /build/
