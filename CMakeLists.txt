@@ -135,11 +135,13 @@ add_subdirectory(external/libavif-container/external/gtest EXCLUDE_FROM_ALL)
 
 add_executable(cavif-tests
     src/math/Fraction.hpp
-    test/MathTest.cpp
+    test/NopTest.cpp
 )
 target_link_libraries(cavif-tests PRIVATE gtest)
 target_link_libraries(cavif-tests PRIVATE gtest_main)
 target_include_directories(cavif-tests PRIVATE external/gtest/googletest/include)
+
+target_compile_features(cavif-tests PRIVATE cxx_std_17)
 set_property(TARGET cavif-tests PROPERTY CXX_STANDARD 17)
 set_property(TARGET cavif-tests PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET cavif-tests PROPERTY CXX_FLAGS_DEBUG "-g3 -O0 -fno-omit-frame-pointer")
