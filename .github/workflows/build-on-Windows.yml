@@ -16,30 +16,37 @@ jobs:
       with:
         submodules: 'recursive'
         fetch-depth: 0
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
     - name: Install dependencies
-      shell: cmd
+      shell: msys2 {0}
       run: |
-        set MSYSTEM=MINGW64
-        set HOME=${{ github.workspace }}
-        C:\msys64\usr\bin\bash -lc "pacman -S mingw-w64-x86_64-cmake mingw-w64-x86_64-nasm mingw-w64-x86_64-yasm mingw-w64-x86_64-meson mingw-w64-x86_64-ninja --noconfirm"
+        export HOME=${{ github.workspace }}
+        pacman -S \
+            mingw-w64-x86_64-cmake \
+            mingw-w64-x86_64-nasm \
+            mingw-w64-x86_64-yasm \
+            mingw-w64-x86_64-meson \
+            mingw-w64-x86_64-ninja \
+            --noconfirm
     - name: build dependencies
-      shell: cmd
+      shell: msys2 {0}
       run: |
-        set MSYSTEM=MINGW64
-        set HOME=${{ github.workspace }}
-        C:\msys64\usr\bin\bash -lc "bash scripts/reset-submodules.sh && bash scripts/apply-patches.sh && bash scripts/build-deps.sh"
+        export HOME=${{ github.workspace }}
+        bash scripts/reset-submodules.sh
+        bash scripts/apply-patches.sh
+        bash scripts/build-deps.sh
     - name: configure
-      shell: cmd
+      shell: msys2 {0}
       run: |
-        set MSYSTEM=MINGW64
-        set HOME=${{ github.workspace }}
-        C:\msys64\usr\bin\bash -lc "cmake -S . -B build -G Ninja '-DCMAKE_CXX_FLAGS=-static'"
+        export HOME=${{ github.workspace }}
+        cmake -S . -B build -G Ninja '-DCMAKE_CXX_FLAGS=-static'
     - name: make
-      shell: cmd
+      shell: msys2 {0}
       run: |
-        set MSYSTEM=MINGW64
-        set HOME=${{ github.workspace }}
-        C:\msys64\usr\bin\bash -lc "cd build && ninja -v && strip cavif.exe"
+        export HOME=${{ github.workspace }}
+        cd build && ninja -v && strip cavif.exe
     - name: Upload result
       uses: actions/upload-artifact@v2
       with:
