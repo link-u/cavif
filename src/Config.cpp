@@ -21,7 +21,7 @@ bool endsWith(std::string const& target, std::string const& suffix) {
 }
 
 std::string basename(std::string const& path) {
-  auto pos = path.find_last_of('/');
+  auto const pos = path.find_last_of('/');
   if(pos == std::string::npos) {
     return path;
   }
@@ -39,14 +39,14 @@ std::string trim(std::string str) {
 }
 
 avif::math::Fraction parseFraction(std::string const& str) {
-  auto pos = str.find('/');
+  auto const pos = str.find('/');
   if(pos == std::string::npos) {
     return avif::math::Fraction(std::stoi(trim(str)), 1);
   } else {
-    std::string first = trim(str.substr(0, pos));
-    std::string second = trim(str.substr(pos + 1));
-    int n = std::stoi(first);
-    int d = std::stoi(second);
+    std::string const first = trim(str.substr(0, pos));
+    std::string const second = trim(str.substr(pos + 1));
+    int const n = std::stoi(first);
+    int const d = std::stoi(second);
     if(d == 0) {
       throw std::invalid_argument("denominator_ can't be 0.");
     }
@@ -66,8 +66,7 @@ std::pair<avif::math::Fraction, avif::math::Fraction> parseFractionPair(std::str
 
 template <typename T>
 std::optional<T> parseEnumFromInt(std::string const& str) {
-  auto i = std::stoi(str);
-  return std::make_optional(static_cast<T>(i));
+  return std::make_optional(static_cast<T>(std::stoi(str)));
 }
 
 }
