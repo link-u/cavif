@@ -385,7 +385,7 @@ numbers.
 std::optional<avif::img::ColorProfile> Config::calcColorProfile() const {
   if(colorPrimaries.has_value() && transferCharacteristics.has_value() && matrixCoefficients.has_value()) {
     avif::img::ColorProfile profile;
-    profile.cicp = {};
+    profile.cicp = std::make_optional<avif::ColourInformationBox::CICP>();
     profile.cicp->colourPrimaries = static_cast<uint16_t>(colorPrimaries.value());
     profile.cicp->transferCharacteristics = static_cast<uint16_t>(transferCharacteristics.value());
     profile.cicp->colourPrimaries = static_cast<uint16_t>(colorPrimaries.value());
