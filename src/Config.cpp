@@ -365,8 +365,16 @@ numbers.
     if (!(cropWidth.isInteger() && cropHeight.isInteger())) {
       throw std::invalid_argument("crop size must be integers.");
     }
-    auto const left = Fraction(static_cast<int32_t>(width)-1,2).minus(offX).minus(cropWidth.div(2));
-    auto const top = Fraction(static_cast<int32_t>(height)-1,2).minus(offY).minus(cropHeight.div(2));
+    // ISO/IEC 14496-12:2015(E)
+    // p.157
+    auto const left =
+        Fraction(static_cast<int32_t>(width - 1),2).reduce()
+        .add(offX)
+        .minus(cropWidth.minus(Fraction(1,1)).div(2));
+    auto const top =
+        Fraction(static_cast<int32_t>(height - 1),2).reduce()
+        .add(offY)
+        .minus(cropHeight.minus(Fraction(1,1)).div(2));
     if(!left.isInteger()) {
       throw std::invalid_argument("The leftmost pixel must be an integer.");
     }
