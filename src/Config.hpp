@@ -119,6 +119,7 @@ public:
   void usage();
   bool parse();
   void validateBeforeLoad() const;
+  void validateAfterLoad(uint32_t width, uint32_t height) const;
   void modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorProfile);
 
 public:

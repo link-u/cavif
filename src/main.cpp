@@ -155,6 +155,14 @@ int internal::main(int argc, char** argv) {
   uint32_t const width = aom_img_plane_width(&img, AOM_PLANE_Y);
   uint32_t const height = aom_img_plane_height(&img, AOM_PLANE_Y);
 
+  try {
+    config.validateAfterLoad(width, height);
+  } catch (std::exception const& e) {
+    log.error("Arguments validation failed:");
+    log.error("{}", e.what());
+    return -2;
+  }
+
   // initialize encoder
   config.codec.g_w = width;
   config.codec.g_h = height;

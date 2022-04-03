@@ -332,7 +332,16 @@ void Config::validateBeforeLoad() const {
   ) {
     throw std::invalid_argument("All of (or none of) --color-primaries, --transfer-characteristics and --matrix-coefficients should be set.");
   }
+  if(
+      (cropSize.has_value() || cropOffset.has_value()) &&
+      !(cropSize.has_value() && cropOffset.has_value())
+  ) {
+    throw std::invalid_argument("both crop-size and crop-offset must be set.");
+  }
 
+}
+
+void Config::validateAfterLoad(const uint32_t width, const uint32_t height) const {
   /*
 ISO/IEC 23000-22:2019/Amd. 2:2021(E)
 
@@ -348,21 +357,16 @@ Section 12.1.4.1 shall be integers;
 shall be even numbers;
 — If chroma is subsampled vertically (i.e., 4:2:0), the topmost line of the clean aperture shall be even
 numbers.
-   */
-  if(
-      (cropSize.has_value() || cropOffset.has_value()) &&
-      !(cropSize.has_value() && cropOffset.has_value())
-  ) {
-    throw std::invalid_argument("both crop-size and crop-offset must be set.");
-  }
+ */
   if(cropSize.has_value() && cropOffset.has_value()) {
-    auto const [width, height] = this->cropSize.value();
-    auto const [offX, offY] = this->cropSize.value();
-    if (!(width.isInteger()  && height.isInteger())) {
+    using avif::math::Fraction;
+    auto const [cropWidth, cropHeight] = this->cropSize.value();
+    auto const [offX, offY] = this->cropOffset.value();
+    if (!(cropWidth.isInteger() && cropHeight.isInteger())) {
       throw std::invalid_argument("crop size must be integers.");
     }
-    auto const left = offX.minus(width.div(2));
-    auto const top = offY.minus(height.div(2));
+    auto const left = Fraction(static_cast<int32_t>(width)-1,2).minus(offX).minus(cropWidth.div(2));
+    auto const top = Fraction(static_cast<int32_t>(height)-1,2).minus(offY).minus(cropHeight.div(2));
     if(!left.isInteger()) {
       throw std::invalid_argument("The leftmost pixel must be an integer.");
     }
