@@ -118,7 +118,7 @@ private:
 public:
   void usage();
   bool parse();
-  void validate() const;
+  void validateBeforeLoad() const;
   void modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorProfile);
 
 public:

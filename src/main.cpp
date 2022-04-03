@@ -130,7 +130,7 @@ int internal::main(int argc, char** argv) {
     return 0;
   }
   try {
-    config.validate();
+    config.validateBeforeLoad();
   } catch (std::exception const& e) {
     log.error("Arguments validation failed:");
     log.error("{}", e.what());

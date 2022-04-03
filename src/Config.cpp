@@ -316,7 +316,7 @@ clipp::group Config::createCommandLineFlags() {
   return (io, meta, av1, color, scales, pixelAndColor, multiThreading, rateControl, preProcess, postProcess, codingParameters) | support;
 }
 
-void Config::validate() const {
+void Config::validateBeforeLoad() const {
   if(input == output) {
     throw std::invalid_argument("Input and output can't be the same file!");
   }
