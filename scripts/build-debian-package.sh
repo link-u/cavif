@@ -11,8 +11,9 @@ cd "${ROOT_DIR}" || exit 1
 set -eux
 set -o pipefail
 
+chown "${GID}:${UID}" . -R
+
 # Generate changelog
-git config --global --add safe.directory "$(pwd)"
 git_describe="$(git describe --tags)"
 VERSION=${git_describe:1}.$(TZ=JST-9 date +%Y%m%d)+$(lsb_release -cs)
 DATE=$(LC_ALL=C TZ=JST-9 date '+%a, %d %b %Y %H:%M:%S %z')
