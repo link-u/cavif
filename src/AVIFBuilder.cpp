@@ -70,7 +70,7 @@ AVIFBuilder::Frame AVIFBuilder::Frame::load(avif::util::Logger& log, std::string
   }
   avif::FileBox const& fileBox = result->fileBox();
   std::optional<uint32_t> primaryItemID{};
-  if(!fileBox.metaBox.primaryItemBox.has_value()) {
+  if(fileBox.metaBox.primaryItemBox.has_value()) {
     primaryItemID = fileBox.metaBox.primaryItemBox.value().itemID;
   }
   namespace query = avif::util::query;
