@@ -297,9 +297,9 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }
-    if(config_.cropSize.has_value() || config_.cropOffset.has_value()) {
+    if(config_.cropSize.has_value() && config_.cropOffset.has_value()) {
       CleanApertureBox clap{};
-      if(config_.cropSize.has_value()) {
+      {
         auto const w = config_.cropSize.value().first.reduce();
         auto const h = config_.cropSize.value().second.reduce();
         clap.cleanApertureWidthN = w.numerator();
@@ -307,7 +307,7 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
         clap.cleanApertureHeightN = h.numerator();
         clap.cleanApertureHeightD = h.denominator();
       }
-      if(config_.cropOffset.has_value()) {
+      {
         auto const h = config_.cropOffset.value().first.reduce();
         auto const v = config_.cropOffset.value().second.reduce();
         clap.horizOffN = h.numerator();
