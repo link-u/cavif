@@ -1,3 +1,4 @@
+#include <iostream>
 #include <thread>
 
 #include <aom/aom_encoder.h>
@@ -8,7 +9,6 @@
 #include <avif/util/FileLogger.hpp>
 #include <avif/util/File.hpp>
 #include <avif/img/Image.hpp>
-#include <iostream>
 
 #include "Config.hpp"
 #include "AVIFBuilder.hpp"
