@@ -331,7 +331,7 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
       });
     }
     if(config_.mirrorAxis.has_value()) {
-      propertiesBox.propertyContainers.properties.emplace_back( ImageMirrorBox {
+      propertiesBox.propertyContainers.properties.emplace_back(ImageMirrorBox {
           .axis = config_.mirrorAxis.value(),
       });
       item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
