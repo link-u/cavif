@@ -47,7 +47,7 @@ meson and ninja are required to build libvmaf.
 
 Please see: https://mesonbuild.com/Quick-guide.html
 
-Or another method: [Use python's venv module to install meson and ninja in CI](https://github.com/link-u/cavif/blob/master/.github/workflows/build-on-linux.yml).
+Or another method: Use python's venv module to install meson and ninja. [See details for our CI](https://github.com/link-u/cavif/blob/master/.github/workflows/build-on-linux.yml).
 
 ## Build steps
 
