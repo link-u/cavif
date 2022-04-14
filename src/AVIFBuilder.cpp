@@ -64,7 +64,7 @@ AVIFBuilder::Frame AVIFBuilder::Frame::load(avif::util::Logger& log, std::string
   if(std::holds_alternative<std::string>(file)) {
     log.fatal(std::get<std::string>(file));
   }
-  std::shared_ptr<avif::Parser::Result> result = avif::Parser(log, std::get<std::vector<uint8_t>>(file)).parse();
+  std::shared_ptr<avif::Parser::Result> const result = avif::Parser(log, std::get<std::vector<uint8_t>>(file)).parse();
   if(!result->ok()) {
     log.fatal(result->error());
   }
