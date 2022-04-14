@@ -5,7 +5,7 @@
 #include "Reader.hpp"
 #include <filesystem>
 #include <system_error>
-#include "fmt/format.h"
+#include <fmt/format.h>
 
 namespace img::png {
 
