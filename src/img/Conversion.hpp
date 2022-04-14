@@ -4,10 +4,11 @@
 
 #include <stdexcept>
 #include <fmt/format.h>
-#include "avif/img/Image.hpp"
-#include "avif/img/Conversion.hpp"
-#include "avif/img/color/Constants.hpp"
-#include "avif/img/color/Matrix.hpp"
+
+#include <avif/img/Image.hpp>
+#include <avif/img/Conversion.hpp>
+#include <avif/img/color/Constants.hpp>
+#include <avif/img/color/Matrix.hpp>
 
 using MatrixCoefficients = avif::img::color::MatrixCoefficients;
 
