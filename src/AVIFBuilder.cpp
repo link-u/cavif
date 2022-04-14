@@ -263,7 +263,7 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
     locationBox.offsetSize = 0;
     locationBox.lengthSize = 4;
     locationBox.baseOffsetSize = 4;
-    locationBox.items.emplace_back(ItemLocationBox::Item{
+    locationBox.items.emplace_back(ItemLocationBox::Item {
         .itemID = itemID,
         .dataReferenceIndex = 0,
         .baseOffset = 0,// TODO: fill it after.
@@ -288,7 +288,7 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
     {
       // FIXME(ledyba-z): Is it really correct?
       // https://aomediacodec.github.io/av1-isobmff/#av1sampleentry-semantics
-      propertiesBox.propertyContainers.properties.emplace_back(PixelAspectRatioBox{
+      propertiesBox.propertyContainers.properties.emplace_back(PixelAspectRatioBox {
           .hSpacing = 1,
           .vSpacing = 1,
       });
@@ -374,7 +374,7 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
     if (frame.colorProfile().iccProfile.has_value()){
       auto const& icc = frame.colorProfile().iccProfile.value();
       propertiesBox.propertyContainers.properties.emplace_back(ColourInformationBox {
-          .profile = ColourInformationBox::UnrestrictedICC{
+          .profile = ColourInformationBox::UnrestrictedICC {
               .payload = icc.payload(),
           }
       });
