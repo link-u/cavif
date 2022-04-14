@@ -60,7 +60,7 @@ jobs:
         ninja -v
         strip cavif.exe
     - name: Upload result
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: cavif-win64
         path: build/cavif.exe

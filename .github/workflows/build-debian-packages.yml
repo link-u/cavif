@@ -27,7 +27,7 @@ jobs:
           script: scripts/build-debian-package.sh
           on: ${{ matrix.codename }}
       - name: Upload result
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.codename }}
           path: |
