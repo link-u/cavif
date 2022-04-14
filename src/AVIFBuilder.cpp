@@ -371,7 +371,7 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
     }
-    if (frame.colorProfile().iccProfile.has_value()){
+    if (frame.colorProfile().iccProfile.has_value()) {
       auto const& icc = frame.colorProfile().iccProfile.value();
       propertiesBox.propertyContainers.properties.emplace_back(ColourInformationBox {
           .profile = ColourInformationBox::UnrestrictedICC {
