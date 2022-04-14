@@ -11,6 +11,8 @@ cd "${ROOT_DIR}" || exit 1
 set -eux
 set -o pipefail
 
+# To avoid limitation:
+#   https://git-scm.com/docs/git-config/2.35.2#Documentation/git-config.txt-safedirectory
 chown "${GID}:${UID}" . -R
 
 # Generate changelog
