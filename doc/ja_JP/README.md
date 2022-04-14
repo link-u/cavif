@@ -5,7 +5,7 @@
 ## 参考になるかもしれないリンク集
 
 - AV1/AVIF
-  - [AV1 Image File Format (AVIF)](https://people.xiph.org/~negge/AVIF2018.pdf)
+  - [AV1 Image File Format (AVIF)](http://web.archive.org/web/20181109113447/https://people.xiph.org/~negge/AVIF2018.pdf)
   - [Into the Depths:
 The Technical Details Behind AV1](http://mile-high.video/files/mhv2018/pdf/day1/1_02_Egge.pdf)
   - [AV1リアルタイムハードウェアエンコーダを開発しました - dwango on GitHub](https://dwango.github.io/articles/av1hwencoder/)
