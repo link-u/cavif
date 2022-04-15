@@ -165,7 +165,7 @@ avif::FileBox AVIFBuilder::buildFileBox() {
     }
   }
   this->fillFrameInfo(1, frame);
-  size_t nextID = 2;
+  uint16_t nextID = 2;
   if(this->alpha_.has_value()) {
     this->fillFrameInfo(nextID, alpha_.value(), avif::kAlphaAuxType());
     this->linkAuxImages(nextID, 1);
@@ -179,16 +179,16 @@ avif::FileBox AVIFBuilder::buildFileBox() {
   return this->fileBox_;
 }
 
-void AVIFBuilder::linkAuxImages(uint32_t const from, uint32_t const to) {
+void AVIFBuilder::linkAuxImages(uint16_t const from, uint16_t const to) {
   using namespace avif;
   if(!this->fileBox_.metaBox.itemReferenceBox.has_value()) {
     ItemReferenceBox box{
-        .references = std::vector<SingleItemTypeReferenceBoxLarge>{},
+        .references = std::vector<SingleItemTypeReferenceBox>{},
     };
     box.setFullBoxHeader(1, 0);
     this->fileBox_.metaBox.itemReferenceBox = box;
   }
-  auto& refs = std::get<std::vector<SingleItemTypeReferenceBoxLarge>>(this->fileBox_.metaBox.itemReferenceBox.value().references);
+  auto& refs = std::get<std::vector<SingleItemTypeReferenceBox>>(this->fileBox_.metaBox.itemReferenceBox.value().references);
   for(auto& ref : refs) {
     if(ref.fromItemID == from) {
       for(auto const& oldTo : ref.toItemIDs) {
@@ -200,7 +200,7 @@ void AVIFBuilder::linkAuxImages(uint32_t const from, uint32_t const to) {
       return;
     }
   }
-  auto box = SingleItemTypeReferenceBoxLarge{
+  auto box = SingleItemTypeReferenceBox {
       .fromItemID = from,
       .toItemIDs = {to},
   };
