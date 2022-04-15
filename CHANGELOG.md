@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `3/4`
   - `1/8`
 - `--cpu-used 9` is introduced.
-- `--enable-rect-tx` is introduced. Enabled by default.
+- `--(enable|disable)-rect-tx` is introduced. Enabled by default.
 - `--(enable|disable)-diagonal-intra` is introduced. Enabled by default.
 - `--content-type (default|screen|film)` is introduced.
   - `default`: regular video content(default)
