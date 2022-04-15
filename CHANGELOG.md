@@ -44,5 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - crop size must be integers.
   - the leftmost pixel must be positioned in even line if pixel format is `yuv420` or `yuv422`.
   - the topmost pixel must be positioned in even line if pixel format is `yuv420`.
+- [Fix HEIF compatibility](https://github.com/link-u/cavif/commit/2232b3f23646e18607cf6636a967720a6e0ec2d7).
 
 ### Removed
