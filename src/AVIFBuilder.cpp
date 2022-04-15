@@ -281,10 +281,15 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
     metaBox.primaryItemBox = pitm;
   }
   { // fill ItemPropertiesBox
-    ItemPropertyAssociation assoc{};
+    ItemPropertiesBox& propertiesBox = metaBox.itemPropertiesBox;
+    // Just only one ItemPropertyAssociation box to comply with HEIF requirements.
+    //  See: https://github.com/link-u/avif-sample-images/issues/4
+    ItemPropertyAssociation& assoc =
+        propertiesBox.associations.empty()
+          ? propertiesBox.associations.emplace_back(ItemPropertyAssociation{})
+          : propertiesBox.associations[0];
     ItemPropertyAssociation::Item item{};
     item.itemID = itemID;
-    ItemPropertiesBox& propertiesBox = metaBox.itemPropertiesBox;
     {
       // FIXME(ledyba-z): Is it really correct?
       // https://aomediacodec.github.io/av1-isobmff/#av1sampleentry-semantics
@@ -292,7 +297,7 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
           .hSpacing = 1,
           .vSpacing = 1,
       });
-      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry{
+      item.entries.emplace_back(ItemPropertyAssociation::Item::Entry {
           .essential = false,
           .propertyIndex = static_cast<uint16_t>(propertiesBox.propertyContainers.properties.size()),
       });
@@ -427,7 +432,6 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
       });
     }
     assoc.items.emplace_back(item);
-    propertiesBox.associations.emplace_back(assoc);
   }
   this->fileBox_.mediaDataBoxes.push_back(MediaDataBox {
     .offset = 0, // TODO: fill it later.
