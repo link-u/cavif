@@ -148,7 +148,7 @@ Reader::Result Reader::read() {
       pixelOrder = avif::img::PixelOrder::RGBA;
       break;
     default:
-      throw std::logic_error(fmt::format("Unknown bit depth: {}", bitDepth));
+      throw std::logic_error(fmt::format("Unknown color type: {}", colorType));
   }
   size_t const bytesPerPixel = avif::img::calcNumComponents(pixelOrder) * (bitDepth / 8);
   png_read_update_info(png_, info_);
