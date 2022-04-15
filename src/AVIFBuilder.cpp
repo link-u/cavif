@@ -284,6 +284,9 @@ void AVIFBuilder::fillFrameInfo(uint16_t const itemID, AVIFBuilder::Frame const&
     ItemPropertiesBox& propertiesBox = metaBox.itemPropertiesBox;
     // Just only one ItemPropertyAssociation box to comply with HEIF requirements.
     //  See: https://github.com/link-u/avif-sample-images/issues/4
+    // HEIF (ISO 23008-12:2017) 9.3.1
+    // There shall be at most one ItemPropertyAssociation box
+    // with a given pair of values of version and flags.
     ItemPropertyAssociation& assoc =
         propertiesBox.associations.empty()
           ? propertiesBox.associations.emplace_back(ItemPropertyAssociation{})
