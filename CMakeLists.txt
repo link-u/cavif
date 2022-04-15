@@ -54,8 +54,10 @@ set(ENABLE_TOOLS OFF CACHE BOOL "" FORCE)
 # See: external/libaom/build/cmake/aom_config_defaults.cmake
 set(CONFIG_TUNE_VMAF 1 CACHE INTERNAL "Enable encoding tuning for VMAF." FORCE)
 set(CONFIG_NN_V2 1 CACHE INTERNAL "Fully-connected neural nets ver.2." FORCE)
-set(CONFIG_COLLECT_PARTITION_STATS 1 CACHE INTERNAL "AV1 experiment: Collect partition timing stats. Can be 1 or 2." FORCE)
-set(CONFIG_PARTITION_SEARCH_ORDER 1 CACHE INTERNAL "AV1 experiment: Use alternative partition search order." FORCE)
+# FIXME(ledyba-z): They can be useful, but they creates csv files in current dir.
+# It may cause some problem when encoding multiple images at parallel.
+#set(CONFIG_COLLECT_PARTITION_STATS 1 CACHE INTERNAL "AV1 experiment: Collect partition timing stats. Can be 1 or 2." FORCE)
+#set(CONFIG_PARTITION_SEARCH_ORDER 1 CACHE INTERNAL "AV1 experiment: Use alternative partition search order." FORCE)
 # FIXME(ledyba-z): CONFIG_DIST_8X8 conflicts with CONFIG_MULTITHREAD.
 # --- aom_configure: Detected CPU: x86_64
 # CMake Warning at external/libaom/build/cmake/util.cmake:57 (message):
