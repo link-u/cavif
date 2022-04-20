@@ -145,11 +145,11 @@ int internal::main(int argc, char** argv) {
   if(std::holds_alternative<avif::img::Image<8>>(loadResult.image)) {
     auto src = std::get<avif::img::Image<8>>(loadResult.image);
     src.colorProfile() = colorProfile;
-    convert(config, src, img);
+    convert<8>(config, src, img);
   } else {
     auto src = std::get<avif::img::Image<16>>(loadResult.image);
     src.colorProfile() = colorProfile;
-    convert(config, src, img);
+    convert<16>(config, src, img);
   }
 
   uint32_t const width = aom_img_plane_width(&img, AOM_PLANE_Y);
