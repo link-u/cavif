@@ -130,6 +130,7 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
       convert<Converter, Config::EncodeTarget::Image, rgbBits>(src, dst);
       break;
     case Config::EncodeTarget::Alpha:
+      dst.range = AOM_CR_FULL_RANGE;
       convert<Converter, Config::EncodeTarget::Alpha, rgbBits>(src, dst);
       break;
     default:
