@@ -83,11 +83,7 @@ void convertAlpha(avif::img::Image<rgbBits>& src, aom_image& dst) {
 
 template <typename Converter, uint8_t rgbBits, uint8_t yuvBits>
 void convertAlpha(avif::img::Image<rgbBits>& src, aom_image& dst) {
-  if(dst.range == AOM_CR_FULL_RANGE) {
-    convertAlpha<Converter, rgbBits, yuvBits, true>(src, dst);
-  } else {
-    convertAlpha<Converter, rgbBits, yuvBits, false>(src, dst);
-  }
+  convertAlpha<Converter, rgbBits, yuvBits, true>(src, dst);
 }
 
 }
@@ -130,7 +126,6 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
       convert<Converter, Config::EncodeTarget::Image, rgbBits>(src, dst);
       break;
     case Config::EncodeTarget::Alpha:
-      dst.range = AOM_CR_FULL_RANGE;
       convert<Converter, Config::EncodeTarget::Alpha, rgbBits>(src, dst);
       break;
     default:
