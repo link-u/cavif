@@ -203,8 +203,8 @@ clipp::group Config::createCommandLineFlags() {
       option("--profile").doc("AV1 Profile(0=base, 1=high, 2=professional)") & integer("0=base(default), 1=high, 2=professional", aom.g_profile),
       option("--pix-fmt").doc("Pixel format of output image") & (parameter("yuv420").set(pixFmt, AOM_IMG_FMT_I420).doc("YUV420 format (default)") | parameter("yuv422").set(pixFmt, AOM_IMG_FMT_I422).doc("YUV422 format") | parameter("yuv444").set(pixFmt, AOM_IMG_FMT_I444).doc("YUV444 format (recommended for lossless images)")),
       option("--bit-depth").doc("Bit depth of output image") & (parameter("8").set(aom.g_bit_depth, AOM_BITS_8).doc("8bits per color, 24bits per pixel (default)") | parameter("10").set(aom.g_bit_depth, AOM_BITS_10).doc("10bits per color, 30bits per pixel") | parameter("12").set(aom.g_bit_depth, AOM_BITS_12).doc("12bits per color, 36bits per pixel")),
-      option("--disable-full-color-range").doc("Use limited YUV color range (default)").set(fullColorRange, false),
-      option("--enable-full-color-range").doc("Use full YUV color range").set(fullColorRange, true)
+      option("--disable-full-color-range").doc("Use limited YUV color range").set(fullColorRange, false),
+      option("--enable-full-color-range").doc("Use full YUV color range (default)").set(fullColorRange, true)
   );
 
   // trade-offs between speed and quality.
@@ -395,16 +395,15 @@ numbers.
 }
 
 std::optional<avif::img::ColorProfile> Config::calcColorProfile() const {
+  avif::img::ColorProfile profile;
+  profile.cicp = std::make_optional<avif::ColourInformationBox::CICP>();
   if(colorPrimaries.has_value() && transferCharacteristics.has_value() && matrixCoefficients.has_value()) {
-    avif::img::ColorProfile profile;
-    profile.cicp = std::make_optional<avif::ColourInformationBox::CICP>();
     profile.cicp->colourPrimaries = static_cast<uint16_t>(colorPrimaries.value());
     profile.cicp->transferCharacteristics = static_cast<uint16_t>(transferCharacteristics.value());
     profile.cicp->colourPrimaries = static_cast<uint16_t>(colorPrimaries.value());
-    profile.cicp->fullRangeFlag = fullColorRange;
-    return profile;
   }
-  return {};
+  profile.cicp->fullRangeFlag = fullColorRange;
+  return profile;
 }
 
 void Config::modify(aom_codec_ctx_t* aom, avif::img::ColorProfile const& colorProfile) {

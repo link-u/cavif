@@ -98,7 +98,7 @@ public:
   bool lossless = false;
   bool enableCDEF = false;
   bool enableRestoration = false;
-  bool fullColorRange = false;
+  bool fullColorRange = true;
   aom_superblock_size_t superblockSize = AOM_SUPERBLOCK_SIZE_DYNAMIC;
   aom_tune_metric tune = AOM_TUNE_SSIM;
   std::string vmafModelPath = "/usr/share/cavif/model/vmaf_v0.6.1.pkl";

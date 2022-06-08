@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `--transfer-characteristics 13` (sRGB/sYCC)
     - `--matrix-coefficients 5` (sYCC)
 - All of `--color-primaries`, `--transfer-characteristics` and `--matrix-coefficients` nor none of them must be set.
+- `--enable-full-color-range` is now default, as mentioned in [ISO/IEC 23000-22:2019/Amd 2:2021](https://www.iso.org/standard/81634.html).
 - [Use SingleItemTypeReferenceBox instead of SingleItemTypeReferenceBoxLarge](https://github.com/link-u/cavif/commit/e271be5eddf1259d7a34315ece967a5e95766f49) to make images smaller.
 
 ### Fixed
