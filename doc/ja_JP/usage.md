@@ -291,8 +291,8 @@ AV1のプロファイルを指定する。[プロファイルごとに使える�
 
 ### 色域
 
- - `--disable-full-color-range`（初期値）
- - `--enable-full-color-range`
+- `--enable-full-color-range`（初期値） 
+- `--disable-full-color-range`
 
 例えば通常の8bitのYUVのフォーマットでは、Yの値として16-235、UとVの値として16-240しか使わないが、このフラグをenableにすると0-255のすべてを使うようになる。10/12ビットでも同様。デフォルトではfalse。
 

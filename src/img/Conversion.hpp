@@ -144,7 +144,8 @@ void convert(Config& config, avif::img::Image<rgbBits>& src, aom_image& dst) {
         config.pixFmt :
         static_cast<aom_img_fmt_t>(config.pixFmt | static_cast<unsigned int>(AOM_IMG_FMT_HIGHBITDEPTH));
   aom_img_alloc(&dst, pixFmt, src.width(), src.height(), 1);
-  dst.range = config.fullColorRange ? AOM_CR_FULL_RANGE : AOM_CR_STUDIO_RANGE;
+  avif::ColourInformationBox::CICP const cicp = src.colorProfile().cicp.value_or(avif::ColourInformationBox::CICP());
+  dst.range = cicp.fullRangeFlag ? AOM_CR_FULL_RANGE : AOM_CR_STUDIO_RANGE;
   dst.monochrome = config.codec.monochrome ? 1 : 0;
   dst.bit_depth = config.codec.g_bit_depth;
 
