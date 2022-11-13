@@ -1,5 +1,9 @@
 # cavif
 
+**Currently maitained by [avif-community](https://github.com/avif-community/cavif)**
+
+**[avif-community](https://github.com/avif-community/cavif)でメンテナンスを継続しております**
+
 |         | Status |
 |--|---|
 | Linux | [![Build on Linux](https://github.com/link-u/cavif/workflows/Build%20on%20Linux/badge.svg) ](https://github.com/link-u/cavif/actions?query=workflow%3A%22Build+on+Linux%22) |
