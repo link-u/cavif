@@ -1,6 +1,6 @@
 # cavif
 
-## **Sorry, this repository is no longer maintained due to the retirement of the main maintainer. There are some alternatives like `libavif-bin`. After some time, this repository will be archived.**
+## **Sorry, this repository is no longer maintained due to the retirement of the main maintainer. After some time, this repository will be archived.**
 
 |         | Status |
 |--|---|
