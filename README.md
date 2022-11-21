@@ -1,5 +1,7 @@
 # cavif
 
+## **Sorry, this repository is no longer maintained due to the retirement of the main maintainer. There are some alternatives like `libavif-bin`. After some time, this repository will be archived.**
+
 |         | Status |
 |--|---|
 | Linux | [![Build on Linux](https://github.com/link-u/cavif/workflows/Build%20on%20Linux/badge.svg) ](https://github.com/link-u/cavif/actions?query=workflow%3A%22Build+on+Linux%22) |
