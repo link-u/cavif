@@ -1,6 +1,10 @@
 # cavif
 
-## **Sorry, this repository is no longer maintained due to the retirement of the main maintainer. There are some alternatives like `libavif-bin`. After some time, this repository will be archived.**
+**Sorry, this repository is no longer maintained due to the retirement of the main maintainer. After some time, this repository will be archived.**
+
+**Ther source is currently maitained on avif-community by the maintaier. It's not a official community of AVIF codec. We take no resposibility the name of the community.**
+
+**This repository will be removed after 2023-01-31 to resolve the confusing situation.**
 
 |         | Status |
 |--|---|
