@@ -2,8 +2,8 @@ Source: cavif
 Section: unknown
 Priority: optional
 Maintainer: Ryo Hirafuji <ryo.hirafuji@link-u.co.jp>
-Build-Depends: debhelper (>= 10), cmake (>= 3.13), gcc-8, g++-8, libgcc-8-dev, libstdc++-8-dev, yasm
-Standards-Version: 4.1.2
+Build-Depends: debhelper-compat (= 13), cmake (>= 3.13), gcc-8, g++-8, libgcc-8-dev, libstdc++-8-dev, yasm
+Standards-Version: 4.6.0
 Homepage: https://github.com/link-u/cavif
 Vcs-Git: https://github.com/link-u/cavif.git
 Vcs-Browser: https://github.com/link-u/cavif
