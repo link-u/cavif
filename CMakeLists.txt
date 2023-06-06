@@ -91,7 +91,7 @@ target_include_directories(cavif PRIVATE external/libyuv/include)
 target_include_directories(cavif PRIVATE external/libavif-container/src)
 target_include_directories(cavif PRIVATE "${CMAKE_BINARY_DIR}/include")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    # FIXME(ledyba-z): workaround for gcc-8
+    # FIXME(ledyba-z): workaround for gcc-9
     target_link_libraries(cavif PRIVATE stdc++fs)
 endif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 

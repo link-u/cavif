@@ -43,8 +43,8 @@ mkdir build && cd build
 # System gcc is 8.0 or higher:
 cmake ..
 
-# If not, please install gcc-8 (or higher) and tell them to CMake.
-CXX=g++-8 CC=gcc-8 cmake ..
+# If not, please install gcc-9 (or higher) and tell them to CMake.
+CXX=g++-9 CC=gcc-9 cmake ..
 
 # build cavif binary.
 make cavif
